@@ -492,6 +492,31 @@
       });
   }
 
+  // Yangi buyurtmani Supabase'ning "orders" jadvaliga yozadi
+  function saveOrder(o) {
+    return fetch(SUPABASE_URL + "/rest/v1/orders", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({
+        order_num: o.num,
+        items: o.items,
+        region: o.region,
+        city: o.city,
+        address: o.address,
+        phone: o.phone,
+        comment: o.comment,
+        pay_method: o.pay,
+        total: o.total,
+        count: o.count
+      })
+    });
+  }
+
   // ---- Narx qoidalari ----
   var CARGO_PER_KG = 120000;       // kargo: 1 kg uchun
   var SERVICE_UNDER = 20000;       // 1 kg gacha — sobit xizmat haqi
@@ -723,7 +748,7 @@
 
   window.SAVAT = {
     PRODUCTS: PRODUCTS, CATS: CATS, REGIONS: REGIONS, I18N: I18N,
-    breakdown: breakdown, fmt: fmt, fetchProducts: fetchProducts,
+    breakdown: breakdown, fmt: fmt, fetchProducts: fetchProducts, saveOrder: saveOrder,
     CARGO_PER_KG: CARGO_PER_KG, SERVICE_UNDER: SERVICE_UNDER, SERVICE_PER_KG: SERVICE_PER_KG
   };
 })();
@@ -1188,7 +1213,11 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
   const place = () => {
     if (!region || !phoneValid(phone) || city.trim().length < 2 || address.trim().length < 3) { setErr(true); return; }
     const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
-    onPlace({ num, total, count });
+    const orderItems = items.map((it) => {
+      const b = AC_D.breakdown(it.p);
+      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total };
+    });
+    onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
   };
 
   return (
@@ -1551,6 +1580,7 @@ function App() {
   const onAuth = (u) => { setUser(u); setAuthOpen(false); };
   const onLogout = () => { setUser(null); };
   const placeOrder = (o) => {
+    D.saveOrder(o).catch((err) => console.error("Buyurtmani saqlashda xato:", err));
     setOrder(o);
     setCart([]);
     setView("success");
