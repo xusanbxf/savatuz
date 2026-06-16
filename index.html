@@ -1118,16 +1118,23 @@ function AuthModal({ open, t, onClose, onAuth }) {
     if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
     if (password.length < 6) { setErr("Parol kamida 6 ta belgi"); return; }
     setLoading(true); setErr("");
+
+    // Avval login qilib email mavjudligini tekshiramiz
+    const check = await sb("/auth/v1/token?grant_type=password", { email, password: "___check___" });
+    if (check.ok || (check.d.error_description && check.d.error_description === "Invalid login credentials")) {
+      // "Invalid login credentials" = email bor, parol noto'g'ri = allaqachon ro'yxatdan o'tgan
+      if (check.d.error_description === "Invalid login credentials") {
+        setErr("Bu email allaqachon ro'yxatdan o'tgan");
+        setLoading(false); return;
+      }
+    }
+
     const { ok, d } = await sb("/auth/v1/signup", { email, password, data: { name: name.trim() } });
     setLoading(false);
     if (!ok) {
       const msg = d.error || d.msg || d.message || "";
       const desc = d.error_description || "";
-      if (msg === "User already registered" || desc.includes("already") || msg.includes("already") || d.code === "user_already_exists") {
-        setErr("Bu email allaqachon ro'yxatdan o'tgan");
-      } else {
-        setErr(desc || msg || "Xatolik yuz berdi");
-      }
+      setErr(desc || msg || "Xatolik yuz berdi");
       return;
     }
     setTab("verify");
