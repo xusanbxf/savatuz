@@ -379,9 +379,11 @@ function saveProduct(id, existingImageUrl) {
     var ext = "jpg";
     var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
     var uploadBlob = window._uploadBlob || file;
+    var formData = new FormData();
+    formData.append("", uploadBlob, fileName);
     fetch(SB+"/storage/v1/object/products/"+fileName,{
       method:"POST",
-      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"image/jpeg","x-upsert":"true"},
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"x-upsert":"true"},
       body:uploadBlob
     }).then(function(r){ return r.json(); })
     .then(function(){
