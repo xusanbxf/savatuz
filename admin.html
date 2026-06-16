@@ -302,11 +302,29 @@ function openProductModal(p) {
   var fileInput = document.getElementById("f_image");
   var preview = document.getElementById("imgPreview");
   fileInput.onchange = function() {
-    if(fileInput.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function(e){ preview.src=e.target.result; preview.style.display="block"; };
-      reader.readAsDataURL(fileInput.files[0]);
-    }
+    if(!fileInput.files[0]) return;
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement("canvas");
+        var MAX = 800;
+        var w = img.width, h = img.height;
+        if(w > h) { if(w > MAX){ h = Math.round(h*MAX/w); w = MAX; } }
+        else { if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        preview.src = canvas.toDataURL("image/jpeg", 0.85);
+        preview.style.display = "block";
+        // compressed faylni fileInput.files o'rniga saqlaymiz
+        canvas.toBlob(function(blob){
+          fileInput._compressedBlob = blob;
+        }, "image/jpeg", 0.85);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   document.getElementById("cancelBtn").onclick = closeModal;
@@ -325,7 +343,9 @@ function saveProduct(id, existingImageUrl) {
   var china = parseInt(document.getElementById("f_china").value);
   var market = parseInt(document.getElementById("f_market").value);
   var weight = parseFloat(document.getElementById("f_weight").value);
-  var file = document.getElementById("f_image").files[0];
+  var fileInput2 = document.getElementById("f_image");
+  var file = fileInput2.files[0];
+  if(file) file._compressedBlob = fileInput2._compressedBlob;
 
   if(!name_uz||!name_ru||!china||!market||!weight){
     document.getElementById("modalErr").textContent="Barcha majburiy maydonlarni to'ldiring";
@@ -358,12 +378,13 @@ function saveProduct(id, existingImageUrl) {
 
   if(file) {
     document.getElementById("uploadProgress").style.display="block";
-    var ext = file.name.split(".").pop();
+    var ext = "jpg";
     var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
+    var uploadBlob = file._compressedBlob || file;
     fetch(SB+"/storage/v1/object/products/"+fileName,{
       method:"POST",
-      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":file.type,"x-upsert":"true"},
-      body:file
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"image/jpeg","x-upsert":"true"},
+      body:uploadBlob
     }).then(function(r){ return r.json(); })
     .then(function(){
       var publicUrl = SB+"/storage/v1/object/public/products/"+fileName;
