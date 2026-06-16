@@ -1075,18 +1075,48 @@ function phoneValid(p) { return p.replace(/\D/g, "").length === 12; }
 function AuthModal({ open, t, onClose, onAuth }) {
   const [tab, setTab] = useState("login");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => { if (open) { setErr(""); } }, [open, tab]);
+  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
+
+  useEffect(() => { if (open) { setErr(""); setLoading(false); } }, [open, tab]);
   if (!open) return null;
 
-  const submit = () => {
+  const submit = async () => {
     if (tab === "register" && name.trim().length < 2) { setErr(t.auth_err_name); return; }
-    if (!phoneValid(phone)) { setErr(t.auth_err_phone); return; }
-    const finalName = name.trim() || (t === AC_D.I18N.ru ? "Клиент" : "Mijoz");
-    onAuth({ name: finalName, phone });
-    setName(""); setPhone("");
+    if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
+    if (password.length < 6) { setErr("Parol kamida 6 ta belgi bo'lishi kerak"); return; }
+    setLoading(true); setErr("");
+
+    const endpoint = tab === "login"
+      ? SB_URL + "/auth/v1/token?grant_type=password"
+      : SB_URL + "/auth/v1/signup";
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "apikey": SB_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, data: { name: name.trim() || "Mijoz" } })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.error_description === "Invalid login credentials") setErr("Email yoki parol noto'g'ri");
+        else if (data.error === "User already registered") setErr("Bu email allaqachon ro'yxatdan o'tgan");
+        else setErr(data.error_description || data.msg || "Xatolik yuz berdi");
+        setLoading(false); return;
+      }
+      const user = data.user || data;
+      const finalName = name.trim() || user.user_metadata?.name || email.split("@")[0];
+      onAuth({ name: finalName, email, token: data.access_token });
+      setName(""); setEmail(""); setPassword("");
+    } catch (e) {
+      setErr("Internet aloqasini tekshiring");
+    }
+    setLoading(false);
   };
 
   return (
@@ -1112,15 +1142,25 @@ function AuthModal({ open, t, onClose, onAuth }) {
             </label>
           )}
           <label className="field">
-            <span>{t.auth_phone}</span>
+            <span>Email</span>
             <div className="field-in">
-              <AC_I.phone style={{ width: 18, height: 18 }} />
-              <input inputMode="tel" value={phone} onChange={(e) => setPhone(maskPhone(e.target.value))} placeholder="+998 90 123 45 67" />
+              <AC_I.user style={{ width: 18, height: 18 }} />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@misol.com" />
+            </div>
+          </label>
+          <label className="field">
+            <span>Parol</span>
+            <div className="field-in">
+              <AC_I.lock style={{ width: 18, height: 18 }} />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+                onKeyDown={(e) => { if (e.key === "Enter") submit(); }} />
             </div>
           </label>
           {err && <p className="field-err">{err}</p>}
         </div>
-        <button className="auth-submit" onClick={submit}>{t.auth_continue} <AC_I.arrow style={{ width: 18, height: 18 }} /></button>
+        <button className="auth-submit" onClick={submit} disabled={loading}>
+          {loading ? "Yuklanmoqda..." : t.auth_continue} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
+        </button>
         <p className="auth-note">{t.auth_note}</p>
       </div>
     </div>
@@ -1141,7 +1181,7 @@ function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, 
           <div className="mm-acct-ic"><AC_I.user style={{ width: 20, height: 20 }} /></div>
           <div>
             <div className="mm-acct-name">{user ? `${t.auth_hello}, ${user.name.split(" ")[0]}` : t.login}</div>
-            <div className="mm-acct-sub">{user ? user.phone : t.auth_reg_tab}</div>
+            <div className="mm-acct-sub">{user ? user.email : t.auth_reg_tab}</div>
           </div>
         </div>
         <nav className="mm-nav">
