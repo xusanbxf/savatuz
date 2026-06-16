@@ -7,64 +7,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f7f5fb;
-    --surface: #ffffff;
-    --ink: #1b1430;
-    --ink-2: #4a4360;
-    --ink-3: #8a849c;
-    --line: #ece8f4;
-    --brand: #6c2bd9;
-    --brand-2: #9333ea;
-    --r: 14px;
-    --r-sm: 10px;
+    --bg: #f7f5fb; --surface: #ffffff; --ink: #1b1430; --ink-2: #4a4360;
+    --ink-3: #8a849c; --line: #ece8f4; --brand: #6c2bd9; --r: 14px; --r-sm: 10px;
     --font: "Plus Jakarta Sans", system-ui, sans-serif;
     --display: "Sora", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-  }
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
-  h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.02em; }
 
   /* Login */
-  .login-box {
-    max-width: 380px; margin: 80px auto; background: var(--surface);
-    border: 1px solid var(--line); border-radius: var(--r); padding: 28px;
-    box-shadow: 0 8px 30px rgba(27,20,48,.08);
-  }
-  .login-box h1 { font-size: 22px; margin: 0 0 6px; text-align: center; }
+  .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
+  .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
   .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
   label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
-  input {
-    width: 100%; height: 46px; border-radius: var(--r-sm); border: 1.5px solid var(--line);
-    padding: 0 14px; font-size: 15px; font-family: inherit; margin-bottom: 14px; background: var(--bg);
-    color: var(--ink);
+  input, textarea {
+    width: 100%; border-radius: var(--r-sm); border: 1.5px solid var(--line);
+    padding: 10px 14px; font-size: 15px; font-family: inherit; margin-bottom: 14px;
+    background: var(--bg); color: var(--ink);
   }
-  input:focus { outline: none; border-color: var(--brand); }
-  button {
-    width: 100%; height: 46px; border-radius: var(--r-sm); border: none; cursor: pointer;
+  input { height: 46px; }
+  textarea { height: 80px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border-color: var(--brand); }
+  .btn {
+    height: 46px; border-radius: var(--r-sm); border: none; cursor: pointer;
     font-family: inherit; font-weight: 700; font-size: 15px; color: #fff;
     background: linear-gradient(140deg, #7c3aed 0%, #c026d3 100%);
+    width: 100%;
   }
-  button:disabled { opacity: .6; cursor: default; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn-sm { width: auto; padding: 0 16px; height: 36px; font-size: 13px; }
+  .btn-danger { background: #e11d48; }
+  .btn-ghost { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
   .err { color: #e11d48; font-size: 13.5px; margin: -6px 0 12px; min-height: 1em; }
 
-  /* Header */
-  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-  .top h1 { font-size: 24px; margin: 0; }
-  .logout { width: auto; padding: 0 18px; height: 38px; font-size: 13.5px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+  /* Nav */
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .top-title { font-family: var(--display); font-weight: 800; font-size: 22px; margin: 0; flex: 1; }
+  .nav-tabs { display: flex; gap: 6px; }
+  .tab {
+    height: 38px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line);
+    font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    background: var(--surface); color: var(--ink-2);
+  }
+  .tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
 
   /* Orders */
-  .order-card {
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
-    padding: 18px; margin-bottom: 14px;
-  }
-  .order-head {
-    display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px;
-  }
+  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
+  .order-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
   .order-num { font-family: var(--display); font-weight: 800; font-size: 17px; }
   .order-date { color: var(--ink-3); font-size: 13px; }
   .order-total { font-family: var(--display); font-weight: 800; font-size: 18px; }
@@ -74,193 +65,313 @@
   .items-list b { color: var(--ink); }
   .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
   .info-row b { color: var(--ink); font-weight: 600; }
-  select.status {
-    height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line);
-    padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer;
-    background-color: var(--brand);
-  }
+  select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; }
   .status-yangi { background-color: #f59e0b; }
   .status-tasdiqlangan { background-color: #2563eb; }
   .status-yetkazilmoqda { background-color: #7c3aed; }
   .status-yakunlangan { background-color: #12a150; }
   .status-bekor { background-color: #e11d48; }
+
+  /* Products */
+  .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 4px; }
+  .prod-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+  .prod-tile { width: 100%; height: 80px; border-radius: var(--r-sm); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .prod-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .prod-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 10px; }
+  .prod-prices { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; }
+  .prod-actions { display: flex; gap: 8px; }
+
+  /* Modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: var(--surface); border-radius: var(--r); padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-family: var(--display); font-weight: 800; font-size: 20px; margin: 0 0 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .add-btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+
   .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
+  .badge { display: inline-block; background: #f0e8ff; color: var(--brand); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="root"></div>
+<script>
+var SB = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+var KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
+var CATS = [
+  {id:"tech",label:"Texnika"},{id:"shoes",label:"Oyoq kiyim"},
+  {id:"fashion",label:"Kiyim"},{id:"home",label:"Uy-ro'zg'or"}
+];
+var REGIONS = {
+  "tsh-c":"Toshkent shahri","tsh-v":"Toshkent viloyati","sam":"Samarqand",
+  "bux":"Buxoro","and":"Andijon","far":"Farg'ona","nam":"Namangan",
+  "qash":"Qashqadaryo","surx":"Surxondaryo","xor":"Xorazm",
+  "nav":"Navoiy","jiz":"Jizzax","sir":"Sirdaryo","qor":"Qoraqalpog'iston"
+};
+var STATUSES = [
+  {id:"yangi",label:"Yangi"},{id:"tasdiqlangan",label:"Tasdiqlangan"},
+  {id:"yetkazilmoqda",label:"Yetkazilmoqda"},{id:"yakunlangan",label:"Yakunlangan"},
+  {id:"bekor",label:"Bekor qilindi"}
+];
 
-  <script>
-    var SUPABASE_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
-    var SUPABASE_KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
+var root = document.getElementById("root");
+var token = sessionStorage.getItem("savat_admin_token") || null;
+var currentTab = "orders";
 
-    var REGIONS = {
-      "tsh-c": "Toshkent shahri", "tsh-v": "Toshkent viloyati", "sam": "Samarqand",
-      "bux": "Buxoro", "and": "Andijon", "far": "Farg'ona", "nam": "Namangan",
-      "qash": "Qashqadaryo", "surx": "Surxondaryo", "xor": "Xorazm",
-      "nav": "Navoiy", "jiz": "Jizzax", "sir": "Sirdaryo", "qor": "Qoraqalpog'iston"
-    };
+function fmt(n) { return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g," "); }
+function h(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-    var STATUSES = [
-      { id: "yangi", label: "Yangi" },
-      { id: "tasdiqlangan", label: "Tasdiqlangan" },
-      { id: "yetkazilmoqda", label: "Yetkazilmoqda" },
-      { id: "yakunlangan", label: "Yakunlangan" },
-      { id: "bekor", label: "Bekor qilindi" }
-    ];
+/* ========== AUTH ========== */
+function renderLogin(errMsg) {
+  root.innerHTML =
+    '<div class="login-box">'+
+      '<h1>SAVAT.UZ — Admin</h1>'+
+      '<p>Buyurtmalar va mahsulotlarni boshqarish</p>'+
+      '<label>Email</label><input id="em" type="email" placeholder="email@misol.com" />'+
+      '<label>Parol</label><input id="pw" type="password" placeholder="••••••••" />'+
+      '<div class="err">'+(errMsg||"")+'</div>'+
+      '<button class="btn" id="loginBtn">Kirish</button>'+
+    '</div>';
+  document.getElementById("loginBtn").onclick = doLogin;
+  document.getElementById("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
+}
 
-    var root = document.getElementById("root");
-    var token = sessionStorage.getItem("savat_admin_token") || null;
+function doLogin() {
+  var email = document.getElementById("em").value.trim();
+  var pw = document.getElementById("pw").value;
+  var btn = document.getElementById("loginBtn");
+  btn.disabled=true; btn.textContent="Kirilmoqda...";
+  fetch(SB+"/auth/v1/token?grant_type=password",{
+    method:"POST",
+    headers:{"apikey":KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({email:email,password:pw})
+  }).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};})})
+  .then(function(r){
+    if(!r.ok||!r.d.access_token){renderLogin("Email yoki parol noto'g'ri");return;}
+    token=r.d.access_token;
+    sessionStorage.setItem("savat_admin_token",token);
+    renderMain();
+  }).catch(function(){renderLogin("Xatolik yuz berdi");});
+}
 
-    function fmt(n) {
-      return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g, " ");
-    }
+function doLogout() {
+  sessionStorage.removeItem("savat_admin_token");
+  token=null; renderLogin();
+}
 
-    function renderLogin(errMsg) {
-      root.innerHTML =
-        '<div class="login-box">' +
-          '<h1>SAVAT.UZ — Admin</h1>' +
-          '<p>Buyurtmalarni boshqarish paneli</p>' +
-          '<label>Email</label>' +
-          '<input id="email" type="email" placeholder="email@misol.com" />' +
-          '<label>Parol</label>' +
-          '<input id="password" type="password" placeholder="••••••••" />' +
-          '<div class="err">' + (errMsg || "") + '</div>' +
-          '<button id="loginBtn">Kirish</button>' +
-        '</div>';
+/* ========== SHELL ========== */
+function renderMain() {
+  root.innerHTML =
+    '<div class="wrap">'+
+      '<div class="top">'+
+        '<p class="top-title">SAVAT.UZ Admin</p>'+
+        '<div class="nav-tabs">'+
+          '<button class="tab'+(currentTab==="orders"?" active":"") +'" id="tabOrders">Buyurtmalar</button>'+
+          '<button class="tab'+(currentTab==="products"?" active":"") +'" id="tabProducts">Mahsulotlar</button>'+
+        '</div>'+
+        '<button class="btn btn-ghost logout" id="logoutBtn">Chiqish</button>'+
+      '</div>'+
+      '<div id="content">Yuklanmoqda...</div>'+
+    '</div>';
+  document.getElementById("logoutBtn").onclick = doLogout;
+  document.getElementById("tabOrders").onclick = function(){ currentTab="orders"; renderMain(); };
+  document.getElementById("tabProducts").onclick = function(){ currentTab="products"; renderMain(); };
+  if(currentTab==="orders") loadOrders();
+  else loadProducts();
+}
 
-      document.getElementById("loginBtn").onclick = login;
-      document.getElementById("password").addEventListener("keydown", function (e) {
-        if (e.key === "Enter") login();
-      });
-    }
+/* ========== ORDERS ========== */
+function statusClass(s){
+  if(s==="yangi") return "status-yangi";
+  if(s==="tasdiqlangan") return "status-tasdiqlangan";
+  if(s==="yetkazilmoqda") return "status-yetkazilmoqda";
+  if(s==="yakunlangan") return "status-yakunlangan";
+  if(s==="bekor") return "status-bekor";
+  return "status-yangi";
+}
 
-    function login() {
-      var email = document.getElementById("email").value.trim();
-      var password = document.getElementById("password").value;
-      var btn = document.getElementById("loginBtn");
-      btn.disabled = true; btn.textContent = "Kirilmoqda...";
-
-      fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
-        method: "POST",
-        headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, password: password })
-      })
-        .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
-        .then(function (r) {
-          if (!r.ok || !r.data.access_token) {
-            renderLogin("Email yoki parol noto'g'ri");
-            return;
-          }
-          token = r.data.access_token;
-          sessionStorage.setItem("savat_admin_token", token);
-          renderOrders();
-        })
-        .catch(function () { renderLogin("Xatolik yuz berdi, qayta urinib ko'ring"); });
-    }
-
-    function logout() {
-      sessionStorage.removeItem("savat_admin_token");
-      token = null;
-      renderLogin();
-    }
-
-    function statusClass(s) {
-      if (s === "yangi") return "status-yangi";
-      if (s === "tasdiqlangan") return "status-tasdiqlangan";
-      if (s === "yetkazilmoqda") return "status-yetkazilmoqda";
-      if (s === "yakunlangan") return "status-yakunlangan";
-      if (s === "bekor") return "status-bekor";
-      return "status-yangi";
-    }
-
-    function renderOrders() {
-      root.innerHTML =
-        '<div class="wrap">' +
-          '<div class="top"><h1>Buyurtmalar</h1><button class="logout" id="logoutBtn">Chiqish</button></div>' +
-          '<div id="list">Yuklanmoqda...</div>' +
-        '</div>';
-
-      document.getElementById("logoutBtn").onclick = logout;
-
-      fetch(SUPABASE_URL + "/rest/v1/orders?select=*&order=created_at.desc", {
-        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token }
-      })
-        .then(function (res) {
-          if (res.status === 401) { logout(); return Promise.reject("auth"); }
-          return res.json();
-        })
-        .then(function (orders) {
-          var list = document.getElementById("list");
-          if (!orders.length) {
-            list.innerHTML = '<div class="empty">Hozircha buyurtmalar yo\'q</div>';
-            return;
-          }
-          list.innerHTML = orders.map(renderOrderCard).join("");
-
-          orders.forEach(function (o) {
-            var sel = document.getElementById("status-" + o.id);
-            if (sel) {
-              sel.className = "status " + statusClass(o.status);
-              sel.onchange = function () { updateStatus(o.id, sel.value, sel); };
-            }
-          });
-        })
-        .catch(function (err) {
-          if (err !== "auth") document.getElementById("list").innerHTML = '<div class="empty">Xatolik yuz berdi</div>';
-        });
-    }
-
-    function renderOrderCard(o) {
-      var items = (o.items || []).map(function (it) {
-        return '<div><b>' + it.qty + '×</b> ' + (it.name_uz || it.name_ru || ("Mahsulot #" + it.id)) +
-          ' — ' + fmt(it.price * it.qty) + ' so\'m</div>';
+function loadOrders() {
+  fetch(SB+"/rest/v1/orders?select=*&order=created_at.desc",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){
+    if(r.status===401){doLogout();return Promise.reject();}
+    return r.json();
+  }).then(function(orders){
+    var cont = document.getElementById("content");
+    if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
+    cont.innerHTML = orders.map(function(o){
+      var items = (o.items||[]).map(function(it){
+        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||it.name_ru||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
       }).join("");
-
-      var statusOptions = STATUSES.map(function (s) {
-        return '<option value="' + s.id + '"' + (s.id === o.status ? ' selected' : '') + '>' + s.label + '</option>';
+      var opts = STATUSES.map(function(s){
+        return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
       }).join("");
-
-      var regionName = REGIONS[o.region] || o.region || "—";
       var date = new Date(o.created_at).toLocaleString("ru-RU");
+      return '<div class="order-card">'+
+        '<div class="order-head">'+
+          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+date+'</div></div>'+
+          '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
+          '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
+        '</div>'+
+        '<div class="order-body">'+
+          '<div class="items-list">'+items+'</div>'+
+          '<div>'+
+            '<div class="info-row"><b>Tel:</b> '+h(o.phone||"—")+'</div>'+
+            '<div class="info-row"><b>Hudud:</b> '+(REGIONS[o.region]||h(o.region||"—"))+'</div>'+
+            '<div class="info-row"><b>Shahar:</b> '+h(o.city||"—")+'</div>'+
+            '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
+            (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
+            '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
 
-      return (
-        '<div class="order-card">' +
-          '<div class="order-head">' +
-            '<div><div class="order-num">' + o.order_num + '</div><div class="order-date">' + date + '</div></div>' +
-            '<div class="order-total">' + fmt(o.total) + ' so\'m</div>' +
-            '<select class="status" id="status-' + o.id + '">' + statusOptions + '</select>' +
-          '</div>' +
-          '<div class="order-body">' +
-            '<div class="items-list">' + items + '</div>' +
-            '<div>' +
-              '<div class="info-row"><b>Tel:</b> ' + (o.phone || "—") + '</div>' +
-              '<div class="info-row"><b>Hudud:</b> ' + regionName + '</div>' +
-              '<div class="info-row"><b>Shahar:</b> ' + (o.city || "—") + '</div>' +
-              '<div class="info-row"><b>Manzil:</b> ' + (o.address || "—") + '</div>' +
-              (o.comment ? '<div class="info-row"><b>Izoh:</b> ' + o.comment + '</div>' : '') +
-              '<div class="info-row"><b>To\'lov:</b> ' + (o.pay_method || "—") + '</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>'
-      );
-    }
+    document.querySelectorAll("select.status").forEach(function(sel){
+      sel.onchange = function(){
+        var id = sel.getAttribute("data-id");
+        sel.className = "status "+statusClass(sel.value);
+        fetch(SB+"/rest/v1/orders?id=eq."+id,{
+          method:"PATCH",
+          headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+          body:JSON.stringify({status:sel.value})
+        });
+      };
+    });
+  }).catch(function(){});
+}
 
-    function updateStatus(id, status, sel) {
-      sel.className = "status " + statusClass(status);
-      fetch(SUPABASE_URL + "/rest/v1/orders?id=eq." + id, {
-        method: "PATCH",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + token,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
-        body: JSON.stringify({ status: status })
-      });
-    }
+/* ========== PRODUCTS ========== */
+function loadProducts() {
+  fetch(SB+"/rest/v1/products?select=*&order=id",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(products){
+    var cont = document.getElementById("content");
+    cont.innerHTML =
+      '<div class="add-btn-row">'+
+        '<span>Jami: <b>'+products.length+'</b> ta mahsulot</span>'+
+        '<button class="btn btn-sm" id="addBtn">+ Yangi mahsulot</button>'+
+      '</div>'+
+      '<div class="prod-grid">'+
+        products.map(function(p){
+          return '<div class="prod-card">'+
+            '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>'+
+            '<div class="prod-name">'+h(p.name_uz)+'</div>'+
+            '<div class="prod-sub">'+h(p.sub_uz||"")+'</div>'+
+            '<div class="prod-prices">'+
+              'Xitoy: <b>'+fmt(p.china)+'</b> so\'m | Biz: <b>'+fmt(p.market)+'</b> so\'m | '+p.weight+' kg'+
+            '</div>'+
+            '<div class="prod-actions">'+
+              '<button class="btn btn-sm btn-ghost" onclick="editProduct('+JSON.stringify(JSON.stringify(p))+')">Tahrirlash</button>'+
+              '<button class="btn btn-sm btn-danger" onclick="deleteProduct('+p.id+',\''+h(p.name_uz)+'\')">O\'chirish</button>'+
+            '</div>'+
+          '</div>';
+        }).join("")+
+      '</div>';
+    document.getElementById("addBtn").onclick = function(){ openProductModal(null); };
+  });
+}
 
-    if (token) renderOrders(); else renderLogin();
-  </script>
+function editProduct(pJson) {
+  openProductModal(JSON.parse(pJson));
+}
+
+function deleteProduct(id, name) {
+  if(!confirm(name+" ni o'chirishni tasdiqlaysizmi?")) return;
+  fetch(SB+"/rest/v1/products?id=eq."+id,{
+    method:"DELETE",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+  }).then(function(){ loadProducts(); });
+}
+
+function openProductModal(p) {
+  var isEdit = !!p;
+  var modalHtml =
+    '<div class="modal-bg" id="modalBg">'+
+      '<div class="modal">'+
+        '<h2>'+(isEdit?"Tahrirlash":"Yangi mahsulot")+'</h2>'+
+        '<label>Nomi (uz)</label><input id="f_name_uz" value="'+h(p?p.name_uz:"")+'" placeholder="Sport krossovka" />'+
+        '<label>Nomi (ru)</label><input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" />'+
+        '<label>Tavsif (uz)</label><input id="f_sub_uz" value="'+h(p?p.sub_uz:"")+'" placeholder="Erkaklar uchun..." />'+
+        '<label>Tavsif (ru)</label><input id="f_sub_ru" value="'+h(p?p.sub_ru:"")+'" placeholder="Мужские..." />'+
+        '<div class="form-row">'+
+          '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" placeholder="95000" /></div>'+
+          '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" placeholder="650000" /></div>'+
+        '</div>'+
+        '<div class="form-row">'+
+          '<div><label>Vazni (kg)</label><input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" placeholder="0.8" /></div>'+
+          '<div><label>Kategoriya</label>'+
+            '<select id="f_cat" style="height:46px;width:100%;margin-bottom:14px;border-radius:10px;border:1.5px solid var(--line);padding:0 12px;font-family:inherit;font-size:15px;background:var(--bg);">'+
+              CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+
+            '</select>'+
+          '</div>'+
+        '</div>'+
+        '<div class="form-row">'+
+          '<div><label>Fon rangi (hex)</label><input id="f_tile" value="'+h(p?p.tile:"#ede4ff")+'" placeholder="#ede4ff" /></div>'+
+          '<div><label>Accent rangi (hex)</label><input id="f_accent" value="'+h(p?p.accent:"#6c2bd9")+'" placeholder="#6c2bd9" /></div>'+
+        '</div>'+
+        '<div class="err" id="modalErr"></div>'+
+        '<div style="display:flex;gap:10px;">'+
+          '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
+          '<button class="btn" style="flex:2" id="saveBtn">'+(isEdit?"Saqlash":"Qo\'shish")+'</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+  document.getElementById("cancelBtn").onclick = closeModal;
+  document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
+  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null); };
+}
+
+function closeModal() {
+  var bg = document.getElementById("modalBg");
+  if(bg) bg.remove();
+}
+
+function saveProduct(id) {
+  var name_uz = document.getElementById("f_name_uz").value.trim();
+  var name_ru = document.getElementById("f_name_ru").value.trim();
+  var china = parseInt(document.getElementById("f_china").value);
+  var market = parseInt(document.getElementById("f_market").value);
+  var weight = parseFloat(document.getElementById("f_weight").value);
+
+  if(!name_uz||!name_ru||!china||!market||!weight){
+    document.getElementById("modalErr").textContent = "Barcha majburiy maydonlarni to'ldiring";
+    return;
+  }
+
+  var body = {
+    name_uz: name_uz,
+    name_ru: name_ru,
+    sub_uz: document.getElementById("f_sub_uz").value.trim(),
+    sub_ru: document.getElementById("f_sub_ru").value.trim(),
+    china: china, market: market, weight: weight,
+    cat: document.getElementById("f_cat").value,
+    tile: document.getElementById("f_tile").value.trim(),
+    accent: document.getElementById("f_accent").value.trim()
+  };
+
+  var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
+  var method = id ? "PATCH" : "POST";
+
+  document.getElementById("saveBtn").disabled = true;
+  document.getElementById("saveBtn").textContent = "Saqlanmoqda...";
+
+  fetch(url,{
+    method: method,
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if(!r.ok){ document.getElementById("saveBtn").disabled=false; document.getElementById("saveBtn").textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
+    closeModal();
+    loadProducts();
+  });
+}
+
+/* ========== START ========== */
+if(token) renderMain(); else renderLogin();
+</script>
 </body>
 </html>
