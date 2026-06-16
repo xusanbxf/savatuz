@@ -1119,11 +1119,17 @@ function AuthModal({ open, t, onClose, onAuth }) {
     if (password.length < 6) { setErr("Parol kamida 6 ta belgi"); return; }
     setLoading(true); setErr("");
 
-    // Avval login qilib email mavjudligini tekshiramiz
-    const check = await sb("/auth/v1/token?grant_type=password", { email, password: "___check___" });
-    if (check.ok || (check.d.error_description && check.d.error_description === "Invalid login credentials")) {
-      // "Invalid login credentials" = email bor, parol noto'g'ri = allaqachon ro'yxatdan o'tgan
-      if (check.d.error_description === "Invalid login credentials") {
+    // Email mavjudligini tekshirish
+    const check = await sb("/auth/v1/token?grant_type=password", { email, password: "___check___x9z" });
+    if (!check.ok) {
+      const desc = check.d.error_description || "";
+      if (desc === "Invalid login credentials") {
+        // Email bor, faqat parol noto'g'ri = allaqachon ro'yxatdan o'tgan
+        setErr("Bu email allaqachon ro'yxatdan o'tgan");
+        setLoading(false); return;
+      }
+      // "Email not confirmed" ham email borligini bildiradi
+      if (desc.includes("not confirmed") || desc.includes("Email")) {
         setErr("Bu email allaqachon ro'yxatdan o'tgan");
         setLoading(false); return;
       }
@@ -1132,9 +1138,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
     const { ok, d } = await sb("/auth/v1/signup", { email, password, data: { name: name.trim() } });
     setLoading(false);
     if (!ok) {
-      const msg = d.error || d.msg || d.message || "";
-      const desc = d.error_description || "";
-      setErr(desc || msg || "Xatolik yuz berdi");
+      setErr(d.error_description || d.msg || d.message || "Xatolik yuz berdi");
       return;
     }
     setTab("verify");
