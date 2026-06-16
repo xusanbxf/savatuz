@@ -85,6 +85,7 @@
 <script>
 var SB = "https://gjsaelqqubmlwnmfyuso.supabase.co";
 var KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
+var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 var CATS = [
   {id:"tech",label:"Texnika"},{id:"shoes",label:"Oyoq kiyim"},
   {id:"fashion",label:"Kiyim"},{id:"home",label:"Uy-ro'zg'or"}
@@ -379,11 +380,10 @@ function saveProduct(id, existingImageUrl) {
     var ext = "jpg";
     var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
     var uploadBlob = window._uploadBlob || file;
-    var formData = new FormData();
-    formData.append("", uploadBlob, fileName);
+    var contentType = uploadBlob.type || "image/jpeg";
     fetch(SB+"/storage/v1/object/products/"+fileName,{
       method:"POST",
-      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"x-upsert":"true"},
+      headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":contentType,"x-upsert":"true"},
       body:uploadBlob
     }).then(function(r){ return r.json(); })
     .then(function(){
