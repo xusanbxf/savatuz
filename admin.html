@@ -239,7 +239,7 @@ function loadProducts() {
             : '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>';
           return '<div class="prod-card">'+
             imgHtml+
-            '<div class="prod-name">'+h(p.name_uz)+'</div>'+
+            '<div class="prod-name">'+h(p.name_uz)+(p.sku?' <span style="font-size:11px;font-weight:700;background:#f0e8ff;color:#6c2bd9;padding:2px 8px;border-radius:999px;vertical-align:middle">'+h(p.sku)+'</span>':'')+'</div>'+
             '<div class="prod-sub">'+h(p.sub_uz||"")+'</div>'+
             '<div class="prod-prices">Xitoy: <b>'+fmt(p.china)+'</b> | Biz: <b>'+fmt(p.market)+'</b> so\'m | '+p.weight+' kg</div>'+
             '<div class="prod-actions">'+
@@ -275,6 +275,7 @@ function openProductModal(p) {
         '<label>Nomi (ru)</label><input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" />'+
         '<label>Tavsif (uz)</label><input id="f_sub_uz" value="'+h(p?p.sub_uz:"")+'" placeholder="Erkaklar uchun..." />'+
         '<label>Tavsif (ru)</label><input id="f_sub_ru" value="'+h(p?p.sub_ru:"")+'" placeholder="Мужские..." />'+
+        '<label>SKU (mahsulot kodi)</label><input id="f_sku" value="'+h(p?p.sku||":"")+'" placeholder="SHOES-001, TECH-042..." />'+
         '<div class="form-row">'+
           '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" /></div>'+
           '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" /></div>'+
@@ -341,6 +342,7 @@ function saveProduct(id, existingImageUrl) {
       sub_ru:document.getElementById("f_sub_ru").value.trim(),
       china:china, market:market, weight:weight,
       cat:document.getElementById("f_cat").value,
+      sku:document.getElementById("f_sku").value.trim()||null,
       image_url: imageUrl || null
     };
     var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
