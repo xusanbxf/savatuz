@@ -1151,7 +1151,10 @@ function AuthModal({ open, t, onClose, onAuth }) {
     setLoading(true); setErr("");
     const { ok, d } = await sb("/auth/v1/verify", { type: "signup", email, token: otp.trim() });
     setLoading(false);
-    if (!ok) { setErr("Kod noto'g'ri yoki muddati o'tgan"); return; }
+    if (!ok) { 
+      setErr("Kod noto'g'ri yoki muddati o'tgan. Agar avval ro'yxatdan o'tgan bo'lsangiz — 'Kirishga qaytish' tugmasini bosib, email va parolingiz bilan kiring."); 
+      return; 
+    }
     const finalName = d.user?.user_metadata?.name || name || email.split("@")[0];
     onAuth({ name: finalName, email, token: d.access_token });
     setName(""); setEmail(""); setPassword(""); setOtp("");
@@ -1191,6 +1194,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
           <div style={{ fontSize: 36, marginBottom: 8 }}>📧</div>
           <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>Emailni tasdiqlang</div>
           <div style={{ color: "#8a849c", fontSize: 13.5 }}>{info}</div>
+          <div style={{ color: "#8a849c", fontSize: 12.5, marginTop: 8 }}>Agar xat kelmasa — avval ro'yxatdan o'tgan bo'lishingiz mumkin. "Kirishga qaytish" tugmasini bosing.</div>
         </div>
         <div className="auth-fields">
           <label className="field">
