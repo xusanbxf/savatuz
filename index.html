@@ -1145,8 +1145,16 @@ function AuthModal({ open, t, onClose, onAuth }) {
   const doForgot = async () => {
     if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
     setLoading(true); setErr("");
-    await sb("/auth/v1/recover", { email });
+    const res = await fetch(SB_URL + "/auth/v1/recover", {
+      method: "POST",
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
     setLoading(false);
+    if (res.status === 429) {
+      setErr("Urinishlar soni ko'payib ketdi. 5-10 daqiqadan keyin qayta urinib ko'ring.");
+      return;
+    }
     setTab("reset-sent");
   };
 
@@ -1259,14 +1267,14 @@ function AuthModal({ open, t, onClose, onAuth }) {
             <span>Email</span>
             <div className="field-in">
               <AC_I.user style={{ width: 18, height: 18 }} />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@misol.com" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@misol.com" autoComplete="off" />
             </div>
           </label>
           <label className="field">
             <span>Parol</span>
             <div className="field-in">
               <AC_I.lock style={{ width: 18, height: 18 }} />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="new-password"
                 onKeyDown={(e) => { if (e.key === "Enter") tab === "login" ? doLogin() : doRegister(); }} />
             </div>
           </label>
