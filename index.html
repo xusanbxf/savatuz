@@ -1121,8 +1121,13 @@ function AuthModal({ open, t, onClose, onAuth }) {
     const { ok, d } = await sb("/auth/v1/signup", { email, password, data: { name: name.trim() } });
     setLoading(false);
     if (!ok) {
-      if (d.error === "User already registered") setErr("Bu email allaqachon ro'yxatdan o'tgan");
-      else setErr(d.error_description || d.msg || "Xatolik yuz berdi");
+      const msg = d.error || d.msg || d.message || "";
+      const desc = d.error_description || "";
+      if (msg === "User already registered" || desc.includes("already") || msg.includes("already") || d.code === "user_already_exists") {
+        setErr("Bu email allaqachon ro'yxatdan o'tgan");
+      } else {
+        setErr(desc || msg || "Xatolik yuz berdi");
+      }
       return;
     }
     setTab("verify");
