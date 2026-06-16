@@ -16,44 +16,33 @@
   body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
-  /* Login */
   .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
   .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
   .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
   label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
-  input, textarea {
+  input, textarea, select {
     width: 100%; border-radius: var(--r-sm); border: 1.5px solid var(--line);
     padding: 10px 14px; font-size: 15px; font-family: inherit; margin-bottom: 14px;
     background: var(--bg); color: var(--ink);
   }
+  input[type=file] { padding: 8px 14px; height: auto; cursor: pointer; }
   input { height: 46px; }
   textarea { height: 80px; resize: vertical; }
-  input:focus, textarea:focus { outline: none; border-color: var(--brand); }
-  .btn {
-    height: 46px; border-radius: var(--r-sm); border: none; cursor: pointer;
-    font-family: inherit; font-weight: 700; font-size: 15px; color: #fff;
-    background: linear-gradient(140deg, #7c3aed 0%, #c026d3 100%);
-    width: 100%;
-  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); }
+  .btn { height: 46px; border-radius: var(--r-sm); border: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 15px; color: #fff; background: linear-gradient(140deg, #7c3aed 0%, #c026d3 100%); width: 100%; }
   .btn:disabled { opacity: .6; cursor: default; }
   .btn-sm { width: auto; padding: 0 16px; height: 36px; font-size: 13px; }
   .btn-danger { background: #e11d48; }
   .btn-ghost { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
   .err { color: #e11d48; font-size: 13.5px; margin: -6px 0 12px; min-height: 1em; }
 
-  /* Nav */
   .top { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
   .top-title { font-family: var(--display); font-weight: 800; font-size: 22px; margin: 0; flex: 1; }
   .nav-tabs { display: flex; gap: 6px; }
-  .tab {
-    height: 38px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line);
-    font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer;
-    background: var(--surface); color: var(--ink-2);
-  }
+  .tab { height: 38px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line); font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer; background: var(--surface); color: var(--ink-2); }
   .tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
-  .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+  .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-weight: 700; }
 
-  /* Orders */
   .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
   .order-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
   .order-num { font-family: var(--display); font-weight: 800; font-size: 17px; }
@@ -65,31 +54,30 @@
   .items-list b { color: var(--ink); }
   .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
   .info-row b { color: var(--ink); font-weight: 600; }
-  select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; }
+  select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; width: auto; margin-bottom: 0; }
   .status-yangi { background-color: #f59e0b; }
   .status-tasdiqlangan { background-color: #2563eb; }
   .status-yetkazilmoqda { background-color: #7c3aed; }
   .status-yakunlangan { background-color: #12a150; }
   .status-bekor { background-color: #e11d48; }
 
-  /* Products */
-  .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 4px; }
+  .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 4px; }
   .prod-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
-  .prod-tile { width: 100%; height: 80px; border-radius: var(--r-sm); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .prod-img { width: 100%; height: 140px; border-radius: var(--r-sm); margin-bottom: 12px; object-fit: cover; }
+  .prod-tile { width: 100%; height: 140px; border-radius: var(--r-sm); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
   .prod-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
   .prod-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 10px; }
   .prod-prices { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; }
   .prod-actions { display: flex; gap: 8px; }
 
-  /* Modal */
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .modal { background: var(--surface); border-radius: var(--r); padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .modal { background: var(--surface); border-radius: var(--r); padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
   .modal h2 { font-family: var(--display); font-weight: 800; font-size: 20px; margin: 0 0 18px; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .add-btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-
+  .img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: var(--r-sm); margin-bottom: 10px; display: none; }
+  .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
   .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
-  .badge { display: inline-block; background: #f0e8ff; color: var(--brand); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 </style>
 </head>
 <body>
@@ -120,7 +108,6 @@ var currentTab = "orders";
 function fmt(n) { return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g," "); }
 function h(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-/* ========== AUTH ========== */
 function renderLogin(errMsg) {
   root.innerHTML =
     '<div class="login-box">'+
@@ -158,17 +145,16 @@ function doLogout() {
   token=null; renderLogin();
 }
 
-/* ========== SHELL ========== */
 function renderMain() {
   root.innerHTML =
     '<div class="wrap">'+
       '<div class="top">'+
         '<p class="top-title">SAVAT.UZ Admin</p>'+
         '<div class="nav-tabs">'+
-          '<button class="tab'+(currentTab==="orders"?" active":"") +'" id="tabOrders">Buyurtmalar</button>'+
-          '<button class="tab'+(currentTab==="products"?" active":"") +'" id="tabProducts">Mahsulotlar</button>'+
+          '<button class="tab'+(currentTab==="orders"?" active":"")+'" id="tabOrders">Buyurtmalar</button>'+
+          '<button class="tab'+(currentTab==="products"?" active":"")+'" id="tabProducts">Mahsulotlar</button>'+
         '</div>'+
-        '<button class="btn btn-ghost logout" id="logoutBtn">Chiqish</button>'+
+        '<button class="logout" id="logoutBtn">Chiqish</button>'+
       '</div>'+
       '<div id="content">Yuklanmoqda...</div>'+
     '</div>';
@@ -179,14 +165,12 @@ function renderMain() {
   else loadProducts();
 }
 
-/* ========== ORDERS ========== */
 function statusClass(s){
   if(s==="yangi") return "status-yangi";
   if(s==="tasdiqlangan") return "status-tasdiqlangan";
   if(s==="yetkazilmoqda") return "status-yetkazilmoqda";
   if(s==="yakunlangan") return "status-yakunlangan";
-  if(s==="bekor") return "status-bekor";
-  return "status-yangi";
+  return "status-bekor";
 }
 
 function loadOrders() {
@@ -200,15 +184,14 @@ function loadOrders() {
     if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
-        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||it.name_ru||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
+        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
       }).join("");
-      var date = new Date(o.created_at).toLocaleString("ru-RU");
       return '<div class="order-card">'+
         '<div class="order-head">'+
-          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+date+'</div></div>'+
+          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
           '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
           '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
         '</div>'+
@@ -225,12 +208,10 @@ function loadOrders() {
         '</div>'+
       '</div>';
     }).join("");
-
     document.querySelectorAll("select.status").forEach(function(sel){
       sel.onchange = function(){
-        var id = sel.getAttribute("data-id");
-        sel.className = "status "+statusClass(sel.value);
-        fetch(SB+"/rest/v1/orders?id=eq."+id,{
+        sel.className="status "+statusClass(sel.value);
+        fetch(SB+"/rest/v1/orders?id=eq."+sel.getAttribute("data-id"),{
           method:"PATCH",
           headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
           body:JSON.stringify({status:sel.value})
@@ -240,7 +221,6 @@ function loadOrders() {
   }).catch(function(){});
 }
 
-/* ========== PRODUCTS ========== */
 function loadProducts() {
   fetch(SB+"/rest/v1/products?select=*&order=id",{
     headers:{"apikey":KEY,"Authorization":"Bearer "+token}
@@ -254,15 +234,16 @@ function loadProducts() {
       '</div>'+
       '<div class="prod-grid">'+
         products.map(function(p){
+          var imgHtml = p.image_url
+            ? '<img class="prod-img" src="'+h(p.image_url)+'" alt="'+h(p.name_uz)+'" />'
+            : '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>';
           return '<div class="prod-card">'+
-            '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>'+
+            imgHtml+
             '<div class="prod-name">'+h(p.name_uz)+'</div>'+
             '<div class="prod-sub">'+h(p.sub_uz||"")+'</div>'+
-            '<div class="prod-prices">'+
-              'Xitoy: <b>'+fmt(p.china)+'</b> so\'m | Biz: <b>'+fmt(p.market)+'</b> so\'m | '+p.weight+' kg'+
-            '</div>'+
+            '<div class="prod-prices">Xitoy: <b>'+fmt(p.china)+'</b> | Biz: <b>'+fmt(p.market)+'</b> so\'m | '+p.weight+' kg</div>'+
             '<div class="prod-actions">'+
-              '<button class="btn btn-sm btn-ghost" onclick="editProduct('+JSON.stringify(JSON.stringify(p))+')">Tahrirlash</button>'+
+              '<button class="btn btn-sm btn-ghost" onclick="editProduct(\''+encodeURIComponent(JSON.stringify(p))+'\')">Tahrirlash</button>'+
               '<button class="btn btn-sm btn-danger" onclick="deleteProduct('+p.id+',\''+h(p.name_uz)+'\')">O\'chirish</button>'+
             '</div>'+
           '</div>';
@@ -272,8 +253,8 @@ function loadProducts() {
   });
 }
 
-function editProduct(pJson) {
-  openProductModal(JSON.parse(pJson));
+function editProduct(pEnc) {
+  openProductModal(JSON.parse(decodeURIComponent(pEnc)));
 }
 
 function deleteProduct(id, name) {
@@ -286,7 +267,7 @@ function deleteProduct(id, name) {
 
 function openProductModal(p) {
   var isEdit = !!p;
-  var modalHtml =
+  document.body.insertAdjacentHTML("beforeend",
     '<div class="modal-bg" id="modalBg">'+
       '<div class="modal">'+
         '<h2>'+(isEdit?"Tahrirlash":"Yangi mahsulot")+'</h2>'+
@@ -295,34 +276,41 @@ function openProductModal(p) {
         '<label>Tavsif (uz)</label><input id="f_sub_uz" value="'+h(p?p.sub_uz:"")+'" placeholder="Erkaklar uchun..." />'+
         '<label>Tavsif (ru)</label><input id="f_sub_ru" value="'+h(p?p.sub_ru:"")+'" placeholder="Мужские..." />'+
         '<div class="form-row">'+
-          '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" placeholder="95000" /></div>'+
-          '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" placeholder="650000" /></div>'+
+          '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" /></div>'+
+          '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" /></div>'+
         '</div>'+
         '<div class="form-row">'+
-          '<div><label>Vazni (kg)</label><input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" placeholder="0.8" /></div>'+
+          '<div><label>Vazni (kg)</label><input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" /></div>'+
           '<div><label>Kategoriya</label>'+
-            '<select id="f_cat" style="height:46px;width:100%;margin-bottom:14px;border-radius:10px;border:1.5px solid var(--line);padding:0 12px;font-family:inherit;font-size:15px;background:var(--bg);">'+
-              CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+
-            '</select>'+
+            '<select id="f_cat">'+CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+'</select>'+
           '</div>'+
         '</div>'+
-        '<div class="form-row">'+
-          '<div><label>Fon rangi (hex)</label><input id="f_tile" value="'+h(p?p.tile:"#ede4ff")+'" placeholder="#ede4ff" /></div>'+
-          '<div><label>Accent rangi (hex)</label><input id="f_accent" value="'+h(p?p.accent:"#6c2bd9")+'" placeholder="#6c2bd9" /></div>'+
-        '</div>'+
+        '<label>Mahsulot rasmi</label>'+
+        (p&&p.image_url?'<img class="img-preview" id="imgPreview" src="'+h(p.image_url)+'" style="display:block" />':'<img class="img-preview" id="imgPreview" />')+
+        '<input type="file" id="f_image" accept="image/*" />'+
+        '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
         '<div class="err" id="modalErr"></div>'+
         '<div style="display:flex;gap:10px;">'+
           '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
           '<button class="btn" style="flex:2" id="saveBtn">'+(isEdit?"Saqlash":"Qo\'shish")+'</button>'+
         '</div>'+
       '</div>'+
-    '</div>';
+    '</div>'
+  );
 
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
+  var fileInput = document.getElementById("f_image");
+  var preview = document.getElementById("imgPreview");
+  fileInput.onchange = function() {
+    if(fileInput.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e){ preview.src=e.target.result; preview.style.display="block"; };
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+  };
 
   document.getElementById("cancelBtn").onclick = closeModal;
   document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
-  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null); };
+  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null, p?p.image_url:null); };
 }
 
 function closeModal() {
@@ -330,47 +318,63 @@ function closeModal() {
   if(bg) bg.remove();
 }
 
-function saveProduct(id) {
+function saveProduct(id, existingImageUrl) {
   var name_uz = document.getElementById("f_name_uz").value.trim();
   var name_ru = document.getElementById("f_name_ru").value.trim();
   var china = parseInt(document.getElementById("f_china").value);
   var market = parseInt(document.getElementById("f_market").value);
   var weight = parseFloat(document.getElementById("f_weight").value);
+  var file = document.getElementById("f_image").files[0];
 
   if(!name_uz||!name_ru||!china||!market||!weight){
-    document.getElementById("modalErr").textContent = "Barcha majburiy maydonlarni to'ldiring";
+    document.getElementById("modalErr").textContent="Barcha majburiy maydonlarni to'ldiring";
     return;
   }
 
-  var body = {
-    name_uz: name_uz,
-    name_ru: name_ru,
-    sub_uz: document.getElementById("f_sub_uz").value.trim(),
-    sub_ru: document.getElementById("f_sub_ru").value.trim(),
-    china: china, market: market, weight: weight,
-    cat: document.getElementById("f_cat").value,
-    tile: document.getElementById("f_tile").value.trim(),
-    accent: document.getElementById("f_accent").value.trim()
+  var btn = document.getElementById("saveBtn");
+  btn.disabled=true; btn.textContent="Saqlanmoqda...";
+
+  var doSave = function(imageUrl) {
+    var body = {
+      name_uz:name_uz, name_ru:name_ru,
+      sub_uz:document.getElementById("f_sub_uz").value.trim(),
+      sub_ru:document.getElementById("f_sub_ru").value.trim(),
+      china:china, market:market, weight:weight,
+      cat:document.getElementById("f_cat").value,
+      image_url: imageUrl || null
+    };
+    var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
+    fetch(url,{
+      method: id?"PATCH":"POST",
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+      body:JSON.stringify(body)
+    }).then(function(r){
+      if(!r.ok){ btn.disabled=false; btn.textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
+      closeModal(); loadProducts();
+    });
   };
 
-  var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
-  var method = id ? "PATCH" : "POST";
-
-  document.getElementById("saveBtn").disabled = true;
-  document.getElementById("saveBtn").textContent = "Saqlanmoqda...";
-
-  fetch(url,{
-    method: method,
-    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
-    body: JSON.stringify(body)
-  }).then(function(r){
-    if(!r.ok){ document.getElementById("saveBtn").disabled=false; document.getElementById("saveBtn").textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
-    closeModal();
-    loadProducts();
-  });
+  if(file) {
+    document.getElementById("uploadProgress").style.display="block";
+    var ext = file.name.split(".").pop();
+    var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
+    fetch(SB+"/storage/v1/object/products/"+fileName,{
+      method:"POST",
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":file.type,"x-upsert":"true"},
+      body:file
+    }).then(function(r){ return r.json(); })
+    .then(function(){
+      var publicUrl = SB+"/storage/v1/object/public/products/"+fileName;
+      doSave(publicUrl);
+    }).catch(function(){
+      document.getElementById("modalErr").textContent="Rasm yuklanmadi, qayta urinib ko'ring";
+      btn.disabled=false; btn.textContent="Saqlash";
+    });
+  } else {
+    doSave(existingImageUrl);
+  }
 }
 
-/* ========== START ========== */
 if(token) renderMain(); else renderLogin();
 </script>
 </body>
