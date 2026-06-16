@@ -1090,7 +1090,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
 
   const sb = (path, body) => fetch(SB_URL + path, {
     method: "POST",
-    headers: { "apikey": SB_KEY, "Content-Type": "application/json" },
+    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" },
     body: JSON.stringify(body)
   }).then(r => r.json().then(d => ({ ok: r.ok, d })));
 
