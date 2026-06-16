@@ -301,8 +301,10 @@ function openProductModal(p) {
 
   var fileInput = document.getElementById("f_image");
   var preview = document.getElementById("imgPreview");
+  window._uploadBlob = null;
   fileInput.onchange = function() {
     if(!fileInput.files[0]) return;
+    window._uploadBlob = null;
     var file = fileInput.files[0];
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -317,10 +319,7 @@ function openProductModal(p) {
         canvas.getContext("2d").drawImage(img, 0, 0, w, h);
         preview.src = canvas.toDataURL("image/jpeg", 0.85);
         preview.style.display = "block";
-        // compressed faylni fileInput.files o'rniga saqlaymiz
-        canvas.toBlob(function(blob){
-          fileInput._compressedBlob = blob;
-        }, "image/jpeg", 0.85);
+        canvas.toBlob(function(blob){ window._uploadBlob = blob; }, "image/jpeg", 0.85);
       };
       img.src = e.target.result;
     };
@@ -345,7 +344,6 @@ function saveProduct(id, existingImageUrl) {
   var weight = parseFloat(document.getElementById("f_weight").value);
   var fileInput2 = document.getElementById("f_image");
   var file = fileInput2.files[0];
-  if(file) file._compressedBlob = fileInput2._compressedBlob;
 
   if(!name_uz||!name_ru||!china||!market||!weight){
     document.getElementById("modalErr").textContent="Barcha majburiy maydonlarni to'ldiring";
@@ -380,7 +378,7 @@ function saveProduct(id, existingImageUrl) {
     document.getElementById("uploadProgress").style.display="block";
     var ext = "jpg";
     var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
-    var uploadBlob = file._compressedBlob || file;
+    var uploadBlob = window._uploadBlob || file;
     fetch(SB+"/storage/v1/object/products/"+fileName,{
       method:"POST",
       headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"image/jpeg","x-upsert":"true"},
