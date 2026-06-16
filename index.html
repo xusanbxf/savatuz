@@ -1073,63 +1073,177 @@ function phoneValid(p) { return p.replace(/\D/g, "").length === 12; }
 
 /* ---------- Auth modal ---------- */
 function AuthModal({ open, t, onClose, onAuth }) {
-  const [tab, setTab] = useState("login");
+  const [tab, setTab] = useState("login"); // login | register | verify | forgot | reset-sent
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [err, setErr] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
-  useEffect(() => { if (open) { setErr(""); setLoading(false); } }, [open, tab]);
+  useEffect(() => { if (open) { setErr(""); setInfo(""); setLoading(false); } }, [open, tab]);
   if (!open) return null;
 
-  const submit = async () => {
-    if (tab === "register" && name.trim().length < 2) { setErr(t.auth_err_name); return; }
+  const sb = (path, body) => fetch(SB_URL + path, {
+    method: "POST",
+    headers: { "apikey": SB_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(r => r.json().then(d => ({ ok: r.ok, d })));
+
+  // Kirish
+  const doLogin = async () => {
     if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
-    if (password.length < 6) { setErr("Parol kamida 6 ta belgi bo'lishi kerak"); return; }
+    if (password.length < 6) { setErr("Parol kamida 6 ta belgi"); return; }
     setLoading(true); setErr("");
-
-    const endpoint = tab === "login"
-      ? SB_URL + "/auth/v1/token?grant_type=password"
-      : SB_URL + "/auth/v1/signup";
-
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "apikey": SB_KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, data: { name: name.trim() || "Mijoz" } })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.error_description === "Invalid login credentials") setErr("Email yoki parol noto'g'ri");
-        else if (data.error === "User already registered") setErr("Bu email allaqachon ro'yxatdan o'tgan");
-        else setErr(data.error_description || data.msg || "Xatolik yuz berdi");
-        setLoading(false); return;
-      }
-      const user = data.user || data;
-      const finalName = name.trim() || user.user_metadata?.name || email.split("@")[0];
-      onAuth({ name: finalName, email, token: data.access_token });
-      setName(""); setEmail(""); setPassword("");
-    } catch (e) {
-      setErr("Internet aloqasini tekshiring");
-    }
+    const { ok, d } = await sb("/auth/v1/token?grant_type=password", { email, password });
     setLoading(false);
+    if (!ok) {
+      if (d.error_description === "Invalid login credentials") setErr("Email yoki parol noto'g'ri");
+      else if (d.error_description?.includes("Email not confirmed")) setErr("Email tasdiqlanmagan — pochtangizni tekshiring");
+      else setErr(d.error_description || "Xatolik yuz berdi");
+      return;
+    }
+    const finalName = d.user?.user_metadata?.name || email.split("@")[0];
+    onAuth({ name: finalName, email, token: d.access_token });
+    setName(""); setEmail(""); setPassword("");
   };
 
+  // Ro'yxatdan o'tish
+  const doRegister = async () => {
+    if (name.trim().length < 2) { setErr("Ismingizni kiriting"); return; }
+    if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
+    if (password.length < 6) { setErr("Parol kamida 6 ta belgi"); return; }
+    setLoading(true); setErr("");
+    const { ok, d } = await sb("/auth/v1/signup", { email, password, data: { name: name.trim() } });
+    setLoading(false);
+    if (!ok) {
+      if (d.error === "User already registered") setErr("Bu email allaqachon ro'yxatdan o'tgan");
+      else setErr(d.error_description || d.msg || "Xatolik yuz berdi");
+      return;
+    }
+    setTab("verify");
+    setInfo(email + " manziliga tasdiqlash kodi yuborildi");
+  };
+
+  // OTP tasdiqlash
+  const doVerify = async () => {
+    if (otp.trim().length < 6) { setErr("Kodni to'liq kiriting"); return; }
+    setLoading(true); setErr("");
+    const { ok, d } = await sb("/auth/v1/verify", { type: "signup", email, token: otp.trim() });
+    setLoading(false);
+    if (!ok) { setErr("Kod noto'g'ri yoki muddati o'tgan"); return; }
+    const finalName = d.user?.user_metadata?.name || name || email.split("@")[0];
+    onAuth({ name: finalName, email, token: d.access_token });
+    setName(""); setEmail(""); setPassword(""); setOtp("");
+  };
+
+  // Parolni tiklash
+  const doForgot = async () => {
+    if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
+    setLoading(true); setErr("");
+    await sb("/auth/v1/recover", { email });
+    setLoading(false);
+    setTab("reset-sent");
+  };
+
+  const Brand = () => (
+    <div className="modal-brand">
+      <div className="brand-mark" style={{ width: 44, height: 44 }}><AC_I.basket style={{ width: 25, height: 25 }} /></div>
+      <div className="brand-name" style={{ fontSize: 22 }}>SAVAT<span className="uz">.UZ</span></div>
+    </div>
+  );
+
+  // OTP ekrani
+  if (tab === "verify") return (
+    <div className="modal-scrim on" onClick={onClose}>
+      <div className="modal pop" onClick={e => e.stopPropagation()}>
+        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
+        <Brand />
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>📧</div>
+          <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>Emailni tasdiqlang</div>
+          <div style={{ color: "#8a849c", fontSize: 13.5 }}>{info}</div>
+        </div>
+        <div className="auth-fields">
+          <label className="field">
+            <span>Tasdiqlash kodi</span>
+            <div className="field-in">
+              <AC_I.lock style={{ width: 18, height: 18 }} />
+              <input value={otp} onChange={e => setOtp(e.target.value)} placeholder="123456"
+                inputMode="numeric" maxLength={6}
+                onKeyDown={e => { if (e.key === "Enter") doVerify(); }} />
+            </div>
+          </label>
+          {err && <p className="field-err">{err}</p>}
+        </div>
+        <button className="auth-submit" onClick={doVerify} disabled={loading}>
+          {loading ? "Tekshirilmoqda..." : "Tasdiqlash"} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
+        </button>
+        <p className="auth-note" style={{ textAlign: "center", cursor: "pointer", color: "#6c2bd9" }}
+          onClick={() => { setTab("login"); setErr(""); }}>← Kirishga qaytish</p>
+      </div>
+    </div>
+  );
+
+  // Parol tiklash yuborildi
+  if (tab === "reset-sent") return (
+    <div className="modal-scrim on" onClick={onClose}>
+      <div className="modal pop" onClick={e => e.stopPropagation()}>
+        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
+        <Brand />
+        <div style={{ textAlign: "center", padding: "16px 0" }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>✉️</div>
+          <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>Xat yuborildi</div>
+          <div style={{ color: "#8a849c", fontSize: 13.5 }}><b>{email}</b> manziliga parolni tiklash havolasi yuborildi. Pochtangizni tekshiring.</div>
+        </div>
+        <button className="auth-submit" onClick={() => { setTab("login"); setErr(""); }}>
+          Kirishga qaytish
+        </button>
+      </div>
+    </div>
+  );
+
+  // Parolni unutdim
+  if (tab === "forgot") return (
+    <div className="modal-scrim on" onClick={onClose}>
+      <div className="modal pop" onClick={e => e.stopPropagation()}>
+        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
+        <Brand />
+        <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>Parolni tiklash</div>
+        <div style={{ color: "#8a849c", fontSize: 13.5, marginBottom: 16 }}>Emailingizga tiklash havolasi yuboramiz</div>
+        <div className="auth-fields">
+          <label className="field">
+            <span>Email</span>
+            <div className="field-in">
+              <AC_I.user style={{ width: 18, height: 18 }} />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@misol.com"
+                onKeyDown={e => { if (e.key === "Enter") doForgot(); }} />
+            </div>
+          </label>
+          {err && <p className="field-err">{err}</p>}
+        </div>
+        <button className="auth-submit" onClick={doForgot} disabled={loading}>
+          {loading ? "Yuborilmoqda..." : "Havolani yuborish"} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
+        </button>
+        <p className="auth-note" style={{ textAlign: "center", cursor: "pointer", color: "#6c2bd9" }}
+          onClick={() => { setTab("login"); setErr(""); }}>← Kirishga qaytish</p>
+      </div>
+    </div>
+  );
+
+  // Asosiy kirish / ro'yxatdan o'tish
   return (
     <div className="modal-scrim on" onClick={onClose}>
       <div className="modal pop" onClick={(e) => e.stopPropagation()}>
         <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
-        <div className="modal-brand">
-          <div className="brand-mark" style={{ width: 44, height: 44 }}><AC_I.basket style={{ width: 25, height: 25 }} /></div>
-          <div className="brand-name" style={{ fontSize: 22 }}>SAVAT<span className="uz">.UZ</span></div>
-        </div>
+        <Brand />
         <div className="auth-tabs">
-          <button className={tab === "login" ? "on" : ""} onClick={() => setTab("login")}>{t.auth_login_tab}</button>
-          <button className={tab === "register" ? "on" : ""} onClick={() => setTab("register")}>{t.auth_reg_tab}</button>
+          <button className={tab === "login" ? "on" : ""} onClick={() => { setTab("login"); setErr(""); }}>{t.auth_login_tab}</button>
+          <button className={tab === "register" ? "on" : ""} onClick={() => { setTab("register"); setErr(""); }}>{t.auth_reg_tab}</button>
         </div>
         <div className="auth-fields">
           {tab === "register" && (
@@ -1153,12 +1267,16 @@ function AuthModal({ open, t, onClose, onAuth }) {
             <div className="field-in">
               <AC_I.lock style={{ width: 18, height: 18 }} />
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
-                onKeyDown={(e) => { if (e.key === "Enter") submit(); }} />
+                onKeyDown={(e) => { if (e.key === "Enter") tab === "login" ? doLogin() : doRegister(); }} />
             </div>
           </label>
           {err && <p className="field-err">{err}</p>}
+          {tab === "login" && (
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6c2bd9", cursor: "pointer", textAlign: "right" }}
+              onClick={() => { setTab("forgot"); setErr(""); }}>Parolni unutdingizmi?</p>
+          )}
         </div>
-        <button className="auth-submit" onClick={submit} disabled={loading}>
+        <button className="auth-submit" onClick={tab === "login" ? doLogin : doRegister} disabled={loading}>
           {loading ? "Yuklanmoqda..." : t.auth_continue} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
         </button>
         <p className="auth-note">{t.auth_note}</p>
