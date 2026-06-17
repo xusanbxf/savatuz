@@ -710,9 +710,19 @@ function doImport() {
     result.className="import-result show";
 
     var nameEl = document.getElementById("importName");
-    nameEl.textContent = info.name || "";
+    nameEl.textContent = info.name_uz || info.name || "";
     nameEl.contentEditable = "true";
     nameEl.style.cssText = "border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;min-height:28px;outline:none;cursor:text;";
+
+    // Also fill name_ru field if exists
+    var nameRuEl = document.getElementById("importNameRu");
+    if(nameRuEl) nameRuEl.value = info.name_ru || info.name || "";
+
+    // Show original chinese name hint
+    if(info.name && (info.name_uz || info.name_ru)) {
+      var hint = document.getElementById("importNameHint");
+      if(hint) hint.textContent = "Xitoycha: " + info.name;
+    }
 
     var badge = document.getElementById("importBadge");
     if(platform==="pdd"){ badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
@@ -872,6 +882,7 @@ function parseProductPage(html, platform) {
 
 function doImportSave() {
   var name = document.getElementById("importName").textContent.trim();
+  var nameRu = (document.getElementById("importNameRu") || {}).value || name;
   var china = parseInt(document.getElementById("importChina").value);
   var market = parseInt(document.getElementById("importMarket").value);
   var weight = parseFloat(document.getElementById("importWeight").value);
@@ -889,7 +900,7 @@ function doImportSave() {
   var firstImg = images[0] || null;
 
   var body = {
-    name_uz: name, name_ru: name,
+    name_uz: name, name_ru: nameRu || name,
     sub_uz: "", sub_ru: "",
     china: china, market: market, weight: weight, cat: cat,
     image_url: firstImg,
