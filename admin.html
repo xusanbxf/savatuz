@@ -84,6 +84,25 @@
   .img-add-box:hover { border-color: var(--brand); color: var(--brand); }
   .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
   .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
+  .tab-import { background: linear-gradient(135deg,#7c3aed,#a855f7) !important; color: #fff !important; border-color: transparent !important; }
+  .import-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; max-width: 640px; margin: 0 auto; }
+  .import-box h3 { font-family: var(--display); font-weight: 800; font-size: 18px; margin: 0 0 6px; }
+  .import-box p { color: var(--ink-3); font-size: 13.5px; margin: 0 0 20px; }
+  .import-result { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: none; }
+  .import-result.show { display: block; }
+  .import-preview { display: grid; grid-template-columns: 180px 1fr; gap: 20px; padding: 20px; }
+  .import-img { width: 180px; height: 180px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); }
+  .import-img-ph { width: 180px; height: 180px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .import-field { margin-bottom: 12px; }
+  .import-field label { font-size: 12px; font-weight: 700; color: var(--ink-3); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .import-field .val { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .platform-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+  .badge-taobao { background: #fff0e6; color: #e05c00; }
+  .badge-pdd { background: #ffe8f0; color: #c0184e; }
+  .import-actions { padding: 16px 20px; border-top: 1px solid var(--line); background: var(--bg); display: flex; gap: 10px; align-items: center; }
+  .import-status { font-size: 13px; padding: 10px 16px; border-radius: var(--r-sm); margin-top: 12px; display: none; }
+  .import-status.ok { background: #e7f7ee; color: #12a150; display: block; font-weight: 700; }
+  .import-status.err { background: #fff0f0; color: #e11d48; display: block; font-weight: 700; }
 
   .confirm-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn .15s; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -138,7 +157,7 @@ function showConfirm(opts) {
       '<p>'+opts.text+'</p>'+
       '<div class="confirm-btns">'+
         '<button class="confirm-cancel" id="confirmCancel">Bekor qilish</button>'+
-        '<button class="confirm-ok '+(opts.okClass||"")+'" id="confirmOk">'+(opts.okText||"O'chirish")+'</button>'+
+        '<button class="confirm-ok '+(opts.okClass||"")+'" id="confirmOk">'+(opts.okText||"O&#39;chirish")+'</button>'+
       '</div>'+
     '</div>';
   document.body.appendChild(bg);
@@ -200,6 +219,7 @@ function renderMain() {
           '<button class="tab'+(currentTab==="products"?" active":"")+'" id="tabProducts">Mahsulotlar</button>'+
           '<button class="tab'+(currentTab==="users"?" active":"")+'" id="tabUsers">Foydalanuvchilar</button>'+
           '<button class="tab'+(currentTab==="messages"?" active":"")+'" id="tabMessages">Xabarlar</button>'+
+          '<button class="tab'+(currentTab==="import"?" active":"")+' tab-import" id="tabImport">📥 Import</button>'+
         '</div>'+
         '<button class="logout" id="logoutBtn">Chiqish</button>'+
       '</div>'+
@@ -210,9 +230,11 @@ function renderMain() {
   document.getElementById("tabProducts").onclick = function(){ currentTab="products"; renderMain(); };
   document.getElementById("tabUsers").onclick = function(){ currentTab="users"; renderMain(); };
   document.getElementById("tabMessages").onclick = function(){ currentTab="messages"; renderMain(); };
+  document.getElementById("tabImport").onclick = function(){ currentTab="import"; renderMain(); };
   if(currentTab==="orders") loadOrders();
   else if(currentTab==="products") loadProducts();
   else if(currentTab==="users") loadUsers();
+  else if(currentTab==="import") loadImport();
   else loadMessages();
 }
 
@@ -530,6 +552,225 @@ function deleteOrder(id, num) {
     }
   });
 }
+
+function loadImport() {
+  var cont = document.getElementById("content");
+  cont.innerHTML =
+    '<div class="import-box">'+
+      '<h3>📥 Mahsulot import qilish</h3>'+
+      '<p>Taobao yoki Pinduoduo dan mahsulot linkini tashlang — ma&#39;lumotlar avtomatik tortib olinadi</p>'+
+      '<label>Mahsulot linki</label>'+
+      '<input id="importUrl" placeholder="https://item.taobao.com/item.htm?id=... yoki https://pinduoduo.com/goods.html?goodsId=..." style="margin-bottom:8px" />'+
+      '<div style="display:flex;gap:10px;margin-bottom:4px">'+
+        '<button class="btn" id="importBtn" style="flex:1">🔍 Ma&#39;lumot olish</button>'+
+        '<button class="btn btn-ghost" style="width:auto;padding:0 16px" onclick="document.getElementById('importUrl').value='';document.getElementById('importResult').className='import-result';document.getElementById('importStatus').className='import-status'">✕</button>'+
+      '</div>'+
+      '<div id="importStatus" class="import-status"></div>'+
+      '<div id="importResult" class="import-result">'+
+        '<div class="import-preview">'+
+          '<div id="importImgWrap"><div class="import-img-ph">📦</div></div>'+
+          '<div>'+
+            '<div id="importBadge" class="platform-badge badge-taobao">Taobao</div>'+
+            '<div class="import-field"><label>Nomi</label><div class="val" id="importName">—</div></div>'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+              '<div class="import-field"><label>Xitoy narxi (so'&#39;m)</label><input id="importChina" type="number" placeholder="95000" /></div>'+
+              '<div class="import-field"><label>Bozor narxi (so'&#39;m)</label><input id="importMarket" type="number" placeholder="650000" /></div>'+
+            '</div>'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+              '<div class="import-field"><label>Vazni (kg)</label><input id="importWeight" type="number" step="0.01" placeholder="0.5" /></div>'+
+              '<div class="import-field"><label>Kategoriya</label>'+
+                '<select id="importCat">'+CATS.map(function(c){return'<option value="'+c.id+'">'+c.label+'</option>';}).join("")+'</select>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="import-actions">'+
+          '<button class="btn" id="importSaveBtn" style="flex:1">✅ Saqlash</button>'+
+          '<span id="importSaveStatus" style="font-size:13px;color:var(--ink-3)"></span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById("importBtn").onclick = doImport;
+  document.getElementById("importUrl").addEventListener("keydown", function(e){ if(e.key==="Enter") doImport(); });
+  document.getElementById("importSaveBtn").onclick = doImportSave;
+}
+
+function detectPlatform(url) {
+  if(url.includes("taobao.com") || url.includes("tmall.com")) return "taobao";
+  if(url.includes("pinduoduo.com") || url.includes("pdd")) return "pdd";
+  if(url.includes("1688.com")) return "1688";
+  return null;
+}
+
+function doImport() {
+  var url = document.getElementById("importUrl").value.trim();
+  var status = document.getElementById("importStatus");
+  var result = document.getElementById("importResult");
+  if(!url) { status.className="import-status err"; status.textContent="❌ Link kiriting!"; return; }
+
+  var platform = detectPlatform(url);
+  if(!platform) { status.className="import-status err"; status.textContent="❌ Faqat Taobao, PDD yoki 1688 linki qabul qilinadi"; return; }
+
+  var btn = document.getElementById("importBtn");
+  btn.disabled = true; btn.textContent = "⏳ Yuklanmoqda...";
+  status.className="import-status"; result.className="import-result";
+
+  // Use allorigins proxy to bypass CORS
+  var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+
+  fetch(proxyUrl)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      btn.disabled=false; btn.textContent="🔍 Ma'lumot olish";
+      var html = data.contents || "";
+      if(!html) { status.className="import-status err"; status.textContent="❌ Sahifa olinmadi. Linkni tekshiring."; return; }
+
+      var info = parseProductPage(html, platform);
+      if(!info.name) { status.className="import-status err"; status.textContent="❌ Ma'lumot topilmadi. Taobao ba'zan blok qiladi — keyinroq urinib ko'ring."; return; }
+
+      // Show result
+      result.className="import-result show";
+      document.getElementById("importName").textContent = info.name;
+
+      // Badge
+      var badge = document.getElementById("importBadge");
+      if(platform==="pdd") { badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo 拼多多"; }
+      else if(platform==="1688") { badge.className="platform-badge badge-taobao"; badge.textContent="1688.com"; }
+      else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao 淘宝"; }
+
+      // Image
+      var imgWrap = document.getElementById("importImgWrap");
+      window._importImages = info.images || [];
+      if(info.images && info.images[0]) {
+        imgWrap.innerHTML = '<img class="import-img" id="importMainImg" src="'+info.images[0]+'" onerror="this.parentNode.innerHTML='<div class=\"import-img-ph\">📦</div>'" />';
+      } else {
+        imgWrap.innerHTML = '<div class="import-img-ph">📦</div>';
+      }
+
+      // Price hint
+      if(info.price) {
+        var yuanPrice = parseFloat(info.price);
+        if(yuanPrice > 0) {
+          var somPrice = Math.round(yuanPrice * 1300);
+          document.getElementById("importChina").value = somPrice;
+          document.getElementById("importMarket").value = Math.round(somPrice * 4.5);
+        }
+      }
+
+      status.className="import-status ok";
+      status.textContent = "✅ Ma'lumot olindi! Narx va vaznni kiriting, keyin saqlang.";
+    })
+    .catch(function(e) {
+      btn.disabled=false; btn.textContent="🔍 Ma'lumot olish";
+      status.className="import-status err";
+      status.textContent="❌ Xatolik: " + (e.message||"Tarmoq xatosi");
+    });
+}
+
+function parseProductPage(html, platform) {
+  var info = { name: "", price: "", images: [] };
+
+  // Extract title
+  var titlePatterns = [
+    /<title[^>]*>([^<]{10,})<\/title>/i,
+    /"title"\s*:\s*"([^"]{10,})"/,
+    /og:title[^>]*content="([^"]{10,})"/i,
+    /<h1[^>]*>([^<]{5,})<\/h1>/i
+  ];
+  for(var i=0;i<titlePatterns.length;i++) {
+    var m = html.match(titlePatterns[i]);
+    if(m && m[1]) {
+      var t = m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#x27;/g,"'").replace(/&quot;/g,'"').trim();
+      // Remove site name suffixes
+      t = t.replace(/[-|–]\s*(淘宝|天猫|拼多多|Taobao|Tmall|1688)[^]*$/i,"").trim();
+      if(t.length > 5) { info.name = t; break; }
+    }
+  }
+
+  // Extract price
+  var pricePatterns = [
+    /"defaultPrice"\s*:\s*"([\d.]+)"/,
+    /"price"\s*:\s*"([\d.]+)"/,
+    /"min_price"\s*:\s*"?([\d.]+)"?/,
+    /class="[^"]*price[^"]*"[^>]*>\s*[¥￥]?\s*([\d.]+)/i
+  ];
+  for(var j=0;j<pricePatterns.length;j++) {
+    var pm = html.match(pricePatterns[j]);
+    if(pm && pm[1] && parseFloat(pm[1])>0) { info.price = pm[1]; break; }
+  }
+
+  // Extract images
+  var imgPatterns = [
+    /https:\/\/img\.alicdn\.com\/imgextra\/[^"'\s]{20,}/g,
+    /https:\/\/img\.alicdn\.com\/bao\/[^"'\s]{20,}/g,
+    /https:\/\/gw\.alicdn\.com\/[^"'\s]{20,}/g,
+    /https:\/\/yangkeduo\.com\/[^"'\s]*\.(?:jpg|png|jpeg|webp)/gi,
+    /https:\/\/img\.kwcdn\.com\/[^"'\s]{20,}/g
+  ];
+  var seen = {};
+  for(var k=0;k<imgPatterns.length;k++) {
+    var matches = html.match(imgPatterns[k]) || [];
+    for(var l=0;l<matches.length;l++) {
+      var imgUrl = matches[l].replace(/\\/g,"").split('"')[0].split("'")[0];
+      if(!seen[imgUrl] && info.images.length < 8) {
+        seen[imgUrl] = true;
+        // Filter out icons and small images
+        if(!imgUrl.includes("icon") && !imgUrl.includes("logo") && imgUrl.length > 40) {
+          info.images.push(imgUrl);
+        }
+      }
+    }
+  }
+
+  return info;
+}
+
+function doImportSave() {
+  var name = document.getElementById("importName").textContent.trim();
+  var china = parseInt(document.getElementById("importChina").value);
+  var market = parseInt(document.getElementById("importMarket").value);
+  var weight = parseFloat(document.getElementById("importWeight").value);
+  var cat = document.getElementById("importCat").value;
+  var saveStatus = document.getElementById("importSaveStatus");
+
+  if(!name||!china||!market||!weight) {
+    saveStatus.textContent="❌ Barcha maydonlarni to'ldiring"; saveStatus.style.color="#e11d48"; return;
+  }
+
+  var saveBtn = document.getElementById("importSaveBtn");
+  saveBtn.disabled=true; saveBtn.textContent="⏳ Saqlanmoqda...";
+
+  var images = window._importImages || [];
+  var firstImg = images[0] || null;
+
+  var body = {
+    name_uz: name, name_ru: name,
+    sub_uz: "", sub_ru: "",
+    china: china, market: market, weight: weight, cat: cat,
+    image_url: firstImg,
+    image_urls: images.length > 0 ? images : null,
+    tile: "#ede4ff", accent: "#6c2bd9",
+    rating: 4.5, sold: 0, days: 12, hit: false
+  };
+
+  fetch(SB+"/rest/v1/products", {
+    method:"POST",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+    body:JSON.stringify(body)
+  }).then(function(r){
+    if(r.ok) {
+      saveBtn.textContent="✅ Saqlandi!";
+      saveStatus.textContent="Mahsulot qo'shildi! Mahsulotlar bo'limida tahrirlashingiz mumkin.";
+      saveStatus.style.color="#12a150";
+      setTimeout(function(){ currentTab="products"; renderMain(); }, 1800);
+    } else {
+      saveBtn.disabled=false; saveBtn.textContent="✅ Saqlash";
+      saveStatus.textContent="❌ Xatolik yuz berdi"; saveStatus.style.color="#e11d48";
+    }
+  });
+}
+
 function loadUsers() {
   fetch(SB+"/auth/v1/admin/users?per_page=100", {
     headers: {"apikey": SERVICE_KEY, "Authorization": "Bearer "+SERVICE_KEY}
