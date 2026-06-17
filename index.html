@@ -485,8 +485,9 @@
     .success-order { flex-direction: column; gap: 8px; text-align: left; }
 
     /* Bottom padding for bottom nav */
-    main { padding-bottom: 72px; min-height: calc(100vh - 60px); display: flex; flex-direction: column; }
-    main > *:not(.ftr) { flex: 1; }
+    main { padding-bottom: 72px; }
+    main > div, main > section { min-height: calc(100vh - 200px); }
+
   }
 
   @media (max-width: 400px) {
@@ -1669,7 +1670,7 @@ function MyOrders({ user, t, onHome }) {
   }, [user]);
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px" }}>
+    <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px", minHeight: "calc(100vh - 140px)" }}>
       <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 16, padding: 0 }}>← Bosh sahifa</button>
       <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 20px" }}>Mening buyurtmalarim</h2>
       {loading && <p style={{ color: "#8a849c" }}>Yuklanmoqda...</p>}
