@@ -305,6 +305,7 @@ function openProductModal(p) {
         '</div>'+
         '<label>Mahsulot rasmlari <span style="color:var(--ink-3);font-weight:500;font-size:12px">(8 tagacha, istalgan tartibda)</span></label>'+
         '<div class="imgs-grid" id="imgsGrid"></div>'+
+        '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
         '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
         '<div class="err" id="modalErr"></div>'+
         '<div style="display:flex;gap:10px;">'+
@@ -328,15 +329,17 @@ function openProductModal(p) {
     grid.innerHTML = window._imgList.map(function(item, idx){
       return '<div class="img-thumb-wrap">'+
         '<img src="'+h(item.url)+'" />'+
-        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="Ochirish">×</button>'+
+        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="Ochirish">\u00d7</button>'+
       '</div>';
     }).join("") +
     (window._imgList.length < 8 ?
-      '<div class="img-add-box" onclick="document.getElementById(\"f_img_add\").click()">'+
-        '<span style="font-size:22px">+</span><span>Rasm kushish</span>'+
-      '</div><input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />' : "");
+      '<div class="img-add-box" id="imgAddBox">'+
+        '<span style="font-size:22px">+</span><span>Rasm qushish</span>'+
+      '</div>' : "");
+    var addBox = document.getElementById("imgAddBox");
+    if(addBox) addBox.onclick = function(){ var inp = document.getElementById("f_img_add"); if(inp) inp.click(); };
     var inp = document.getElementById("f_img_add");
-    if(inp) inp.onchange = function(){ addImages(this.files); };
+    if(inp) inp.onchange = function(){ addImages(this.files); this.value=""; };
   }
 
   window._removeImg = function(idx) {
