@@ -1909,8 +1909,19 @@ function ImageSwiper({ p, lang }) {
   const onTouchMove  = (e) => { if(isTouch.current) moveDrag(e.touches[0].clientX); };
   const onTouchEnd   = () => { if(isTouch.current) endDrag(); };
 
-  // Sichqoncha drag — o'chirildi
-  const onMouseDown  = () => {};
+  const onMouseDown = (e) => {
+    if(total <= 1) return;
+    e.preventDefault();
+    startDrag(e.clientX, false);
+    const onMove = (ev) => moveDrag(ev.clientX);
+    const onUp   = () => {
+      endDrag();
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  };
   const onMouseMove  = () => {};
   const onMouseUp    = () => {};
   const onMouseLeave = () => {};
