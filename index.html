@@ -1686,19 +1686,18 @@ function MyOrders({ user, t, onHome }) {
 }
 
 function HelpPage({ t, onHome, user, onLogin }) {
+  const [chatOpen, setChatOpen] = React.useState(false);
   const [messages, setMessages] = React.useState([]);
   const [msg, setMsg] = React.useState("");
   const [sending, setSending] = React.useState(false);
   const [openFaq, setOpenFaq] = React.useState(null);
+  const [unread, setUnread] = React.useState(0);
   const bottomRef = React.useRef(null);
   const inputRef = React.useRef(null);
+  const lastIdRef = React.useRef(0);
 
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
-
-  const fmtTime = (iso) => {
-    return new Date(iso).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tashkent", hour12: false });
-  };
 
   const faqs = [
     { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
@@ -1706,116 +1705,138 @@ function HelpPage({ t, onHome, user, onLogin }) {
     { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo + xizmat haqi. Hech qanday yashirin to'lov yo'q." },
     { q: "Mahsulot sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz — to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
     { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul." },
+    { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
+    { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." },
   ];
 
-  const loadMessages = React.useCallback(() => {
+  const fetchMessages = React.useCallback(() => {
     if (!user) return;
     fetch(SB_URL + "/rest/v1/chats?user_email=eq." + encodeURIComponent(user.email) + "&order=created_at.asc", {
       headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
     }).then(r => r.json()).then(data => {
-      setMessages(data || []);
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      const msgs = data || [];
+      if (!msgs.length) return;
+      const maxId = msgs[msgs.length - 1].id;
+      if (maxId > lastIdRef.current) {
+        const newAdminMsgs = msgs.filter(m => m.id > lastIdRef.current && m.sender === "admin");
+        setMessages(msgs);
+        lastIdRef.current = maxId;
+        if (!chatOpen && newAdminMsgs.length) setUnread(u => u + newAdminMsgs.length);
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      } else if (lastIdRef.current === 0) {
+        setMessages(msgs);
+        lastIdRef.current = maxId;
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      }
     });
-  }, [user]);
+  }, [user, chatOpen]);
 
   useEffect(() => {
     if (!user) return;
-    loadMessages();
-    const interval = setInterval(loadMessages, 1500);
-    return () => clearInterval(interval);
-  }, [user, loadMessages]);
+    fetchMessages();
+    const iv = setInterval(fetchMessages, 1500);
+    return () => clearInterval(iv);
+  }, [user, fetchMessages]);
+
+  useEffect(() => {
+    if (chatOpen) {
+      setUnread(0);
+      setTimeout(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); inputRef.current?.focus(); }, 100);
+    }
+  }, [chatOpen]);
 
   const sendMsg = async () => {
     if (!msg.trim() || sending) return;
     setSending(true);
     const text = msg.trim();
     setMsg("");
-    inputRef.current?.focus();
     await fetch(SB_URL + "/rest/v1/chats", {
       method: "POST",
       headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
       body: JSON.stringify({ user_email: user.email, sender: "user", message: text })
     });
     setSending(false);
-    loadMessages();
+    fetchMessages();
   };
 
-  if (!user) return (
-    <div style={{ maxWidth: 480, margin: "60px auto", padding: "0 16px", textAlign: "center" }}>
-      <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
-      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 10px" }}>Kirish talab qilinadi</h2>
-      <p style={{ color: "#8a849c", fontSize: 14.5, margin: "0 0 24px", lineHeight: 1.6 }}>Yordam bo'limiga kirish uchun avval ro'yxatdan o'ting yoki kiring</p>
-      <button onClick={onLogin} style={{ background: "linear-gradient(140deg,#7c3aed,#c026d3)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 32px", fontFamily: "inherit", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>Kirish / Ro'yxatdan o'tish</button>
-      <button onClick={onHome} style={{ display: "block", margin: "14px auto 0", background: "none", border: "none", color: "#8a849c", cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>← Bosh sahifaga qaytish</button>
-      <div style={{ marginTop: 40, textAlign: "left" }}>
-        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, marginBottom: 12 }}>Ko'p so'raladigan savollar</div>
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 100px" }}>
+      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>← Bosh sahifa</button>
+      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>Yordam markazi</h2>
+      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 24px" }}>Ko'p so'raladigan savollarga javoblar</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
         {faqs.map((f, i) => (
-          <div key={i} style={{ background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, overflow: "hidden", marginBottom: 8 }}>
+          <div key={i} style={{ background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, overflow: "hidden" }}>
             <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left", fontFamily: "inherit", fontWeight: 700, fontSize: 14, color: "#1b1430" }}>
+              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "16px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, textAlign: "left", fontFamily: "inherit", fontWeight: 700, fontSize: 14.5, color: "#1b1430" }}>
               <span>{f.q}</span>
-              <span style={{ color: "#6c2bd9", fontSize: 18, flexShrink: 0, transform: openFaq === i ? "rotate(45deg)" : "none", display: "inline-block", transition: ".2s" }}>+</span>
+              <span style={{ fontSize: 20, color: "#6c2bd9", flexShrink: 0, display: "inline-block", transform: openFaq === i ? "rotate(45deg)" : "none", transition: ".2s" }}>+</span>
             </button>
-            {openFaq === i && <div style={{ padding: "0 16px 14px", fontSize: 13.5, color: "#4a4360", lineHeight: 1.6 }}>{f.a}</div>}
+            {openFaq === i && <div style={{ padding: "0 18px 16px", fontSize: 14, color: "#4a4360", lineHeight: 1.6 }}>{f.a}</div>}
           </div>
         ))}
       </div>
-    </div>
-  );
 
-  return (
-    <div style={{ maxWidth: 760, margin: "0 auto", padding: "20px 16px 40px" }}>
-      {/* Chat oynasi */}
-      <div style={{ background: "#fff", border: "1px solid #ece8f4", borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.07)", display: "flex", flexDirection: "column", height: "calc(100vh - 180px)", minHeight: 400, maxHeight: 680 }}>
+      {!user && (
+        <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", textAlign: "center", color: "#fff" }}>
+          <div style={{ fontSize: 28, marginBottom: 10 }}>💬</div>
+          <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 8 }}>Admin bilan chat</div>
+          <div style={{ fontSize: 13.5, opacity: .85, marginBottom: 16 }}>Kirish yoki ro'yxatdan o'tib, bevosita muloqot qiling</div>
+          <button onClick={onLogin} style={{ background: "#fff", color: "#6c2bd9", border: "none", borderRadius: 10, padding: "12px 28px", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>Kirish / Ro'yxatdan o'tish</button>
+        </div>
+      )}
 
-        {/* Header */}
-        <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", padding: "16px 20px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          <button onClick={onHome} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", color: "#fff", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>←</button>
-          <div style={{ width: 40, height: 40, background: "rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🛍️</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, fontFamily: "Sora, sans-serif" }}>SAVAT.UZ Yordam</div>
-            <div style={{ color: "rgba(255,255,255,.75)", fontSize: 12 }}>🟢 Online — SAVAT.UZ Yordam</div>
+      {user && (
+        <button onClick={() => setChatOpen(true)}
+          style={{ position: "fixed", bottom: 80, right: 20, width: 58, height: 58, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#a855f7)", border: "none", cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, zIndex: 90 }}>
+          💬
+          {unread > 0 && <span style={{ position: "absolute", top: 0, right: 0, background: "#e11d48", color: "#fff", fontSize: 11, fontWeight: 800, width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>{unread}</span>}
+        </button>
+      )}
+
+      {chatOpen && (
+        <div style={{ position: "fixed", bottom: 80, right: 16, width: "calc(100% - 32px)", maxWidth: 420, height: 500, background: "#fff", borderRadius: 20, boxShadow: "0 8px 40px rgba(0,0,0,.18)", display: "flex", flexDirection: "column", overflow: "hidden", zIndex: 100 }}>
+          <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            <div style={{ width: 36, height: 36, background: "rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🛍️</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "Sora, sans-serif" }}>SAVAT.UZ Yordam</div>
+              <div style={{ color: "rgba(255,255,255,.75)", fontSize: 11.5 }}>🟢 Online</div>
+            </div>
+            <button onClick={() => setChatOpen(false)} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", color: "#fff", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+          </div>
+          <div style={{ flex: 1, overflowY: "auto", padding: "14px", background: "#f7f5fb", display: "flex", flexDirection: "column", gap: 8 }}>
+            {messages.length === 0 && (
+              <div style={{ textAlign: "center", color: "#8a849c", padding: "20px 0", fontSize: 13.5 }}>
+                <div style={{ fontSize: 30, marginBottom: 6 }}>👋</div>Salom! Savolingizni yozing
+              </div>
+            )}
+            {messages.map((m, i) => {
+              const isUser = m.sender === "user";
+              return (
+                <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 6 }}>
+                  {!isUser && <div style={{ width: 26, height: 26, background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>🛍️</div>}
+                  <div style={{ maxWidth: "75%", padding: "9px 13px", borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px", background: isUser ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#fff", color: isUser ? "#fff" : "#1b1430", fontSize: 14, lineHeight: 1.5, boxShadow: "0 1px 4px rgba(0,0,0,.07)" }}>
+                    {m.message}
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+          <div style={{ padding: "10px 12px", borderTop: "1px solid #ece8f4", display: "flex", gap: 8, background: "#fff", flexShrink: 0 }}>
+            <input ref={inputRef} value={msg} onChange={e => setMsg(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); sendMsg(); } }}
+              placeholder="Xabar yozing..." disabled={sending}
+              style={{ flex: 1, border: "1.5px solid #ece8f4", borderRadius: 10, padding: "10px 12px", fontSize: 14, fontFamily: "inherit", background: "#f7f5fb", outline: "none" }} />
+            <button onClick={sendMsg} disabled={sending || !msg.trim()}
+              style={{ width: 40, height: 40, borderRadius: 10, border: "none", background: msg.trim() ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#ece8f4", color: msg.trim() ? "#fff" : "#8a849c", cursor: msg.trim() ? "pointer" : "default", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>↑</button>
           </div>
         </div>
-
-        {/* Messages */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 10, background: "#f7f5fb" }}>
-          {messages.length === 0 && (
-            <div style={{ textAlign: "center", color: "#8a849c", padding: "40px 20px", fontSize: 14 }}>
-              <div style={{ fontSize: 40, marginBottom: 10 }}>👋</div>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Salom, {user.name}!</div>
-              <div>Savolingizni yozing — tez javob beramiz</div>
-            </div>
-          )}
-          {messages.map((m, i) => {
-            const isUser = m.sender === "user";
-            return (
-              <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
-                {!isUser && <div style={{ width: 30, height: 30, background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🛍️</div>}
-                <div style={{ maxWidth: "72%", padding: "10px 14px", borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px", background: isUser ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#fff", color: isUser ? "#fff" : "#1b1430", fontSize: 14.5, lineHeight: 1.55, boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>
-                  {m.message}
-                  <div style={{ fontSize: 10.5, opacity: .6, marginTop: 3, textAlign: "right" }}>{fmtTime(m.created_at)}</div>
-                </div>
-              </div>
-            );
-          })}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Input */}
-        <div style={{ padding: "12px 14px", borderTop: "1px solid #ece8f4", display: "flex", gap: 8, background: "#fff", flexShrink: 0 }}>
-          <input ref={inputRef} value={msg} onChange={e => setMsg(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
-            placeholder="Xabar yozing..." disabled={sending}
-            style={{ flex: 1, border: "1.5px solid #ece8f4", borderRadius: 12, padding: "11px 14px", fontSize: 15, fontFamily: "inherit", background: "#f7f5fb", outline: "none" }} />
-          <button onClick={sendMsg} disabled={sending || !msg.trim()}
-            style={{ width: 44, height: 44, borderRadius: 12, border: "none", background: msg.trim() ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#ece8f4", color: msg.trim() ? "#fff" : "#8a849c", cursor: msg.trim() ? "pointer" : "default", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>↑</button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
-
 window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage };
 
 </script>
