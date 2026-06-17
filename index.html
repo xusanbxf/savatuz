@@ -1698,7 +1698,8 @@ function HelpPage({ t, onHome, user, onLogin }) {
 
   const fmtTime = (iso) => {
     const d = new Date(iso);
-    const h = String(d.getUTCHours() + 5).padStart(2, "0");
+    const hh = (d.getUTCHours() + 5) % 24;
+    const h = String(hh).padStart(2, "0");
     const m = String(d.getUTCMinutes()).padStart(2, "0");
     return h + ":" + m;
   };
@@ -1724,7 +1725,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
   useEffect(() => {
     if (!user) return;
     loadMessages();
-    const interval = setInterval(loadMessages, 3000);
+    const interval = setInterval(loadMessages, 1500);
     return () => clearInterval(interval);
   }, [user, loadMessages]);
 
