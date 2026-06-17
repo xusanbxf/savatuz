@@ -84,6 +84,18 @@
   .img-add-box:hover { border-color: var(--brand); color: var(--brand); }
   .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
   .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
+
+  .confirm-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn .15s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .confirm-box { background: #fff; border-radius: 16px; padding: 28px 24px 20px; max-width: 340px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.2); text-align: center; }
+  .confirm-box .ic { font-size: 36px; margin-bottom: 12px; }
+  .confirm-box h3 { font-family: var(--display); font-weight: 800; font-size: 17px; margin: 0 0 8px; color: var(--ink); }
+  .confirm-box p { color: var(--ink-3); font-size: 14px; margin: 0 0 22px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-btns button { flex: 1; height: 44px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .confirm-cancel { background: var(--bg); color: var(--ink); border: 1.5px solid var(--line) !important; }
+  .confirm-ok { background: #e11d48; color: #fff; }
+  .confirm-ok.purple { background: linear-gradient(135deg,#7c3aed,#a855f7); }
 </style>
 </head>
 <body>
@@ -113,6 +125,31 @@ var root = document.getElementById("root");
 var token = sessionStorage.getItem("savat_admin_token") || null;
 var currentTab = "orders";
 
+
+function showConfirm(opts) {
+  // opts: { icon, title, text, okText, okClass, onOk }
+  var bg = document.createElement("div");
+  bg.className = "confirm-bg";
+  bg.id = "confirmBg";
+  bg.innerHTML =
+    '<div class="confirm-box">'+
+      '<div class="ic">'+(opts.icon||"🗑️")+'</div>'+
+      '<h3>'+opts.title+'</h3>'+
+      '<p>'+opts.text+'</p>'+
+      '<div class="confirm-btns">'+
+        '<button class="confirm-cancel" id="confirmCancel">Bekor qilish</button>'+
+        '<button class="confirm-ok '+(opts.okClass||"")+'" id="confirmOk">'+(opts.okText||"O'chirish")+'</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(bg);
+  bg.onclick = function(e){ if(e.target===bg) closeConfirm(); };
+  document.getElementById("confirmCancel").onclick = closeConfirm;
+  document.getElementById("confirmOk").onclick = function(){ closeConfirm(); opts.onOk(); };
+}
+function closeConfirm() {
+  var el = document.getElementById("confirmBg");
+  if(el) el.remove();
+}
 function fmt(n) { return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g," "); }
 function h(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
@@ -276,11 +313,18 @@ function editProduct(pEnc) {
 }
 
 function deleteProduct(id, name) {
-  if(!confirm(name+" ni o'chirishni tasdiqlaysizmi?")) return;
-  fetch(SB+"/rest/v1/products?id=eq."+id,{
-    method:"DELETE",
-    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
-  }).then(function(){ loadProducts(); });
+  showConfirm({
+    icon: "🗑️",
+    title: "Mahsulotni o'chirish",
+    text: "<b>"+name+"</b> ni o'chirishni tasdiqlaysizmi?",
+    okText: "O'chirish",
+    onOk: function(){
+      fetch(SB+"/rest/v1/products?id=eq."+id,{
+        method:"DELETE",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+      }).then(function(){ loadProducts(); });
+    }
+  });
 }
 
 function openProductModal(p) {
@@ -473,11 +517,18 @@ function saveProduct(id) {
 
 
 function deleteOrder(id, num) {
-  if(!confirm(num+" buyurtmani o'chirishni tasdiqlaysizmi?")) return;
-  fetch(SB+"/rest/v1/orders?id=eq."+id,{
-    method:"DELETE",
-    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
-  }).then(function(){ loadOrders(); });
+  showConfirm({
+    icon: "📦",
+    title: "Buyurtmani o'chirish",
+    text: "<b>"+num+"</b> buyurtmani o'chirishni tasdiqlaysizmi?",
+    okText: "O'chirish",
+    onOk: function(){
+      fetch(SB+"/rest/v1/orders?id=eq."+id,{
+        method:"DELETE",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+      }).then(function(){ loadOrders(); });
+    }
+  });
 }
 function loadUsers() {
   fetch(SB+"/auth/v1/admin/users?per_page=100", {
@@ -522,13 +573,21 @@ function loadUsers() {
 }
 
 function resetPassword(email) {
-  if(!confirm(email+" ga parol tiklash xati yuborilsinmi?")) return;
-  fetch(SB+"/auth/v1/recover", {
-    method:"POST",
-    headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":"application/json"},
-    body:JSON.stringify({email:email})
-  }).then(function(r){
-    alert(r.status===429 ? "Juda ko'p urinish, 5-10 daqiqadan keyin qayta urinib ko'ring" : email+" ga parol tiklash xati yuborildi!");
+  showConfirm({
+    icon: "🔑",
+    title: "Parolni tiklash",
+    text: "<b>"+email+"</b> ga parol tiklash xati yuborilsinmi?",
+    okText: "Yuborish",
+    okClass: "purple",
+    onOk: function(){
+      fetch(SB+"/auth/v1/recover", {
+        method:"POST",
+        headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({email:email})
+      }).then(function(r){
+        showConfirm({icon:"✅",title:"Yuborildi",text:r.status===429?"Juda ko'p urinish, keyinroq urinib ko'ring":email+" ga xat yuborildi!",okText:"OK",onOk:function(){}});
+      });
+    }
   });
 }
 
