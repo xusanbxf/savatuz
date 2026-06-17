@@ -670,6 +670,14 @@ function loadImport() {
 }
 
 
+
+function detectPlatform(url) {
+  if(url.includes("taobao.com") || url.includes("tmall.com")) return "taobao";
+  if(url.includes("pinduoduo.com") || url.includes("pdd") || url.includes("yangkeduo.com") || url.includes("kwcdn.com")) return "pdd";
+  if(url.includes("1688.com")) return "1688";
+  return null;
+}
+
 function doImport() {
   var url = document.getElementById("importUrl").value.trim();
   var status = document.getElementById("importStatus");
