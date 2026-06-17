@@ -519,7 +519,8 @@
         comment: o.comment,
         pay_method: o.pay,
         total: o.total,
-        count: o.count
+        count: o.count,
+        user_email: o.user_email || null
       })
     });
   }
@@ -1314,7 +1315,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
 }
 
 /* ---------- Mobile menu ---------- */
-function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout }) {
+function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders }) {
   return (
     <>
       <div className={"mm-scrim" + (open ? " on" : "")} onClick={onClose} />
@@ -1341,6 +1342,7 @@ function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, 
             <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
             <button className={lang === "ru" ? "on" : ""} onClick={() => setLang("ru")}>RU</button>
           </div>
+          {user && <button className="mm-logout" style={{ background: "#f0e8ff", color: "#6c2bd9", marginBottom: 8 }} onClick={() => { onClose(); onMyOrders(); }}>Mening buyurtmalarim</button>}
           {user && <button className="mm-logout" onClick={() => { onClose(); onLogout(); }}>{t.auth_logout}</button>}
         </div>
       </aside>
@@ -1540,13 +1542,54 @@ function OrderSuccess({ order, t, onHome }) {
   );
 }
 
-window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess };
+function MyOrders({ user, t, onHome }) {
+  const [orders, setOrders] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
+
+  const STATUS_LABELS = { yangi: "🟡 Yangi", tasdiqlangan: "🔵 Tasdiqlangan", yetkazilmoqda: "🟣 Yetkazilmoqda", yakunlangan: "🟢 Yakunlangan", bekor: "🔴 Bekor" };
+
+  useEffect(() => {
+    if (!user || !user.email) { setLoading(false); return; }
+    fetch(SB_URL + "/rest/v1/orders?user_email=eq." + encodeURIComponent(user.email) + "&order=created_at.desc", {
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
+    }).then(r => r.json()).then(data => { setOrders(data || []); setLoading(false); })
+    .catch(() => setLoading(false));
+  }, [user]);
+
+  return (
+    <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px" }}>
+      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 16, padding: 0 }}>← Bosh sahifa</button>
+      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 20px" }}>Mening buyurtmalarim</h2>
+      {loading && <p style={{ color: "#8a849c" }}>Yuklanmoqda...</p>}
+      {!loading && !orders.length && <p style={{ color: "#8a849c" }}>Hozircha buyurtmalar yo'q</p>}
+      {orders.map(o => (
+        <div key={o.id} style={{ background: "#fff", border: "1px solid #ece8f4", borderRadius: 14, padding: 18, marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 16 }}>{o.order_num}</span>
+            <span style={{ fontSize: 13, color: "#8a849c" }}>{new Date(o.created_at).toLocaleDateString("ru-RU")}</span>
+          </div>
+          <div style={{ fontSize: 14, color: "#4a4360", marginBottom: 8 }}>
+            {(o.items || []).map((it, i) => <div key={i}>{it.qty}× {it.name_uz} — {Math.round(it.price * it.qty).toLocaleString()} so'm</div>)}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17 }}>{Math.round(o.total).toLocaleString()} so'm</span>
+            <span style={{ fontSize: 13, fontWeight: 700 }}>{STATUS_LABELS[o.status] || o.status}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders };
 
 </script>
   <script type="text/babel">
 /* ============ SAVAT.UZ — product detail, cart, app ============ */
 const { Media, useCountUp, Header, Hero, Cats, ProductCard, Bestsellers, Why, Footer } = window.SC;
-const { AuthModal, MobileMenu, Checkout, OrderSuccess } = window.AC;
+const { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders } = window.AC;
 const Ico = window.Icons;
 const D = window.SAVAT;
 
@@ -1780,7 +1823,7 @@ function App() {
   const onAuth = (u) => { setUser(u); setAuthOpen(false); };
   const onLogout = () => { setUser(null); };
   const placeOrder = (o) => {
-    D.saveOrder(o).catch((err) => console.error("Buyurtmani saqlashda xato:", err));
+    D.saveOrder({ ...o, user_email: user ? user.email : null }).catch((err) => console.error("Buyurtmani saqlashda xato:", err));
     setOrder(o);
     setCart([]);
     setView("success");
@@ -1827,6 +1870,12 @@ function App() {
           <Footer t={t} />
         </main>
       )}
+      {view === "myorders" && (
+        <main>
+          <MyOrders user={user} t={t} onHome={goHome} />
+          <Footer t={t} />
+        </main>
+      )}
 
       <CartDrawer open={cartOpen} items={cart} t={t} lang={lang}
         onClose={() => setCartOpen(false)} onQty={changeQty} onRemove={removeItem}
@@ -1835,7 +1884,8 @@ function App() {
       <AuthModal open={authOpen} t={t} onClose={() => setAuthOpen(false)} onAuth={onAuth} />
       <MobileMenu open={menuOpen} t={t} lang={lang} setLang={setLang}
         onClose={() => setMenuOpen(false)} onHome={goHome}
-        user={user} onAccount={() => setAuthOpen(true)} onLogout={onLogout} />
+        user={user} onAccount={() => setAuthOpen(true)} onLogout={onLogout}
+        onMyOrders={() => setView("myorders")} />
 
       <div className={"toast" + (toast ? " on" : "")}>
         <span className="ok"><Ico.check style={{ width: 13, height: 13, color: "#fff" }} /></span>
