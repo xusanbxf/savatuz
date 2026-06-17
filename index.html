@@ -1685,8 +1685,18 @@ function MyOrders({ user, t, onHome }) {
   );
 }
 
-function HelpPage({ t, onHome }) {
+function HelpPage({ t, onHome, user }) {
   const [openFaq, setOpenFaq] = React.useState(null);
+  const [name, setName] = React.useState(user ? user.name || "" : "");
+  const [email, setEmail] = React.useState(user ? user.email || "" : "");
+  const [msg, setMsg] = React.useState("");
+  const [sent, setSent] = React.useState(false);
+  const [sending, setSending] = React.useState(false);
+  const [err, setErr] = React.useState("");
+
+  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
+
   const faqs = [
     { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
     { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni. Mahsulot og'irligiga qarab farq qilishi mumkin." },
@@ -1697,33 +1707,69 @@ function HelpPage({ t, onHome }) {
     { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." },
   ];
 
+  const sendMsg = async () => {
+    if (msg.trim().length < 5) { setErr("Xabar juda qisqa"); return; }
+    setSending(true); setErr("");
+    const res = await fetch(SB_URL + "/rest/v1/messages", {
+      method: "POST",
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ name: name.trim() || "Noma'lum", email: email.trim() || null, message: msg.trim() })
+    });
+    setSending(false);
+    if (res.ok) { setSent(true); setMsg(""); }
+    else setErr("Xabar yuborishda xatolik, qayta urinib ko'ring");
+  };
+
   return (
     <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 40px" }}>
       <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>← Bosh sahifa</button>
 
       <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>Yordam markazi</h2>
-      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 28px" }}>Savollaringizga javob toping yoki biz bilan bog'laning</p>
+      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 28px" }}>Savollaringizga javob toping yoki xabar yuboring</p>
 
-      {/* Aloqa */}
-      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", marginBottom: 28, color: "#fff" }}>
-        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, marginBottom: 14 }}>Biz bilan bog'laning</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {[
-            { icon: "📱", label: "Telegram", val: "@savatmarket", link: "https://t.me/savatmarket" },
-            { icon: "📞", label: "Telefon", val: "+998 90 000 00 00", link: "tel:+998900000000" },
-            { icon: "✉️", label: "Email", val: "info@savatmarket.uz", link: "mailto:info@savatmarket.uz" },
-            { icon: "🕐", label: "Ish vaqti", val: "9:00 — 21:00", link: null },
-          ].map((c, i) => (
-            <a key={i} href={c.link || undefined}
-              style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", textDecoration: "none", color: "#fff" }}>
-              <span style={{ fontSize: 20 }}>{c.icon}</span>
-              <div>
-                <div style={{ fontSize: 11, opacity: .75 }}>{c.label}</div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>{c.val}</div>
+      {/* Xabar yuborish formasi */}
+      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", marginBottom: 28 }}>
+        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, color: "#fff", marginBottom: 16 }}>💬 Biz bilan yozing</div>
+        {sent ? (
+          <div style={{ background: "rgba(255,255,255,.2)", borderRadius: 12, padding: "18px 20px", textAlign: "center", color: "#fff" }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Xabar yuborildi!</div>
+            <div style={{ fontSize: 13.5, opacity: .85 }}>Tez orada javob beramiz</div>
+            <button onClick={() => setSent(false)} style={{ marginTop: 14, background: "rgba(255,255,255,.25)", border: "none", borderRadius: 10, padding: "10px 20px", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Yana yozish</button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {!user && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Ismingiz"
+                  style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14 }} />
+                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (ixtiyoriy)" type="email"
+                  style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14 }} />
               </div>
-            </a>
-          ))}
-        </div>
+            )}
+            <textarea value={msg} onChange={e => setMsg(e.target.value)} placeholder="Savolingiz yoki muammoingizni yozing..."
+              style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14, resize: "none", height: 100, outline: "none" }} />
+            {err && <div style={{ color: "#fca5a5", fontSize: 13 }}>{err}</div>}
+            <button onClick={sendMsg} disabled={sending}
+              style={{ background: "#fff", color: "#6c2bd9", border: "none", borderRadius: 10, padding: "13px 0", fontFamily: "inherit", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>
+              {sending ? "Yuborilmoqda..." : "Xabar yuborish →"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Tezkor aloqa */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+        <a href="https://t.me/savatmarket" target="_blank"
+          style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#1b1430" }}>
+          <span style={{ fontSize: 22 }}>✈️</span>
+          <div><div style={{ fontSize: 11, color: "#8a849c" }}>Telegram</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>@savatmarket</div></div>
+        </a>
+        <a href="tel:+998900000000"
+          style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#1b1430" }}>
+          <span style={{ fontSize: 22 }}>📞</span>
+          <div><div style={{ fontSize: 11, color: "#8a849c" }}>Telefon</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>+998 90 000 00 00</div></div>
+        </a>
       </div>
 
       {/* FAQ */}
@@ -2042,7 +2088,7 @@ function App() {
       )}
       {view === "help" && (
         <main>
-          <HelpPage t={t} onHome={goHome} />
+          <HelpPage t={t} onHome={goHome} user={user} />
           <Footer t={t} />
         </main>
       )}
