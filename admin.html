@@ -458,37 +458,87 @@ function resetPassword(email) {
   });
 }
 
+var currentChatEmail = null;
+
 function loadMessages() {
-  fetch(SB+"/rest/v1/messages?select=*&order=created_at.desc", {
+  fetch(SB+"/rest/v1/chats?select=user_email&order=created_at.desc", {
     headers:{"apikey":KEY,"Authorization":"Bearer "+token}
   }).then(function(r){ return r.json(); })
   .then(function(msgs){
+    // Unique emaillar
+    var seen = {}; var users = [];
+    (msgs||[]).forEach(function(m){ if(!seen[m.user_email]){ seen[m.user_email]=true; users.push(m.user_email); } });
     var cont = document.getElementById("content");
-    if(!msgs.length){ cont.innerHTML='<div class="empty">Hozircha xabarlar yo\'q</div>'; return; }
+    if(!users.length){ cont.innerHTML='<div class="empty">Hozircha xabarlar yo\'q</div>'; return; }
+
     cont.innerHTML =
-      '<div class="add-btn-row"><span>Jami: <b>'+msgs.length+'</b> ta xabar</span></div>'+
-      msgs.map(function(m){
-        var date = new Date(m.created_at).toLocaleString("ru-RU");
-        return '<div class="order-card" style="'+(m.read?'':'border-left:3px solid #6c2bd9')+'">'+
-          '<div class="order-head">'+
-            '<div>'+
-              '<div class="order-num" style="font-size:15px">'+(m.name||'Noma\'lum')+'</div>'+
-              '<div class="order-date">'+(m.email||'Email yo\'q')+' · '+date+'</div>'+
-            '</div>'+
-            '<button class="btn btn-sm btn-ghost" onclick="markRead('+m.id+',this)">'+(m.read?'✓ O\'qilgan':'O\'qildi deb belgilash')+'</button>'+
-          '</div>'+
-          '<div style="font-size:14px;color:#4a4360;line-height:1.6">'+h(m.message)+'</div>'+
-        '</div>';
-      }).join("");
+      '<div style="display:grid;grid-template-columns:260px 1fr;gap:0;height:600px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;">'+
+        '<div id="chatList" style="border-right:1px solid var(--line);overflow-y:auto;">'+
+          users.map(function(email){
+            return '<div class="chat-user'+(currentChatEmail===email?" active":"")+'" onclick="openChat(\''+h(email)+'\')" '+
+              'style="padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);'+(currentChatEmail===email?'background:var(--bg)':'')+'">' +
+              '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+h(email)+'</div>'+
+            '</div>';
+          }).join("")+
+        '</div>'+
+        '<div id="chatBox" style="display:flex;flex-direction:column;">'+
+          '<div style="padding:20px;color:var(--ink-3);text-align:center;margin:auto">Chap tomondagi foydalanuvchini tanlang</div>'+
+        '</div>'+
+      '</div>';
+
+    if(currentChatEmail) openChat(currentChatEmail);
   });
 }
 
-function markRead(id, btn) {
-  fetch(SB+"/rest/v1/messages?id=eq."+id,{
-    method:"PATCH",
+function openChat(email) {
+  currentChatEmail = email;
+  var chatBox = document.getElementById("chatBox");
+  if(!chatBox) return;
+
+  fetch(SB+"/rest/v1/chats?user_email=eq."+encodeURIComponent(email)+"&order=created_at.asc",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(msgs){
+    chatBox.innerHTML =
+      '<div style="padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;">'+h(email)+'</div>'+
+      '<div id="msgList" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">'+
+        (msgs||[]).map(function(m){
+          var isAdmin = m.sender==="admin";
+          return '<div style="display:flex;justify-content:'+(isAdmin?'flex-end':'flex-start')+'">'+
+            '<div style="max-width:70%;padding:10px 14px;border-radius:'+(isAdmin?'16px 16px 4px 16px':'16px 16px 16px 4px')+';'+
+              'background:'+(isAdmin?'linear-gradient(135deg,#7c3aed,#a855f7)':'var(--bg)')+';color:'+(isAdmin?'#fff':'var(--ink)')+';font-size:14px;line-height:1.5;">'+
+              (isAdmin?'':'<div style="font-size:11px;font-weight:700;color:#6c2bd9;margin-bottom:3px">Foydalanuvchi</div>')+
+              h(m.message)+
+              '<div style="font-size:10px;opacity:.6;margin-top:4px;text-align:right">'+new Date(m.created_at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})+'</div>'+
+            '</div>'+
+          '</div>';
+        }).join("")+
+      '</div>'+
+      '<div style="padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;">'+
+        '<input id="adminMsgInput" placeholder="Javob yozing..." '+
+          'style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--bg);outline:none;" '+
+          'onkeydown="if(event.key===\'Enter\')sendAdminMsg(\''+h(email)+'\')" />'+
+        '<button onclick="sendAdminMsg(\''+h(email)+'\')" '+
+          'style="height:42px;padding:0 18px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">'+
+          'Yuborish'+
+        '</button>'+
+      '</div>';
+
+    var msgList = document.getElementById("msgList");
+    if(msgList) msgList.scrollTop = msgList.scrollHeight;
+  });
+}
+
+function sendAdminMsg(email) {
+  var input = document.getElementById("adminMsgInput");
+  if(!input || !input.value.trim()) return;
+  var text = input.value.trim();
+  input.value = "";
+  fetch(SB+"/rest/v1/chats",{
+    method:"POST",
     headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
-    body:JSON.stringify({read:true})
-  }).then(function(){ btn.textContent="✓ O'qilgan"; btn.closest(".order-card").style.borderLeft="none"; });
+    body:JSON.stringify({user_email:email,sender:"admin",message:text})
+  }).then(function(){ openChat(email); });
 }
 
 if(token) renderMain(); else renderLogin();
