@@ -684,39 +684,59 @@ function doImport() {
   var result = document.getElementById("importResult");
 
   if(!url) { status.className="import-status err"; status.textContent="Link kiriting!"; return; }
-
   var platform = detectPlatform(url);
-  if(!platform) { status.className="import-status err"; status.textContent="Faqat Taobao, PDD yoki 1688 linki qabul qilinadi"; return; }
+  if(!platform) { status.className="import-status err"; status.textContent="Faqat Taobao, PDD yoki 1688 linki"; return; }
 
   var btn = document.getElementById("importBtn");
   btn.disabled = true; btn.textContent = "Yuklanmoqda...";
   status.className="import-status"; result.className="import-result";
 
-  var proxies = [
-    "https://api.allorigins.win/get?url=" + encodeURIComponent(url),
-    "https://corsproxy.io/?" + encodeURIComponent(url),
-    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url)
-  ];
-
   function showResult(info) {
     btn.disabled=false; btn.textContent="Ma'lumot olish";
     result.className="import-result show";
-    document.getElementById("importName").textContent = info.name || "Nomni kiriting";
+    document.getElementById("importName").textContent = info.name || "";
+
+    var nameEl = document.getElementById("importName");
+    nameEl.contentEditable = "true";
+    nameEl.style.cssText = "border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;min-height:28px;outline:none;";
 
     var badge = document.getElementById("importBadge");
-    if(platform==="pdd") { badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
-    else if(platform==="1688") { badge.className="platform-badge badge-taobao"; badge.textContent="1688.com"; }
+    if(platform==="pdd"){ badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
+    else if(platform==="1688"){ badge.className="platform-badge badge-taobao"; badge.textContent="1688.com"; }
     else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao"; }
 
     var imgWrap = document.getElementById("importImgWrap");
     window._importImages = info.images || [];
-    if(info.images && info.images[0]) {
-      var img = document.createElement("img");
-      img.className = "import-img";
-      img.src = info.images[0];
-      img.onerror = function(){ this.parentNode.innerHTML = "<div class=\"import-img-ph\">📦</div>"; };
-      imgWrap.innerHTML = "";
-      imgWrap.appendChild(img);
+    if(info.images && info.images.length > 0) {
+      var grid = document.createElement("div");
+      grid.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;";
+      info.images.slice(0,6).forEach(function(src, i) {
+        var thumb = document.createElement("img");
+        thumb.src = src;
+        thumb.style.cssText = "width:52px;height:52px;object-fit:cover;border-radius:6px;border:2px solid "+(i===0?"var(--brand)":"var(--line)")+";cursor:pointer;";
+        thumb.onclick = function() {
+          grid.querySelectorAll("img").forEach(function(t){ t.style.borderColor="var(--line)"; });
+          this.style.borderColor = "var(--brand)";
+          window._importImages = [src].concat(info.images.filter(function(u){ return u!==src; }));
+          mainImg.src = src;
+        };
+        if(i===0) {
+          var mainImg = document.createElement("img");
+          mainImg.className = "import-img";
+          mainImg.src = src;
+          mainImg.onerror = function(){ this.src=""; this.parentNode.innerHTML="<div class=\"import-img-ph\">📦</div>"; };
+          imgWrap.innerHTML = "";
+          imgWrap.appendChild(mainImg);
+        }
+        grid.appendChild(thumb);
+      });
+      // Add thumb grid below main image
+      var existing = imgWrap.querySelector(".thumb-grid");
+      if(existing) existing.remove();
+      var tg = document.createElement("div");
+      tg.className = "thumb-grid";
+      tg.appendChild(grid);
+      imgWrap.appendChild(tg);
     } else {
       imgWrap.innerHTML = "<div class=\"import-img-ph\">📦</div>";
     }
@@ -731,27 +751,44 @@ function doImport() {
 
     if(info.name) {
       status.className="import-status ok";
-      status.textContent = "Ma'lumot olindi! Narx va vaznni to'ldiring.";
+      status.textContent = "Ma'lumot olindi!";
     } else {
       status.className="import-status err";
-      status.textContent = "Nom topilmadi — qo'lda kiriting.";
+      status.textContent = "Nom topilmadi — yuqoridagi maydonga kiriting.";
     }
   }
+
+  // Try direct fetch first (works if VPN is on + CORS extension)
+  // Then try proxies
+  var proxies = [
+    { url: url, isJson: false, direct: true },
+    { url: "https://api.allorigins.win/get?url=" + encodeURIComponent(url), isJson: true },
+    { url: "https://corsproxy.io/?" + encodeURIComponent(url), isJson: false },
+    { url: "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url), isJson: false }
+  ];
 
   function tryProxy(idx) {
     if(idx >= proxies.length) {
       btn.disabled=false; btn.textContent="Ma'lumot olish";
       status.className="import-status err";
-      status.textContent = "Proxy ishlamadi — qo'lda to'ldiring.";
-      showResult({ name: "", images: [], price: "" });
+      status.textContent = "Avtomatik olinmadi — qo'lda to'ldiring.";
+      showResult({ name:"", images:[], price:"" });
       return;
     }
-    var isJson = proxies[idx].includes("allorigins");
-    fetch(proxies[idx])
-      .then(function(r) { return isJson ? r.json() : r.text(); })
+    var p = proxies[idx];
+    fetch(p.url, { mode: p.direct ? "no-cors" : "cors" })
+      .then(function(r) {
+        if(p.direct) {
+          // no-cors returns opaque response — can't read body
+          // If we got here without error, try next proxy that can read body
+          tryProxy(idx+1); return;
+        }
+        return p.isJson ? r.json() : r.text();
+      })
       .then(function(data) {
-        var html = isJson ? (data.contents || "") : (data || "");
-        if(html.length < 200) { tryProxy(idx+1); return; }
+        if(!data) return;
+        var html = p.isJson ? (data.contents||"") : data;
+        if(!html || html.length < 500) { tryProxy(idx+1); return; }
         var info = parseProductPage(html, platform);
         showResult(info);
       })
@@ -772,62 +809,79 @@ function showManualForm(platform) {
 }
 
 function parseProductPage(html, platform) {
-  var info = { name: "", price: "", images: [] };
+  var info = { name:"", price:"", images:[] };
 
-  // Extract title
-  var titlePatterns = [
-    /<title[^>]*>([^<]{10,})<\/title>/i,
-    /"title"\s*:\s*"([^"]{10,})"/,
-    /og:title[^>]*content="([^"]{10,})"/i,
-    /<h1[^>]*>([^<]{5,})<\/h1>/i
+  // ---- NAME ----
+  var namePatterns = [
+    // PDD specific
+    /"goodsName"\s*:\s*"([^"]{5,}?)"/,
+    /"goods_name"\s*:\s*"([^"]{5,}?)"/,
+    /"name"\s*:\s*"([^"]{5,}?)"/,
+    // Taobao specific
+    /"title"\s*:\s*"([^"]{5,}?)"/,
+    /"subject"\s*:\s*"([^"]{5,}?)"/,
+    // Meta tags
+    /property="og:title"[^>]*content="([^"]{5,}?)"/i,
+    /name="title"[^>]*content="([^"]{5,}?)"/i,
+    /<title[^>]*>([^<]{5,}?)<\/title>/i,
+    /<h1[^>]*>([^<]{5,}?)<\/h1>/i
   ];
-  for(var i=0;i<titlePatterns.length;i++) {
-    var m = html.match(titlePatterns[i]);
-    if(m && m[1]) {
-      var t = m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#x27;/g,"'").replace(/&quot;/g,'"').trim();
-      // Remove site name suffixes
-      t = t.replace(/[-|–]\s*(淘宝|天猫|拼多多|Taobao|Tmall|1688)[^]*$/i,"").trim();
-      if(t.length > 5) { info.name = t; break; }
+  for(var i=0;i<namePatterns.length;i++){
+    var m = html.match(namePatterns[i]);
+    if(m&&m[1]){
+      var t = m[1]
+        .replace(/\\u([0-9a-fA-F]{4})/g,function(_,c){return String.fromCharCode(parseInt(c,16));})
+        .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"')
+        .replace(/[-–|]\s*(淘宝|天猫|拼多多|Taobao|Tmall|1688|pinduoduo)[^]*/i,"")
+        .trim();
+      if(t.length>4&&!t.includes("404")&&!t.includes("error")){info.name=t;break;}
     }
   }
 
-  // Extract price
+  // ---- PRICE ----
   var pricePatterns = [
-    /"defaultPrice"\s*:\s*"([\d.]+)"/,
+    /"minGroupPrice"\s*:\s*"?([\d.]+)"?/,
+    /"minNormalPrice"\s*:\s*"?([\d.]+)"?/,
+    /"defaultPrice"\s*:\s*"?([\d.]+)"?/,
     /"price"\s*:\s*"([\d.]+)"/,
     /"min_price"\s*:\s*"?([\d.]+)"?/,
-    /class="[^"]*price[^"]*"[^>]*>\s*[¥￥]?\s*([\d.]+)/i
+    /"originalPrice"\s*:\s*"?([\d.]+)"?/,
+    /[¥￥]\s*([\d]+(?:\.[\d]{1,2})?)/
   ];
-  for(var j=0;j<pricePatterns.length;j++) {
-    var pm = html.match(pricePatterns[j]);
-    if(pm && pm[1] && parseFloat(pm[1])>0) { info.price = pm[1]; break; }
+  for(var j=0;j<pricePatterns.length;j++){
+    var pm=html.match(pricePatterns[j]);
+    if(pm&&pm[1]&&parseFloat(pm[1])>0.1&&parseFloat(pm[1])<99999){info.price=pm[1];break;}
   }
 
-  // Extract images
+  // ---- IMAGES ----
+  var seen={};
   var imgPatterns = [
-    /https:\/\/img\.alicdn\.com\/imgextra\/[^"'\s]{20,}/g,
-    /https:\/\/img\.alicdn\.com\/bao\/[^"'\s]{20,}/g,
-    /https:\/\/gw\.alicdn\.com\/[^"'\s]{20,}/g,
-    /https:\/\/yangkeduo\.com\/[^"'\s]*\.(?:jpg|png|jpeg|webp)/gi,
-    /https:\/\/img\.kwcdn\.com\/[^"'\s]{20,}/g
+    // PDD
+    /https?:\/\/img\.kwcdn\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/img\.pddpic\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/yangkeduo\.com\/[^"'\s,}{>]{20,}/g,
+    // Taobao/Alibaba
+    /https?:\/\/img\.alicdn\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/gw\.alicdn\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/g\.alicdn\.com\/[^"'\s,}{>]{20,}/g,
+    // Generic
+    /https?:\/\/[^"'\s,}{>]*\.(?:jpg|jpeg|png|webp)(?:\?[^"'\s,}{>]*)?/gi
   ];
-  var seen = {};
-  for(var k=0;k<imgPatterns.length;k++) {
-    var matches = html.match(imgPatterns[k]) || [];
-    for(var l=0;l<matches.length;l++) {
-      var imgUrl = matches[l].replace(/\\/g,"").split('"')[0].split("'")[0];
-      if(!seen[imgUrl] && info.images.length < 8) {
-        seen[imgUrl] = true;
-        // Filter out icons and small images
-        if(!imgUrl.includes("icon") && !imgUrl.includes("logo") && imgUrl.length > 40) {
-          info.images.push(imgUrl);
-        }
+  for(var k=0;k<imgPatterns.length&&info.images.length<8;k++){
+    var matches=html.match(imgPatterns[k])||[];
+    for(var l=0;l<matches.length&&info.images.length<8;l++){
+      var u=matches[l].replace(/\\/g,"").replace(/['"\s>]+.*$/,"");
+      // Filter: must be image, not icon/logo/tiny
+      if(!seen[u]&&u.length>30&&!u.match(/icon|logo|avatar|badge|star|rating|favicon/i)){
+        seen[u]=true;
+        info.images.push(u);
       }
     }
   }
 
   return info;
 }
+
 
 function doImportSave() {
   var name = document.getElementById("importName").textContent.trim();
