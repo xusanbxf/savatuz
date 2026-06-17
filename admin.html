@@ -156,6 +156,7 @@ function renderMain() {
           '<button class="tab'+(currentTab==="orders"?" active":"")+'" id="tabOrders">Buyurtmalar</button>'+
           '<button class="tab'+(currentTab==="products"?" active":"")+'" id="tabProducts">Mahsulotlar</button>'+
           '<button class="tab'+(currentTab==="users"?" active":"")+'" id="tabUsers">Foydalanuvchilar</button>'+
+          '<button class="tab'+(currentTab==="messages"?" active":"")+'" id="tabMessages">Xabarlar</button>'+
         '</div>'+
         '<button class="logout" id="logoutBtn">Chiqish</button>'+
       '</div>'+
@@ -165,9 +166,11 @@ function renderMain() {
   document.getElementById("tabOrders").onclick = function(){ currentTab="orders"; renderMain(); };
   document.getElementById("tabProducts").onclick = function(){ currentTab="products"; renderMain(); };
   document.getElementById("tabUsers").onclick = function(){ currentTab="users"; renderMain(); };
+  document.getElementById("tabMessages").onclick = function(){ currentTab="messages"; renderMain(); };
   if(currentTab==="orders") loadOrders();
   else if(currentTab==="products") loadProducts();
-  else loadUsers();
+  else if(currentTab==="users") loadUsers();
+  else loadMessages();
 }
 
 function statusClass(s){
@@ -453,6 +456,39 @@ function resetPassword(email) {
   }).then(function(r){
     alert(r.status===429 ? "Juda ko'p urinish, 5-10 daqiqadan keyin qayta urinib ko'ring" : email+" ga parol tiklash xati yuborildi!");
   });
+}
+
+function loadMessages() {
+  fetch(SB+"/rest/v1/messages?select=*&order=created_at.desc", {
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(msgs){
+    var cont = document.getElementById("content");
+    if(!msgs.length){ cont.innerHTML='<div class="empty">Hozircha xabarlar yo\'q</div>'; return; }
+    cont.innerHTML =
+      '<div class="add-btn-row"><span>Jami: <b>'+msgs.length+'</b> ta xabar</span></div>'+
+      msgs.map(function(m){
+        var date = new Date(m.created_at).toLocaleString("ru-RU");
+        return '<div class="order-card" style="'+(m.read?'':'border-left:3px solid #6c2bd9')+'">'+
+          '<div class="order-head">'+
+            '<div>'+
+              '<div class="order-num" style="font-size:15px">'+(m.name||'Noma\'lum')+'</div>'+
+              '<div class="order-date">'+(m.email||'Email yo\'q')+' · '+date+'</div>'+
+            '</div>'+
+            '<button class="btn btn-sm btn-ghost" onclick="markRead('+m.id+',this)">'+(m.read?'✓ O\'qilgan':'O\'qildi deb belgilash')+'</button>'+
+          '</div>'+
+          '<div style="font-size:14px;color:#4a4360;line-height:1.6">'+h(m.message)+'</div>'+
+        '</div>';
+      }).join("");
+  });
+}
+
+function markRead(id, btn) {
+  fetch(SB+"/rest/v1/messages?id=eq."+id,{
+    method:"PATCH",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+    body:JSON.stringify({read:true})
+  }).then(function(){ btn.textContent="✓ O'qilgan"; btn.closest(".order-card").style.borderLeft="none"; });
 }
 
 if(token) renderMain(); else renderLogin();
