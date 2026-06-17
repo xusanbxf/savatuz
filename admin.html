@@ -208,6 +208,7 @@ function loadOrders() {
           '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
           '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
           '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
+          '<button class="btn btn-sm btn-danger" onclick="deleteOrder('+o.id+',\''+h(o.order_num)+'\')" style="flex:none">O\'chirish</button>'+
         '</div>'+
         '<div class="order-body">'+
           '<div class="items-list">'+items+'</div>'+
@@ -470,6 +471,14 @@ function saveProduct(id) {
   });
 }
 
+
+function deleteOrder(id, num) {
+  if(!confirm(num+" buyurtmani o'chirishni tasdiqlaysizmi?")) return;
+  fetch(SB+"/rest/v1/orders?id=eq."+id,{
+    method:"DELETE",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+  }).then(function(){ loadOrders(); });
+}
 function loadUsers() {
   fetch(SB+"/auth/v1/admin/users?per_page=100", {
     headers: {"apikey": SERVICE_KEY, "Authorization": "Bearer "+SERVICE_KEY}
