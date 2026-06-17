@@ -459,88 +459,131 @@ function resetPassword(email) {
 }
 
 var currentChatEmail = null;
+var chatInterval = null;
+
+function fmtT(iso) {
+  var d = new Date(iso);
+  var hh = (d.getUTCHours()+5) % 24;
+  return String(hh).padStart(2,"0")+":"+String(d.getUTCMinutes()).padStart(2,"0");
+}
+
+function renderMsg(m) {
+  var isAdmin = m.sender === "admin";
+  return '<div style="display:flex;justify-content:'+(isAdmin?'flex-end':'flex-start')+';margin-bottom:10px;">'+
+    '<div style="max-width:70%;padding:10px 14px;border-radius:'+(isAdmin?'16px 16px 4px 16px':'16px 16px 16px 4px')+';'+
+      'background:'+(isAdmin?'linear-gradient(135deg,#7c3aed,#a855f7)':'#f3f0fa')+';color:'+(isAdmin?'#fff':'#1b1430')+';font-size:14px;line-height:1.5;">'+
+      (isAdmin?'':'<div style="font-size:11px;font-weight:700;color:#6c2bd9;margin-bottom:3px">Foydalanuvchi</div>')+
+      h(m.message)+
+      '<div style="font-size:10px;opacity:.6;margin-top:3px;text-align:right">'+fmtT(m.created_at)+'</div>'+
+    '</div>'+
+  '</div>';
+}
 
 function loadMessages() {
   fetch(SB+"/rest/v1/chats?select=user_email&order=created_at.desc", {
     headers:{"apikey":KEY,"Authorization":"Bearer "+token}
   }).then(function(r){ return r.json(); })
   .then(function(msgs){
-    // Unique emaillar
     var seen = {}; var users = [];
     (msgs||[]).forEach(function(m){ if(!seen[m.user_email]){ seen[m.user_email]=true; users.push(m.user_email); } });
     var cont = document.getElementById("content");
     if(!users.length){ cont.innerHTML='<div class="empty">Hozircha xabarlar yo\'q</div>'; return; }
 
-    cont.innerHTML =
-      '<div style="display:grid;grid-template-columns:260px 1fr;gap:0;height:600px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;">'+
-        '<div id="chatList" style="border-right:1px solid var(--line);overflow-y:auto;">'+
-          users.map(function(email){
-            return '<div class="chat-user'+(currentChatEmail===email?" active":"")+'" onclick="openChat(\''+h(email)+'\')" '+
-              'style="padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);'+(currentChatEmail===email?'background:var(--bg)':'')+'">' +
-              '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+h(email)+'</div>'+
-            '</div>';
-          }).join("")+
-        '</div>'+
-        '<div id="chatBox" style="display:flex;flex-direction:column;min-height:0;">'+
-          '<div style="padding:20px;color:var(--ink-3);text-align:center;margin:auto">Chap tomondagi foydalanuvchini tanlang</div>'+
-        '</div>'+
+    var listHtml = users.map(function(email){
+      var active = currentChatEmail===email;
+      return '<div onclick="openChat(\''+h(email)+'\')" '+
+        'style="padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);background:'+(active?'#f0e8ff':'')+';transition:.15s;">'+
+        '<div style="font-weight:'+(active?'800':'600')+';font-size:13.5px;color:'+(active?'#6c2bd9':'var(--ink)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+h(email)+'</div>'+
       '</div>';
+    }).join("");
 
-    if(currentChatEmail) openChat(currentChatEmail);
+    var existingList = document.getElementById("chatList");
+    if(existingList) {
+      existingList.innerHTML = listHtml;
+    } else {
+      cont.innerHTML =
+        '<div style="display:grid;grid-template-columns:240px 1fr;height:620px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;">'+
+          '<div id="chatList" style="border-right:1px solid var(--line);overflow-y:auto;">'+listHtml+'</div>'+
+          '<div id="chatBox" style="display:flex;flex-direction:column;min-height:0;background:#faf8fe;">'+
+            '<div style="padding:40px;color:var(--ink-3);text-align:center;margin:auto;font-size:14px;">👈 Foydalanuvchini tanlang</div>'+
+          '</div>'+
+        '</div>';
+      if(currentChatEmail) openChat(currentChatEmail);
+    }
   });
 }
 
 function openChat(email) {
   currentChatEmail = email;
+  if(chatInterval) clearInterval(chatInterval);
+
   var chatBox = document.getElementById("chatBox");
   if(!chatBox) return;
 
-  fetch(SB+"/rest/v1/chats?user_email=eq."+encodeURIComponent(email)+"&order=created_at.asc",{
-    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
-  }).then(function(r){ return r.json(); })
-  .then(function(msgs){
-    chatBox.innerHTML =
-      '<div style="padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;">'+h(email)+'</div>'+
-      '<div id="msgList" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">'+
-        (msgs||[]).map(function(m){
-          var isAdmin = m.sender==="admin";
-          return '<div style="display:flex;justify-content:'+(isAdmin?'flex-end':'flex-start')+'">'+
-            '<div style="max-width:70%;padding:10px 14px;border-radius:'+(isAdmin?'16px 16px 4px 16px':'16px 16px 16px 4px')+';'+
-              'background:'+(isAdmin?'linear-gradient(135deg,#7c3aed,#a855f7)':'var(--bg)')+';color:'+(isAdmin?'#fff':'var(--ink)')+';font-size:14px;line-height:1.5;">'+
-              (isAdmin?'':'<div style="font-size:11px;font-weight:700;color:#6c2bd9;margin-bottom:3px">Foydalanuvchi</div>')+
-              h(m.message)+
-              '<div style="font-size:10px;opacity:.6;margin-top:4px;text-align:right">'+
-              (function(iso){ var d=new Date(iso); var h=String(d.getUTCHours()+5).padStart(2,"0"); var m=String(d.getUTCMinutes()).padStart(2,"0"); return h+":"+m; })(m.created_at)+
-              '</div>'+
-            '</div>'+
-          '</div>';
-        }).join("")+
-      '</div>'+
-      '<div style="padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;">'+
-        '<input id="adminMsgInput" placeholder="Javob yozing..." '+
-          'style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--bg);outline:none;" '+
-          'onkeydown="if(event.key===\'Enter\')sendAdminMsg(\''+h(email)+'\')" />'+
-        '<button onclick="sendAdminMsg(\''+h(email)+'\')" '+
-          'style="height:42px;padding:0 18px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">'+
-          'Yuborish'+
-        '</button>'+
-      '</div>';
+  chatBox.innerHTML =
+    '<div style="padding:14px 18px;border-bottom:1px solid var(--line);background:#fff;font-weight:700;font-size:14px;flex-shrink:0;">💬 '+h(email)+'</div>'+
+    '<div id="msgList" style="flex:1;overflow-y:auto;padding:14px 16px;min-height:0;"></div>'+
+    '<div style="padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;background:#fff;flex-shrink:0;">'+
+      '<input id="adminInput" placeholder="Javob yozing..." '+
+        'style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--bg);outline:none;color:var(--ink);" />'+
+      '<button id="adminSendBtn" '+
+        'style="height:42px;padding:0 20px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;">'+
+        'Yuborish'+
+      '</button>'+
+    '</div>';
 
-    var msgList = document.getElementById("msgList");
-    if(msgList) msgList.scrollTop = msgList.scrollHeight;
-  });
+  document.getElementById("adminSendBtn").onclick = function(){ sendAdminMsg(email); };
+  document.getElementById("adminInput").onkeydown = function(e){ if(e.key==="Enter") sendAdminMsg(email); };
+
+  var lastId = 0;
+  var firstLoad = true;
+
+  function fetchMsgs() {
+    fetch(SB+"/rest/v1/chats?user_email=eq."+encodeURIComponent(email)+"&order=created_at.asc", {
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+    }).then(function(r){ return r.json(); })
+    .then(function(msgs){
+      var list = document.getElementById("msgList");
+      if(!list){ clearInterval(chatInterval); return; }
+
+      if(firstLoad) {
+        firstLoad = false;
+        list.innerHTML = "";
+        (msgs||[]).forEach(function(m){
+          list.insertAdjacentHTML("beforeend", renderMsg(m));
+          if(m.id > lastId) lastId = m.id;
+        });
+        list.scrollTop = list.scrollHeight;
+      } else {
+        var added = false;
+        (msgs||[]).forEach(function(m){
+          if(m.id > lastId) {
+            list.insertAdjacentHTML("beforeend", renderMsg(m));
+            lastId = m.id;
+            added = true;
+          }
+        });
+        if(added) list.scrollTop = list.scrollHeight;
+      }
+    });
+  }
+
+  fetchMsgs();
+  chatInterval = setInterval(fetchMsgs, 1500);
+  loadMessages();
 }
 
 function sendAdminMsg(email) {
-  var input = document.getElementById("adminMsgInput");
+  var input = document.getElementById("adminInput");
   if(!input || !input.value.trim()) return;
   var text = input.value.trim();
   input.value = "";
+  input.focus();
   fetch(SB+"/rest/v1/chats",{
     method:"POST",
     headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
-    body:JSON.stringify({user_email:email,sender:"admin",message:text})
-  }).then(function(){ openChat(email); });
+    body:JSON.stringify({user_email:email, sender:"admin", message:text})
+  });
 }
 
 if(token) renderMain(); else renderLogin();
