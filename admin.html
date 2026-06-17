@@ -767,37 +767,21 @@ function doImport() {
     }
   }
 
-  // ScraperAPI - renders JS, bypasses blocks
-  var scraperUrl = "https://api.scraperapi.com/?api_key=" + SCRAPER_API_KEY +
-    "&url=" + encodeURIComponent(url) +
-    "&render=true&country_code=cn";
-
-  fetch(scraperUrl)
+  // Use our Vercel serverless function (avoids CORS)
+  fetch("/api/scrape?url=" + encodeURIComponent(url))
     .then(function(r) {
-      if(!r.ok) throw new Error("ScraperAPI: " + r.status);
-      return r.text();
+      if(!r.ok) throw new Error("Server xato: " + r.status);
+      return r.json();
     })
-    .then(function(html) {
-      if(!html || html.length < 500) throw new Error("Bo'sh sahifa");
-      var info = parseProductPage(html, platform);
+    .then(function(info) {
+      if(info.error) throw new Error(info.error);
       showResult(info);
     })
     .catch(function(e) {
-      // Fallback: allorigins proxy
-      fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url))
-        .then(function(r){ return r.json(); })
-        .then(function(data) {
-          var html = data.contents || "";
-          if(html.length < 500) throw new Error("Proxy ham ishlamadi");
-          var info = parseProductPage(html, platform);
-          showResult(info);
-        })
-        .catch(function() {
-          btn.disabled=false; btn.textContent="Ma'lumot olish";
-          status.className="import-status err";
-          status.textContent = "⚠️ Avtomatik olinmadi — qo'lda to'ldiring.";
-          showResult({ name:"", images:[], price:"" });
-        });
+      btn.disabled=false; btn.textContent="Ma'lumot olish";
+      status.className="import-status err";
+      status.textContent = "Xato: " + (e.message||"Ishlamadi") + " — qo'lda to'ldiring.";
+      showResult({ name:"", images:[], price:"" });
     });
 }
 
