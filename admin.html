@@ -481,7 +481,7 @@ function loadMessages() {
             '</div>';
           }).join("")+
         '</div>'+
-        '<div id="chatBox" style="display:flex;flex-direction:column;">'+
+        '<div id="chatBox" style="display:flex;flex-direction:column;min-height:0;">'+
           '<div style="padding:20px;color:var(--ink-3);text-align:center;margin:auto">Chap tomondagi foydalanuvchini tanlang</div>'+
         '</div>'+
       '</div>';
@@ -510,7 +510,8 @@ function openChat(email) {
               (isAdmin?'':'<div style="font-size:11px;font-weight:700;color:#6c2bd9;margin-bottom:3px">Foydalanuvchi</div>')+
               h(m.message)+
               '<div style="font-size:10px;opacity:.6;margin-top:4px;text-align:right">'+
-              (function(iso){ var d=new Date(iso); var uz=new Date(d.getTime()+5*60*60*1000); return uz.toISOString().slice(11,16); })(m.created_at)+
+              (function(iso){ var d=new Date(iso); var h=String(d.getUTCHours()+5).padStart(2,"0"); var m=String(d.getUTCMinutes()).padStart(2,"0"); return h+":"+m; })(m.created_at)+
+              '</div>'+
             '</div>'+
           '</div>';
         }).join("")+
