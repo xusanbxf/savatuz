@@ -901,6 +901,7 @@ const Icons = {
   home: (p) => <S {...p}><path d="M3 12L12 4l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z"/></S>,
   grid: (p) => <S {...p}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></S>,
   box: (p) => <S {...p}><path d="M12 3L3 8v8l9 5 9-5V8L12 3Z"/><path d="M3 8l9 5 9-5M12 13v8"/></S>,
+  help: (p) => <S {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/></S>,
 };
 
 window.Icons = Icons;
@@ -1684,13 +1685,74 @@ function MyOrders({ user, t, onHome }) {
   );
 }
 
-window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders };
+function HelpPage({ t, onHome }) {
+  const [openFaq, setOpenFaq] = React.useState(null);
+  const faqs = [
+    { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
+    { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni. Mahsulot og'irligiga qarab farq qilishi mumkin." },
+    { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo xarajati + xizmat haqi. Hech qanday yashirin to'lov yo'q — barchasini oldidan ko'rsatamiz." },
+    { q: "Mahsulot kelmaganda yoki sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz. Muammo bo'lsa, to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
+    { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul — qaysi qulay bo'lsa. To'lov faqat mahsulot yetib kelganidan keyin ham qilsa bo'ladi." },
+    { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
+    { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." },
+  ];
+
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 40px" }}>
+      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>← Bosh sahifa</button>
+
+      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>Yordam markazi</h2>
+      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 28px" }}>Savollaringizga javob toping yoki biz bilan bog'laning</p>
+
+      {/* Aloqa */}
+      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", marginBottom: 28, color: "#fff" }}>
+        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, marginBottom: 14 }}>Biz bilan bog'laning</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {[
+            { icon: "📱", label: "Telegram", val: "@savatmarket", link: "https://t.me/savatmarket" },
+            { icon: "📞", label: "Telefon", val: "+998 90 000 00 00", link: "tel:+998900000000" },
+            { icon: "✉️", label: "Email", val: "info@savatmarket.uz", link: "mailto:info@savatmarket.uz" },
+            { icon: "🕐", label: "Ish vaqti", val: "9:00 — 21:00", link: null },
+          ].map((c, i) => (
+            <a key={i} href={c.link || undefined}
+              style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", textDecoration: "none", color: "#fff" }}>
+              <span style={{ fontSize: 20 }}>{c.icon}</span>
+              <div>
+                <div style={{ fontSize: 11, opacity: .75 }}>{c.label}</div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>{c.val}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 14 }}>Ko'p so'raladigan savollar</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {faqs.map((f, i) => (
+          <div key={i} style={{ background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, overflow: "hidden" }}>
+            <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "16px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, textAlign: "left", fontFamily: "inherit", fontWeight: 700, fontSize: 14.5, color: "#1b1430" }}>
+              <span>{f.q}</span>
+              <span style={{ fontSize: 18, color: "#6c2bd9", transition: "transform .2s", display: "inline-block", transform: openFaq === i ? "rotate(45deg)" : "none", flexShrink: 0 }}>+</span>
+            </button>
+            {openFaq === i && (
+              <div style={{ padding: "0 18px 16px", fontSize: 14, color: "#4a4360", lineHeight: 1.6 }}>{f.a}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage };
 
 </script>
   <script type="text/babel">
 /* ============ SAVAT.UZ — product detail, cart, app ============ */
 const { Media, useCountUp, Header, Hero, Cats, ProductCard, Bestsellers, Why, Footer } = window.SC;
-const { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders } = window.AC;
+const { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage } = window.AC;
 const Ico = window.Icons;
 const D = window.SAVAT;
 
@@ -1978,6 +2040,12 @@ function App() {
           <Footer t={t} />
         </main>
       )}
+      {view === "help" && (
+        <main>
+          <HelpPage t={t} onHome={goHome} />
+          <Footer t={t} />
+        </main>
+      )}
 
       <CartDrawer open={cartOpen} items={cart} t={t} lang={lang}
         onClose={() => setCartOpen(false)} onQty={changeQty} onRemove={removeItem}
@@ -1999,16 +2067,15 @@ function App() {
           <Ico.grid style={{ width: 22, height: 22 }} />
           <span>Katalog</span>
         </button>
-        {user && (
+        {user ? (
           <button className={view === "myorders" ? "active" : ""} onClick={() => setView("myorders")}>
             <Ico.box style={{ width: 22, height: 22 }} />
             <span>Buyurtmalar</span>
           </button>
-        )}
-        {!user && (
-          <button onClick={() => setAuthOpen(true)}>
-            <Ico.user style={{ width: 22, height: 22 }} />
-            <span>Kirish</span>
+        ) : (
+          <button className={view === "help" ? "active" : ""} onClick={() => setView("help")}>
+            <Ico.help style={{ width: 22, height: 22 }} />
+            <span>Yordam</span>
           </button>
         )}
         <button className="bn-cart" onClick={() => setCartOpen(true)}>
