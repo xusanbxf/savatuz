@@ -686,8 +686,20 @@ function doImport() {
   var result = document.getElementById("importResult");
 
   if(!url) { status.className="import-status err"; status.textContent="Link kiriting!"; return; }
+  // Normalize URL - convert mobile to desktop
+  url = url
+    .replace("mobile.yangkeduo.com", "mobile.pinduoduo.com")
+    .replace("//m.taobao.com", "//item.taobao.com")
+    .replace("//a.m.taobao.com/i", "//item.taobao.com/item.htm?id=");
+
   var platform = detectPlatform(url);
   if(!platform) { status.className="import-status err"; status.textContent="Faqat Taobao, PDD yoki 1688 linki"; return; }
+
+  // For PDD, use API endpoint directly
+  if(platform === "pdd") {
+    var goodsId = url.match(/goods_id=(\d+)/)?.[1] || url.match(/ps=([^&]+)/)?.[1] || "";
+    if(goodsId && !goodsId.match(/^\d+$/)) goodsId = ""; // ps= is not goods_id
+  }
 
   var btn = document.getElementById("importBtn");
   btn.disabled = true; btn.textContent = "Yuklanmoqda...";
