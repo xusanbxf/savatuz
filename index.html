@@ -1909,10 +1909,18 @@ function ImageSwiper({ p, lang }) {
   const onTouchMove  = (e) => { if(isTouch.current) moveDrag(e.touches[0].clientX); };
   const onTouchEnd   = () => { if(isTouch.current) endDrag(); };
 
-  const onMouseDown  = (e) => { e.preventDefault(); startDrag(e.clientX, false); };
-  const onMouseMove  = (e) => { if(!isTouch.current && startX.current !== null) moveDrag(e.clientX); };
-  const onMouseUp    = () => { if(!isTouch.current) endDrag(); };
-  const onMouseLeave = () => { if(!isTouch.current && dragging) endDrag(); };
+  const onMouseDown  = (e) => {
+    e.preventDefault();
+    startDrag(e.clientX, false);
+    // document ga bog'laymiz — sichqoncha chetga chiqsa ham ishlaydi
+    const onMove = (ev) => moveDrag(ev.clientX);
+    const onUp   = () => { endDrag(); document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  };
+  const onMouseMove  = () => {};
+  const onMouseUp    = () => {};
+  const onMouseLeave = () => {};
 
   // Track offset: chapga surish = dragX manfiy = track chapga = to'g'ri
   const wrapW = wrapRef.current?.offsetWidth || 300;
