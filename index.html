@@ -226,7 +226,7 @@
   .back-link:hover { color: var(--brand); }
   .pd-grid { display: grid; grid-template-columns: 1fr 1.02fr; gap: 36px; align-items: start; }
   .pd-gallery { position: sticky; top: 92px; }
-  .pd-main-media { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); }
+  .pd-main-media { position: relative; aspect-ratio: 4/3; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
   .pd-thumbs { display: flex; gap: 12px; margin-top: 12px; }
   .pd-thumb { position: relative; width: 76px; height: 76px; border-radius: 14px; overflow: hidden; border: 2px solid var(--line); cursor: pointer; }
   .pd-thumb.on { border-color: var(--brand); }
@@ -1880,13 +1880,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
             <span className="badge-disc" style={{ top: 16, left: 16, fontSize: 15, padding: "7px 14px" }}>−{b.pct}%</span>
             <Media p={p} label={p.name[lang].toLowerCase()} />
           </div>
-          <div className="pd-thumbs">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className={"pd-thumb" + (thumb === i ? " on" : "")} onClick={() => setThumb(i)}>
-                <Media p={p} label={"" + (i + 1)} />
-              </div>
-            ))}
-          </div>
+
         </div>
 
         {/* info */}
