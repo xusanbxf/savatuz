@@ -1697,11 +1697,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
   const fmtTime = (iso) => {
-    const d = new Date(iso);
-    const hh = (d.getUTCHours() + 5) % 24;
-    const h = String(hh).padStart(2, "0");
-    const m = String(d.getUTCMinutes()).padStart(2, "0");
-    return h + ":" + m;
+    return new Date(iso).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tashkent", hour12: false });
   };
 
   const faqs = [
