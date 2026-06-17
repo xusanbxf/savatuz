@@ -1417,7 +1417,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
 }
 
 /* ---------- Mobile menu ---------- */
-function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders }) {
+function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders, onHelp, onCatalog }) {
   return (
     <>
       <div className={"mm-scrim" + (open ? " on" : "")} onClick={onClose} />
@@ -1435,9 +1435,9 @@ function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, 
         </div>
         <nav className="mm-nav">
           <button onClick={() => { onClose(); onHome(); }}>{t.nav_home}</button>
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_catalog}</button>
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_track}</button>
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_help}</button>
+          <button onClick={() => { onClose(); onCatalog && onCatalog(); onHome(); }}>{t.nav_catalog}</button>
+          {user && <button onClick={() => { onClose(); onMyOrders(); }}>{t.nav_track}</button>}
+          <button onClick={() => { onClose(); onHelp(); }}>{t.nav_help}</button>
         </nav>
         <div className="mm-foot">
           <div className="lang" style={{ width: "fit-content" }}>
@@ -2127,7 +2127,9 @@ function App() {
       <MobileMenu open={menuOpen} t={t} lang={lang} setLang={setLang}
         onClose={() => setMenuOpen(false)} onHome={goHome}
         user={user} onAccount={() => setAuthOpen(true)} onLogout={onLogout}
-        onMyOrders={() => setView("myorders")} />
+        onMyOrders={() => setView("myorders")}
+        onHelp={() => { setMenuOpen(false); setView("help"); }}
+        onCatalog={() => { setMenuOpen(false); goHome(); }} />
 
       {/* Bottom Navigation — faqat mobile */}
       <nav className="bottom-nav">
