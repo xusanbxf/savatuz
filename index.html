@@ -1891,7 +1891,7 @@ function ImageSwiper({ p, lang }) {
   const [dragX, setDragX] = React.useState(0);
   const [dragging, setDragging] = React.useState(false);
 
-  const goTo = (i) => setIdx((i + total) % total);
+  const goTo = (i) => { if(i < 0 || i >= total) return; setIdx(i); }; // chegara
   const prev = (e) => { if(e) e.stopPropagation(); goTo(idx - 1); };
   const next = (e) => { if(e) e.stopPropagation(); goTo(idx + 1); };
 
@@ -1901,7 +1901,7 @@ function ImageSwiper({ p, lang }) {
     if (startX.current === null) return;
     // dragX > 0 = o'ngga surdi = chapga o'tish (prev)
     // dragX < 0 = chapga surdi = o'ngga o'tish (next)
-    if (Math.abs(dragX) > 40) { dragX > 0 ? goTo(idx - 1) : goTo(idx + 1); }
+    if (Math.abs(dragX) > 40) { if(dragX > 0 && idx > 0) goTo(idx - 1); else if(dragX < 0 && idx < total - 1) goTo(idx + 1); }
     startX.current = null; setDragX(0); setDragging(false);
   };
 
@@ -1909,15 +1909,8 @@ function ImageSwiper({ p, lang }) {
   const onTouchMove  = (e) => { if(isTouch.current) moveDrag(e.touches[0].clientX); };
   const onTouchEnd   = () => { if(isTouch.current) endDrag(); };
 
-  const onMouseDown  = (e) => {
-    e.preventDefault();
-    startDrag(e.clientX, false);
-    // document ga bog'laymiz — sichqoncha chetga chiqsa ham ishlaydi
-    const onMove = (ev) => moveDrag(ev.clientX);
-    const onUp   = () => { endDrag(); document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  };
+  // Sichqoncha drag — o'chirildi
+  const onMouseDown  = () => {};
   const onMouseMove  = () => {};
   const onMouseUp    = () => {};
   const onMouseLeave = () => {};
@@ -1963,8 +1956,8 @@ function ImageSwiper({ p, lang }) {
 
         {total > 1 && (
           <>
-            <button className="swiper-btn swiper-prev" onMouseDown={e=>e.stopPropagation()} onClick={prev} aria-label="Oldingi"><ChevL /></button>
-            <button className="swiper-btn swiper-next" onMouseDown={e=>e.stopPropagation()} onClick={next} aria-label="Keyingi"><ChevR /></button>
+            {idx > 0 && <button className="swiper-btn swiper-prev" onClick={prev} aria-label="Oldingi"><ChevL /></button>}
+            {idx < total - 1 && <button className="swiper-btn swiper-next" onClick={next} aria-label="Keyingi"><ChevR /></button>}
           </>
         )}
       </div>
