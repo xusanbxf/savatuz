@@ -462,9 +462,7 @@ var currentChatEmail = null;
 var chatInterval = null;
 
 function fmtT(iso) {
-  var d = new Date(iso);
-  var hh = (d.getUTCHours() + 5) % 24;
-  return String(hh).padStart(2,"0")+":"+String(d.getUTCMinutes()).padStart(2,"0");
+  return new Date(iso).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tashkent", hour12: false });
 }
 
 function renderMsg(m) {
