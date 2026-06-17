@@ -425,15 +425,17 @@
     .hdr { position: sticky; top: 0; z-index: 80; backdrop-filter: blur(12px); background: rgba(247,245,251,.92); border-bottom: 1px solid var(--line); }
     .hdr-row { height: 60px; gap: 10px; }
     .brand-tag, .acct-label, .cart-word { display: none; }
-    .acct-btn { padding: 0; width: 42px; justify-content: center; border-radius: 50%; }
-    .cart-btn { padding: 0; width: 44px; height: 44px; border-radius: 14px; justify-content: center; }
-    .cart-btn svg { width: 22px; height: 22px; }
+    .acct-btn { padding: 0; width: 42px; height: 42px; justify-content: center; border-radius: 50%; flex: none; }
+    .cart-btn { padding: 0; width: 42px; height: 42px; border-radius: 14px; justify-content: center; flex: none; overflow: visible; }
+    .cart-btn svg { width: 20px; height: 20px; }
     .cart-count { top: -6px; right: -6px; min-width: 18px; height: 18px; font-size: 10px; }
+    .hdr-actions { gap: 6px; flex: none; }
     .brand-name { font-size: 17px; }
     .wrap { padding: 0 14px; }
     /* Footer mobile */
-    .ftr-row { flex-direction: column; align-items: flex-start; gap: 8px; padding: 20px 0; }
-    .ftr small { font-size: 12px; }
+    .ftr-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px 0 24px; }
+    .ftr .brand { order: 1; }
+    .ftr small { font-size: 12px; order: 2; }
 
     /* Hero — mobile card style */
     .hero { padding: 14px 0 2px; }
@@ -483,7 +485,8 @@
     .success-order { flex-direction: column; gap: 8px; text-align: left; }
 
     /* Bottom padding for bottom nav */
-    main { padding-bottom: 72px; }
+    main { padding-bottom: 72px; min-height: calc(100vh - 60px); display: flex; flex-direction: column; }
+    main > *:not(.ftr) { flex: 1; }
   }
 
   @media (max-width: 400px) {
