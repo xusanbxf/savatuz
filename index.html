@@ -1691,9 +1691,16 @@ function HelpPage({ t, onHome, user, onLogin }) {
   const [sending, setSending] = React.useState(false);
   const [openFaq, setOpenFaq] = React.useState(null);
   const bottomRef = React.useRef(null);
+  const inputRef = React.useRef(null);
 
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
+
+  const fmtTime = (iso) => {
+    const d = new Date(iso);
+    const uz = new Date(d.getTime() + 5*60*60*1000);
+    return uz.toISOString().slice(11,16);
+  };
 
   const faqs = [
     { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
@@ -1709,7 +1716,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
       headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
     }).then(r => r.json()).then(data => {
       setMessages(data || []);
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
     });
   }, [user]);
 
@@ -1725,6 +1732,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
     setSending(true);
     const text = msg.trim();
     setMsg("");
+    inputRef.current?.focus();
     await fetch(SB_URL + "/rest/v1/chats", {
       method: "POST",
       headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
@@ -1734,16 +1742,13 @@ function HelpPage({ t, onHome, user, onLogin }) {
     loadMessages();
   };
 
-  // Kirish talab qilinadi
   if (!user) return (
     <div style={{ maxWidth: 480, margin: "60px auto", padding: "0 16px", textAlign: "center" }}>
       <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
       <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 10px" }}>Kirish talab qilinadi</h2>
-      <p style={{ color: "#8a849c", fontSize: 14.5, margin: "0 0 24px", lineHeight: 1.6 }}>Yordam bo'limiga kirish va admin bilan chat qilish uchun avval ro'yxatdan o'ting yoki kiring</p>
+      <p style={{ color: "#8a849c", fontSize: 14.5, margin: "0 0 24px", lineHeight: 1.6 }}>Yordam bo'limiga kirish uchun avval ro'yxatdan o'ting yoki kiring</p>
       <button onClick={onLogin} style={{ background: "linear-gradient(140deg,#7c3aed,#c026d3)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 32px", fontFamily: "inherit", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>Kirish / Ro'yxatdan o'tish</button>
       <button onClick={onHome} style={{ display: "block", margin: "14px auto 0", background: "none", border: "none", color: "#8a849c", cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>← Bosh sahifaga qaytish</button>
-
-      {/* FAQ — login kerak emas */}
       <div style={{ marginTop: 40, textAlign: "left" }}>
         <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, marginBottom: 12 }}>Ko'p so'raladigan savollar</div>
         {faqs.map((f, i) => (
@@ -1760,60 +1765,54 @@ function HelpPage({ t, onHome, user, onLogin }) {
     </div>
   );
 
-  // Chat ekrani
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 0 80px" }}>
-      {/* Header */}
-      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", padding: "20px 20px 18px", display: "flex", alignItems: "center", gap: 14 }}>
-        <button onClick={onHome} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: 10, width: 38, height: 38, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>←</button>
-        <div style={{ width: 42, height: 42, background: "rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🛍️</div>
-        <div>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, fontFamily: "Sora, sans-serif" }}>SAVAT.UZ Yordam</div>
-          <div style={{ color: "rgba(255,255,255,.75)", fontSize: 12.5 }}>Odatda 30 daqiqada javob beramiz</div>
-        </div>
-      </div>
+    <div style={{ maxWidth: 760, margin: "0 auto", padding: "20px 16px 40px" }}>
+      {/* Chat oynasi */}
+      <div style={{ background: "#fff", border: "1px solid #ece8f4", borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.07)", display: "flex", flexDirection: "column", height: "calc(100vh - 180px)", minHeight: 400, maxHeight: 680 }}>
 
-      {/* Messages */}
-      <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
-        {messages.length === 0 && (
-          <div style={{ textAlign: "center", color: "#8a849c", padding: "30px 0", fontSize: 14 }}>
-            <div style={{ fontSize: 36, marginBottom: 8 }}>👋</div>
-            Salom, {user.name}! Savolingizni yozing — tez javob beramiz.
+        {/* Header */}
+        <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", padding: "16px 20px", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <button onClick={onHome} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", color: "#fff", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>←</button>
+          <div style={{ width: 40, height: 40, background: "rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🛍️</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, fontFamily: "Sora, sans-serif" }}>SAVAT.UZ Yordam</div>
+            <div style={{ color: "rgba(255,255,255,.75)", fontSize: 12 }}>🟢 Odatda 30 daqiqada javob beramiz</div>
           </div>
-        )}
-        {messages.map((m, i) => {
-          const isUser = m.sender === "user";
-          return (
-            <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start" }}>
-              <div style={{
-                maxWidth: "75%", padding: "10px 14px", borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                background: isUser ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#fff",
-                color: isUser ? "#fff" : "#1b1430",
-                border: isUser ? "none" : "1.5px solid #ece8f4",
-                fontSize: 14.5, lineHeight: 1.5, boxShadow: "0 2px 8px rgba(0,0,0,.06)"
-              }}>
-                {!isUser && <div style={{ fontSize: 11, fontWeight: 700, color: "#6c2bd9", marginBottom: 4 }}>SAVAT.UZ</div>}
-                {m.message}
-                <div style={{ fontSize: 10.5, opacity: .6, marginTop: 4, textAlign: "right" }}>
-                  {new Date(m.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+        </div>
+
+        {/* Messages */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 10, background: "#f7f5fb" }}>
+          {messages.length === 0 && (
+            <div style={{ textAlign: "center", color: "#8a849c", padding: "40px 20px", fontSize: 14 }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>👋</div>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>Salom, {user.name}!</div>
+              <div>Savolingizni yozing — tez javob beramiz</div>
+            </div>
+          )}
+          {messages.map((m, i) => {
+            const isUser = m.sender === "user";
+            return (
+              <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
+                {!isUser && <div style={{ width: 30, height: 30, background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🛍️</div>}
+                <div style={{ maxWidth: "72%", padding: "10px 14px", borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px", background: isUser ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#fff", color: isUser ? "#fff" : "#1b1430", fontSize: 14.5, lineHeight: 1.55, boxShadow: "0 1px 4px rgba(0,0,0,.08)" }}>
+                  {m.message}
+                  <div style={{ fontSize: 10.5, opacity: .6, marginTop: 3, textAlign: "right" }}>{fmtTime(m.created_at)}</div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
 
-      {/* Input */}
-      <div style={{ position: "fixed", bottom: 62, left: 0, right: 0, background: "rgba(247,245,251,.96)", backdropFilter: "blur(12px)", borderTop: "1px solid #ece8f4", padding: "10px 14px", display: "flex", gap: 8, maxWidth: 680, margin: "0 auto" }}>
-        <input value={msg} onChange={e => setMsg(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
-          placeholder="Xabar yozing..." disabled={sending}
-          style={{ flex: 1, border: "1.5px solid #ece8f4", borderRadius: 12, padding: "12px 14px", fontSize: 15, fontFamily: "inherit", background: "#fff", outline: "none" }} />
-        <button onClick={sendMsg} disabled={sending || !msg.trim()}
-          style={{ width: 48, height: 48, borderRadius: 12, border: "none", background: msg.trim() ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#ece8f4", color: msg.trim() ? "#fff" : "#8a849c", cursor: msg.trim() ? "pointer" : "default", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          ↑
-        </button>
+        {/* Input */}
+        <div style={{ padding: "12px 14px", borderTop: "1px solid #ece8f4", display: "flex", gap: 8, background: "#fff", flexShrink: 0 }}>
+          <input ref={inputRef} value={msg} onChange={e => setMsg(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
+            placeholder="Xabar yozing..." disabled={sending}
+            style={{ flex: 1, border: "1.5px solid #ece8f4", borderRadius: 12, padding: "11px 14px", fontSize: 15, fontFamily: "inherit", background: "#f7f5fb", outline: "none" }} />
+          <button onClick={sendMsg} disabled={sending || !msg.trim()}
+            style={{ width: 44, height: 44, borderRadius: 12, border: "none", background: msg.trim() ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#ece8f4", color: msg.trim() ? "#fff" : "#8a849c", cursor: msg.trim() ? "pointer" : "default", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>↑</button>
+        </div>
       </div>
     </div>
   );
