@@ -682,71 +682,93 @@ function doImport() {
   var url = document.getElementById("importUrl").value.trim();
   var status = document.getElementById("importStatus");
   var result = document.getElementById("importResult");
-  if(!url) { status.className="import-status err"; status.textContent="❌ Link kiriting!"; return; }
+
+  if(!url) { status.className="import-status err"; status.textContent="Link kiriting!"; return; }
 
   var platform = detectPlatform(url);
-  if(!platform) { status.className="import-status err"; status.textContent="❌ Faqat Taobao, PDD yoki 1688 linki qabul qilinadi"; return; }
+  if(!platform) { status.className="import-status err"; status.textContent="Faqat Taobao, PDD yoki 1688 linki qabul qilinadi"; return; }
 
   var btn = document.getElementById("importBtn");
-  btn.disabled = true; btn.textContent = "⏳ Yuklanmoqda...";
+  btn.disabled = true; btn.textContent = "Yuklanmoqda...";
   status.className="import-status"; result.className="import-result";
 
-  // Use allorigins proxy to bypass CORS
-  var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+  var proxies = [
+    "https://api.allorigins.win/get?url=" + encodeURIComponent(url),
+    "https://corsproxy.io/?" + encodeURIComponent(url),
+    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url)
+  ];
 
-  fetch(proxyUrl)
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      btn.disabled=false; btn.textContent="🔍 Ma'lumot olish";
-      var html = data.contents || "";
-      if(!html) { status.className="import-status err"; status.textContent="❌ Sahifa olinmadi. Linkni tekshiring."; return; }
+  function showResult(info) {
+    btn.disabled=false; btn.textContent="Ma'lumot olish";
+    result.className="import-result show";
+    document.getElementById("importName").textContent = info.name || "Nomni kiriting";
 
-      var info = parseProductPage(html, platform);
-      if(!info.name) { status.className="import-status err"; status.textContent="❌ Ma'lumot topilmadi. Taobao ba'zan blok qiladi — keyinroq urinib ko'ring."; return; }
+    var badge = document.getElementById("importBadge");
+    if(platform==="pdd") { badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
+    else if(platform==="1688") { badge.className="platform-badge badge-taobao"; badge.textContent="1688.com"; }
+    else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao"; }
 
-      // Show result
-      result.className="import-result show";
-      document.getElementById("importName").textContent = info.name;
+    var imgWrap = document.getElementById("importImgWrap");
+    window._importImages = info.images || [];
+    if(info.images && info.images[0]) {
+      var img = document.createElement("img");
+      img.className = "import-img";
+      img.src = info.images[0];
+      img.onerror = function(){ this.parentNode.innerHTML = "<div class=\"import-img-ph\">📦</div>"; };
+      imgWrap.innerHTML = "";
+      imgWrap.appendChild(img);
+    } else {
+      imgWrap.innerHTML = "<div class=\"import-img-ph\">📦</div>";
+    }
 
-      // Badge
-      var badge = document.getElementById("importBadge");
-      if(platform==="pdd") { badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo 拼多多"; }
-      else if(platform==="1688") { badge.className="platform-badge badge-taobao"; badge.textContent="1688.com"; }
-      else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao 淘宝"; }
-
-      // Image
-      var imgWrap = document.getElementById("importImgWrap");
-      window._importImages = info.images || [];
-      if(info.images && info.images[0]) {
-        var img = document.createElement("img");
-        img.className = "import-img";
-        img.id = "importMainImg";
-        img.src = info.images[0];
-        img.onerror = function(){ this.parentNode.innerHTML = '<div class="import-img-ph">📦</div>'; };
-        imgWrap.innerHTML = "";
-        imgWrap.appendChild(img);
-      } else {
-        imgWrap.innerHTML = '<div class="import-img-ph">📦</div>';
+    if(info.price) {
+      var yuan = parseFloat(info.price);
+      if(yuan > 0) {
+        document.getElementById("importChina").value = Math.round(yuan * 1300);
+        document.getElementById("importMarket").value = Math.round(yuan * 1300 * 4.5);
       }
+    }
 
-      // Price hint
-      if(info.price) {
-        var yuanPrice = parseFloat(info.price);
-        if(yuanPrice > 0) {
-          var somPrice = Math.round(yuanPrice * 1300);
-          document.getElementById("importChina").value = somPrice;
-          document.getElementById("importMarket").value = Math.round(somPrice * 4.5);
-        }
-      }
-
+    if(info.name) {
       status.className="import-status ok";
-      status.textContent = "✅ Ma'lumot olindi! Narx va vaznni kiriting, keyin saqlang.";
-    })
-    .catch(function(e) {
-      btn.disabled=false; btn.textContent="🔍 Ma'lumot olish";
+      status.textContent = "Ma'lumot olindi! Narx va vaznni to'ldiring.";
+    } else {
       status.className="import-status err";
-      status.textContent="❌ Xatolik: " + (e.message||"Tarmoq xatosi");
-    });
+      status.textContent = "Nom topilmadi — qo'lda kiriting.";
+    }
+  }
+
+  function tryProxy(idx) {
+    if(idx >= proxies.length) {
+      btn.disabled=false; btn.textContent="Ma'lumot olish";
+      status.className="import-status err";
+      status.textContent = "Proxy ishlamadi — qo'lda to'ldiring.";
+      showResult({ name: "", images: [], price: "" });
+      return;
+    }
+    var isJson = proxies[idx].includes("allorigins");
+    fetch(proxies[idx])
+      .then(function(r) { return isJson ? r.json() : r.text(); })
+      .then(function(data) {
+        var html = isJson ? (data.contents || "") : (data || "");
+        if(html.length < 200) { tryProxy(idx+1); return; }
+        var info = parseProductPage(html, platform);
+        showResult(info);
+      })
+      .catch(function() { tryProxy(idx+1); });
+  }
+
+  tryProxy(0);
+}
+
+
+function showManualForm(platform) {
+  var result = document.getElementById("importResult");
+  var badge = document.getElementById("importBadge");
+  if(platform === "pdd") { badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
+  else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao"; }
+  document.getElementById("importName").textContent = "Nomni qo'lda kiriting";
+  result.className = "import-result show";
 }
 
 function parseProductPage(html, platform) {
