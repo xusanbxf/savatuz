@@ -76,6 +76,12 @@
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .add-btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
   .img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: var(--r-sm); margin-bottom: 10px; display: none; }
+  .imgs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-bottom: 10px; }
+  .img-thumb-wrap { position: relative; aspect-ratio: 1/1; border-radius: var(--r-sm); overflow: hidden; border: 1.5px solid var(--line); background: var(--bg); }
+  .img-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-thumb-del { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: #e11d48; color: #fff; border: none; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; line-height: 1; padding: 0; }
+  .img-add-box { aspect-ratio: 1/1; border: 2px dashed var(--line); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; background: var(--bg); color: var(--ink-3); font-size: 12px; gap: 4px; transition: .15s; }
+  .img-add-box:hover { border-color: var(--brand); color: var(--brand); }
   .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
   .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
 </style>
@@ -242,8 +248,11 @@ function loadProducts() {
       '</div>'+
       '<div class="prod-grid">'+
         products.map(function(p){
-          var imgHtml = p.image_url
-            ? '<img class="prod-img" src="'+h(p.image_url)+'" alt="'+h(p.name_uz)+'" />'
+          var imgs = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
+          var imgHtml = imgs.length > 0
+            ? '<div style="position:relative"><img class="prod-img" src="'+h(imgs[0])+'" alt="'+h(p.name_uz)+'" />'+
+              (imgs.length>1?'<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px">'+imgs.length+' ta</span>':'')+
+              '</div>'
             : '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>';
           return '<div class="prod-card">'+
             imgHtml+
@@ -294,9 +303,8 @@ function openProductModal(p) {
             '<select id="f_cat">'+CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+'</select>'+
           '</div>'+
         '</div>'+
-        '<label>Mahsulot rasmi</label>'+
-        (p&&p.image_url?'<img class="img-preview" id="imgPreview" src="'+h(p.image_url)+'" style="display:block" />':'<img class="img-preview" id="imgPreview" />')+
-        '<input type="file" id="f_image" accept="image/*" />'+
+        '<label>Mahsulot rasmlari <span style="color:var(--ink-3);font-weight:500;font-size:12px">(8 tagacha, istalgan tartibda)</span></label>'+
+        '<div class="imgs-grid" id="imgsGrid"></div>'+
         '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
         '<div class="err" id="modalErr"></div>'+
         '<div style="display:flex;gap:10px;">'+
@@ -307,32 +315,69 @@ function openProductModal(p) {
     '</div>'
   );
 
-  var fileInput = document.getElementById("f_image");
-  var preview = document.getElementById("imgPreview");
-  window._uploadBlob = null;
-  fileInput.onchange = function() {
-    if(!fileInput.files[0]) return;
-    window._uploadBlob = null;
-    var file = fileInput.files[0];
+  // Ko'p rasm — state: [{url, blob, isNew}]
+  window._imgList = [];
+  var existingUrls = [];
+  if(p && p.image_urls && p.image_urls.length) existingUrls = p.image_urls;
+  else if(p && p.image_url) existingUrls = [p.image_url];
+  window._imgList = existingUrls.map(function(u){ return {url:u, blob:null, isNew:false}; });
+
+  function renderImgsGrid() {
+    var grid = document.getElementById("imgsGrid");
+    if(!grid) return;
+    grid.innerHTML = window._imgList.map(function(item, idx){
+      return '<div class="img-thumb-wrap">'+
+        '<img src="'+h(item.url)+'" />'+
+        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="O'chirish">×</button>'+
+      '</div>';
+    }).join("") +
+    (window._imgList.length < 8 ?
+      '<div class="img-add-box" onclick="document.getElementById('f_img_add').click()">'+
+        '<span style="font-size:22px">+</span><span>Rasm qo'shish</span>'+
+      '</div><input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />' : "");
+    var inp = document.getElementById("f_img_add");
+    if(inp) inp.onchange = function(){ addImages(this.files); };
+  }
+
+  window._removeImg = function(idx) {
+    window._imgList.splice(idx, 1);
+    renderImgsGrid();
+  };
+
+  function compressFile(file, cb) {
     var reader = new FileReader();
     reader.onload = function(e) {
       var img = new Image();
       img.onload = function() {
         var canvas = document.createElement("canvas");
-        var MAX = 800;
-        var w = img.width, h = img.height;
-        if(w > h) { if(w > MAX){ h = Math.round(h*MAX/w); w = MAX; } }
-        else { if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; } }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-        preview.src = canvas.toDataURL("image/jpeg", 0.85);
-        preview.style.display = "block";
-        canvas.toBlob(function(blob){ window._uploadBlob = blob; }, "image/jpeg", 0.85);
+        var MAX = 900; var w = img.width, hh = img.height;
+        if(w > hh) { if(w > MAX){ hh = Math.round(hh*MAX/w); w = MAX; } }
+        else { if(hh > MAX){ w = Math.round(w*MAX/hh); hh = MAX; } }
+        canvas.width = w; canvas.height = hh;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, hh);
+        var previewUrl = canvas.toDataURL("image/jpeg", 0.88);
+        canvas.toBlob(function(blob){ cb(blob, previewUrl); }, "image/jpeg", 0.88);
       };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-  };
+  }
+
+  function addImages(files) {
+    var arr = Array.from(files);
+    var remaining = 8 - window._imgList.length;
+    arr = arr.slice(0, remaining);
+    var done = 0;
+    arr.forEach(function(file){
+      compressFile(file, function(blob, previewUrl){
+        window._imgList.push({url: previewUrl, blob: blob, isNew: true});
+        done++;
+        if(done === arr.length) renderImgsGrid();
+      });
+    });
+  }
+
+  renderImgsGrid();
 
   document.getElementById("cancelBtn").onclick = closeModal;
   document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
@@ -344,14 +389,12 @@ function closeModal() {
   if(bg) bg.remove();
 }
 
-function saveProduct(id, existingImageUrl) {
+function saveProduct(id) {
   var name_uz = document.getElementById("f_name_uz").value.trim();
   var name_ru = document.getElementById("f_name_ru").value.trim();
   var china = parseInt(document.getElementById("f_china").value);
   var market = parseInt(document.getElementById("f_market").value);
   var weight = parseFloat(document.getElementById("f_weight").value);
-  var fileInput2 = document.getElementById("f_image");
-  var file = fileInput2.files[0];
 
   if(!name_uz||!name_ru||!china||!market||!weight){
     document.getElementById("modalErr").textContent="Barcha majburiy maydonlarni to'ldiring";
@@ -361,7 +404,12 @@ function saveProduct(id, existingImageUrl) {
   var btn = document.getElementById("saveBtn");
   btn.disabled=true; btn.textContent="Saqlanmoqda...";
 
-  var doSave = function(imageUrl) {
+  var imgList = window._imgList || [];
+  var newImgs = imgList.filter(function(i){ return i.isNew && i.blob; });
+  var prog = document.getElementById("uploadProgress");
+
+  function doFinalSave(finalUrls) {
+    var firstUrl = finalUrls.length > 0 ? finalUrls[0] : null;
     var body = {
       name_uz:name_uz, name_ru:name_ru,
       sub_uz:document.getElementById("f_sub_uz").value.trim(),
@@ -369,7 +417,8 @@ function saveProduct(id, existingImageUrl) {
       china:china, market:market, weight:weight,
       cat:document.getElementById("f_cat").value,
       sku:document.getElementById("f_sku").value.trim()||null,
-      image_url: imageUrl || null
+      image_url: firstUrl,
+      image_urls: finalUrls.length > 0 ? finalUrls : null
     };
     var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
     fetch(url,{
@@ -380,29 +429,42 @@ function saveProduct(id, existingImageUrl) {
       if(!r.ok){ btn.disabled=false; btn.textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
       closeModal(); loadProducts();
     });
-  };
+  }
 
-  if(file) {
-    document.getElementById("uploadProgress").style.display="block";
-    var ext = "jpg";
-    var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
-    var uploadBlob = window._uploadBlob || file;
-    var contentType = uploadBlob.type || "image/jpeg";
+  // Existing (not new) URLs
+  var existingUrls = imgList.filter(function(i){ return !i.isNew; }).map(function(i){ return i.url; });
+
+  if(newImgs.length === 0) {
+    doFinalSave(existingUrls);
+    return;
+  }
+
+  prog.style.display="block";
+  prog.textContent = "0 / "+newImgs.length+" rasm yuklanmoqda...";
+
+  var uploadedUrls = [];
+  var done = 0;
+
+  newImgs.forEach(function(item, i){
+    var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"_"+i+".jpg";
     fetch(SB+"/storage/v1/object/products/"+fileName,{
       method:"POST",
-      headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":contentType,"x-upsert":"true"},
-      body:uploadBlob
+      headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":"image/jpeg","x-upsert":"true"},
+      body:item.blob
     }).then(function(r){ return r.json(); })
     .then(function(){
-      var publicUrl = SB+"/storage/v1/object/public/products/"+fileName;
-      doSave(publicUrl);
+      uploadedUrls[i] = SB+"/storage/v1/object/public/products/"+fileName;
+      done++;
+      prog.textContent = done+" / "+newImgs.length+" rasm yuklandi";
+      if(done === newImgs.length) {
+        var allUrls = existingUrls.concat(uploadedUrls.filter(Boolean));
+        doFinalSave(allUrls);
+      }
     }).catch(function(){
-      document.getElementById("modalErr").textContent="Rasm yuklanmadi, qayta urinib ko'ring";
+      document.getElementById("modalErr").textContent="Rasm "+(i+1)+" yuklanmadi";
       btn.disabled=false; btn.textContent="Saqlash";
     });
-  } else {
-    doSave(existingImageUrl);
-  }
+  });
 }
 
 function loadUsers() {
