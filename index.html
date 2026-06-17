@@ -986,7 +986,7 @@ function useCountUp(target, on) {
 }
 
 /* ---- Header ---- */
-function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu, onMyOrders, onHelp, onCatalog }) {
+function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu, onMyOrders, onHelp, onCatalog, query, onSearch }) {
   return (
     <header className="hdr">
       <div className="wrap hdr-row">
@@ -1006,7 +1006,7 @@ function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, 
         </nav>
         <div className="search">
           <I.search />
-          <input placeholder={t.search} />
+          <input placeholder={t.search} value={query} onChange={(e) => onSearch(e.target.value)} onKeyDown={(e) => { if(e.key==="Escape") onSearch(""); }} />
         </div>
         <div className="hdr-actions">
           <div className="lang">
@@ -1128,21 +1128,33 @@ function ProductCard({ p, t, lang, qty, onView, onAdd, onInc, onDec }) {
 }
 
 /* ---- Grid section ---- */
-function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec }) {
+function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec, query }) {
   return (
     <section className="wrap">
       <div className="sec-head">
         <div>
-          <h2 className="sec-title"><span className="sec-flame">🔥</span> {t.best_title}</h2>
-          <p className="sec-sub">{t.best_sub}</p>
+          <h2 className="sec-title">
+            {query ? <><span style={{fontSize:22}}>🔍</span> "{query}"</> : <><span className="sec-flame">🔥</span> {t.best_title}</>}
+          </h2>
+          <p className="sec-sub">{query ? (lang==="ru" ? "Результаты поиска: " : "Qidiruv natijalari: ") + products.length + (lang==="ru" ? " товаров" : " ta mahsulot") : t.best_sub}</p>
         </div>
       </div>
-      <div className="grid">
-        {products.map((p) => (
-          <ProductCard key={p.id} p={p} t={t} lang={lang} qty={qtyFor(p.id)}
-            onView={onView} onAdd={onAdd} onInc={onInc} onDec={onDec} />
-        ))}
-      </div>
+      {products.length === 0 ? (
+        <div style={{ textAlign:"center", padding:"60px 0", color:"var(--ink-3)" }}>
+          <div style={{ fontSize:48, marginBottom:12 }}>🔍</div>
+          <div style={{ fontFamily:"Sora,sans-serif", fontWeight:800, fontSize:18, color:"var(--ink)", marginBottom:8 }}>
+            {lang==="ru" ? "Ничего не найдено" : "Hech narsa topilmadi"}
+          </div>
+          <div style={{ fontSize:14 }}>"{query}" {lang==="ru" ? "по вашему запросу нет товаров" : "bo'yicha mahsulot yo'q"}</div>
+        </div>
+      ) : (
+        <div className="grid">
+          {products.map((p) => (
+            <ProductCard key={p.id} p={p} t={t} lang={lang} qty={qtyFor(p.id)}
+              onView={onView} onAdd={onAdd} onInc={onInc} onDec={onDec} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -2170,6 +2182,7 @@ function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [order, setOrder] = useState(null);
+  const [query, setQuery] = useState("");
   const toastTimer = useRef(null);
 
   const t = D.I18N[lang];
@@ -2187,7 +2200,12 @@ function App() {
   }, []);
 
   const featured = products.find((p) => p.id === 1) || products[0];
-  const list = cat === "all" ? products : products.filter((p) => p.cat === cat);
+  const list = products.filter((p) => {
+    const matchCat = cat === "all" || p.cat === cat;
+    const q = query.trim().toLowerCase();
+    const matchQ = !q || p.name.uz.toLowerCase().includes(q) || p.name.ru.toLowerCase().includes(q) || (p.sub && (p.sub.uz.toLowerCase().includes(q) || p.sub.ru.toLowerCase().includes(q)));
+    return matchCat && matchQ;
+  });
 
   const showToast = (msg) => {
     setToast(msg);
@@ -2232,13 +2250,14 @@ function App() {
       <Header t={t} lang={lang} setLang={setLang} cartCount={cartCount}
         onCart={() => setCartOpen(true)} onHome={goHome}
         user={user} onAccount={onAccount} onMenu={() => setMenuOpen(true)}
-        onMyOrders={() => setView("myorders")} onHelp={() => setView("help")} onCatalog={() => { goHome(); document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}); }} />
+        onMyOrders={() => setView("myorders")} onHelp={() => setView("help")} onCatalog={() => { goHome(); document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}); }}
+        query={query} onSearch={(v) => { setQuery(v); if(view !== "home") { setView("home"); } }} />
 
       {view === "home" && (
         <main>
           <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
-          <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty}
+          <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query}
             onView={openProduct} onAdd={(p) => addToCart(p)} onInc={(p) => addToCart(p)} onDec={decItem} />
           <Why t={t} />
           <Footer t={t} />
