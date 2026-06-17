@@ -1685,108 +1685,135 @@ function MyOrders({ user, t, onHome }) {
   );
 }
 
-function HelpPage({ t, onHome, user }) {
-  const [openFaq, setOpenFaq] = React.useState(null);
-  const [name, setName] = React.useState(user ? user.name || "" : "");
-  const [email, setEmail] = React.useState(user ? user.email || "" : "");
+function HelpPage({ t, onHome, user, onLogin }) {
+  const [messages, setMessages] = React.useState([]);
   const [msg, setMsg] = React.useState("");
-  const [sent, setSent] = React.useState(false);
   const [sending, setSending] = React.useState(false);
-  const [err, setErr] = React.useState("");
+  const [openFaq, setOpenFaq] = React.useState(null);
+  const bottomRef = React.useRef(null);
 
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
   const faqs = [
     { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
-    { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni. Mahsulot og'irligiga qarab farq qilishi mumkin." },
-    { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo xarajati + xizmat haqi. Hech qanday yashirin to'lov yo'q — barchasini oldidan ko'rsatamiz." },
-    { q: "Mahsulot kelmaganda yoki sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz. Muammo bo'lsa, to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
-    { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul — qaysi qulay bo'lsa. To'lov faqat mahsulot yetib kelganidan keyin ham qilsa bo'ladi." },
-    { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
-    { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." },
+    { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni." },
+    { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo + xizmat haqi. Hech qanday yashirin to'lov yo'q." },
+    { q: "Mahsulot sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz — to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
+    { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul." },
   ];
 
+  const loadMessages = React.useCallback(() => {
+    if (!user) return;
+    fetch(SB_URL + "/rest/v1/chats?user_email=eq." + encodeURIComponent(user.email) + "&order=created_at.asc", {
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
+    }).then(r => r.json()).then(data => {
+      setMessages(data || []);
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    loadMessages();
+    const interval = setInterval(loadMessages, 3000);
+    return () => clearInterval(interval);
+  }, [user, loadMessages]);
+
   const sendMsg = async () => {
-    if (msg.trim().length < 5) { setErr("Xabar juda qisqa"); return; }
-    setSending(true); setErr("");
-    const res = await fetch(SB_URL + "/rest/v1/messages", {
+    if (!msg.trim() || sending) return;
+    setSending(true);
+    const text = msg.trim();
+    setMsg("");
+    await fetch(SB_URL + "/rest/v1/chats", {
       method: "POST",
       headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
-      body: JSON.stringify({ name: name.trim() || "Noma'lum", email: email.trim() || null, message: msg.trim() })
+      body: JSON.stringify({ user_email: user.email, sender: "user", message: text })
     });
     setSending(false);
-    if (res.ok) { setSent(true); setMsg(""); }
-    else setErr("Xabar yuborishda xatolik, qayta urinib ko'ring");
+    loadMessages();
   };
 
-  return (
-    <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 40px" }}>
-      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>← Bosh sahifa</button>
+  // Kirish talab qilinadi
+  if (!user) return (
+    <div style={{ maxWidth: 480, margin: "60px auto", padding: "0 16px", textAlign: "center" }}>
+      <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
+      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 10px" }}>Kirish talab qilinadi</h2>
+      <p style={{ color: "#8a849c", fontSize: 14.5, margin: "0 0 24px", lineHeight: 1.6 }}>Yordam bo'limiga kirish va admin bilan chat qilish uchun avval ro'yxatdan o'ting yoki kiring</p>
+      <button onClick={onLogin} style={{ background: "linear-gradient(140deg,#7c3aed,#c026d3)", color: "#fff", border: "none", borderRadius: 12, padding: "14px 32px", fontFamily: "inherit", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>Kirish / Ro'yxatdan o'tish</button>
+      <button onClick={onHome} style={{ display: "block", margin: "14px auto 0", background: "none", border: "none", color: "#8a849c", cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>← Bosh sahifaga qaytish</button>
 
-      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>Yordam markazi</h2>
-      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 28px" }}>Savollaringizga javob toping yoki xabar yuboring</p>
-
-      {/* Xabar yuborish formasi */}
-      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", marginBottom: 28 }}>
-        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, color: "#fff", marginBottom: 16 }}>💬 Biz bilan yozing</div>
-        {sent ? (
-          <div style={{ background: "rgba(255,255,255,.2)", borderRadius: 12, padding: "18px 20px", textAlign: "center", color: "#fff" }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
-            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Xabar yuborildi!</div>
-            <div style={{ fontSize: 13.5, opacity: .85 }}>Tez orada javob beramiz</div>
-            <button onClick={() => setSent(false)} style={{ marginTop: 14, background: "rgba(255,255,255,.25)", border: "none", borderRadius: 10, padding: "10px 20px", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Yana yozish</button>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {!user && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Ismingiz"
-                  style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14 }} />
-                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (ixtiyoriy)" type="email"
-                  style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14 }} />
-              </div>
-            )}
-            <textarea value={msg} onChange={e => setMsg(e.target.value)} placeholder="Savolingiz yoki muammoingizni yozing..."
-              style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14, resize: "none", height: 100, outline: "none" }} />
-            {err && <div style={{ color: "#fca5a5", fontSize: 13 }}>{err}</div>}
-            <button onClick={sendMsg} disabled={sending}
-              style={{ background: "#fff", color: "#6c2bd9", border: "none", borderRadius: 10, padding: "13px 0", fontFamily: "inherit", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>
-              {sending ? "Yuborilmoqda..." : "Xabar yuborish →"}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Tezkor aloqa */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
-        <a href="https://t.me/savatmarket" target="_blank"
-          style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#1b1430" }}>
-          <span style={{ fontSize: 22 }}>✈️</span>
-          <div><div style={{ fontSize: 11, color: "#8a849c" }}>Telegram</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>@savatmarket</div></div>
-        </a>
-        <a href="tel:+998900000000"
-          style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#1b1430" }}>
-          <span style={{ fontSize: 22 }}>📞</span>
-          <div><div style={{ fontSize: 11, color: "#8a849c" }}>Telefon</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>+998 90 000 00 00</div></div>
-        </a>
-      </div>
-
-      {/* FAQ */}
-      <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 14 }}>Ko'p so'raladigan savollar</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {/* FAQ — login kerak emas */}
+      <div style={{ marginTop: 40, textAlign: "left" }}>
+        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, marginBottom: 12 }}>Ko'p so'raladigan savollar</div>
         {faqs.map((f, i) => (
-          <div key={i} style={{ background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, overflow: "hidden" }}>
+          <div key={i} style={{ background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, overflow: "hidden", marginBottom: 8 }}>
             <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "16px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, textAlign: "left", fontFamily: "inherit", fontWeight: 700, fontSize: 14.5, color: "#1b1430" }}>
+              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left", fontFamily: "inherit", fontWeight: 700, fontSize: 14, color: "#1b1430" }}>
               <span>{f.q}</span>
-              <span style={{ fontSize: 18, color: "#6c2bd9", transition: "transform .2s", display: "inline-block", transform: openFaq === i ? "rotate(45deg)" : "none", flexShrink: 0 }}>+</span>
+              <span style={{ color: "#6c2bd9", fontSize: 18, flexShrink: 0, transform: openFaq === i ? "rotate(45deg)" : "none", display: "inline-block", transition: ".2s" }}>+</span>
             </button>
-            {openFaq === i && (
-              <div style={{ padding: "0 18px 16px", fontSize: 14, color: "#4a4360", lineHeight: 1.6 }}>{f.a}</div>
-            )}
+            {openFaq === i && <div style={{ padding: "0 16px 14px", fontSize: 13.5, color: "#4a4360", lineHeight: 1.6 }}>{f.a}</div>}
           </div>
         ))}
+      </div>
+    </div>
+  );
+
+  // Chat ekrani
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 0 80px" }}>
+      {/* Header */}
+      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", padding: "20px 20px 18px", display: "flex", alignItems: "center", gap: 14 }}>
+        <button onClick={onHome} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: 10, width: 38, height: 38, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>←</button>
+        <div style={{ width: 42, height: 42, background: "rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🛍️</div>
+        <div>
+          <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, fontFamily: "Sora, sans-serif" }}>SAVAT.UZ Yordam</div>
+          <div style={{ color: "rgba(255,255,255,.75)", fontSize: 12.5 }}>Odatda 30 daqiqada javob beramiz</div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 10, minHeight: 300 }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: "center", color: "#8a849c", padding: "30px 0", fontSize: 14 }}>
+            <div style={{ fontSize: 36, marginBottom: 8 }}>👋</div>
+            Salom, {user.name}! Savolingizni yozing — tez javob beramiz.
+          </div>
+        )}
+        {messages.map((m, i) => {
+          const isUser = m.sender === "user";
+          return (
+            <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start" }}>
+              <div style={{
+                maxWidth: "75%", padding: "10px 14px", borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                background: isUser ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#fff",
+                color: isUser ? "#fff" : "#1b1430",
+                border: isUser ? "none" : "1.5px solid #ece8f4",
+                fontSize: 14.5, lineHeight: 1.5, boxShadow: "0 2px 8px rgba(0,0,0,.06)"
+              }}>
+                {!isUser && <div style={{ fontSize: 11, fontWeight: 700, color: "#6c2bd9", marginBottom: 4 }}>SAVAT.UZ</div>}
+                {m.message}
+                <div style={{ fontSize: 10.5, opacity: .6, marginTop: 4, textAlign: "right" }}>
+                  {new Date(m.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ position: "fixed", bottom: 62, left: 0, right: 0, background: "rgba(247,245,251,.96)", backdropFilter: "blur(12px)", borderTop: "1px solid #ece8f4", padding: "10px 14px", display: "flex", gap: 8, maxWidth: 680, margin: "0 auto" }}>
+        <input value={msg} onChange={e => setMsg(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); } }}
+          placeholder="Xabar yozing..." disabled={sending}
+          style={{ flex: 1, border: "1.5px solid #ece8f4", borderRadius: 12, padding: "12px 14px", fontSize: 15, fontFamily: "inherit", background: "#fff", outline: "none" }} />
+        <button onClick={sendMsg} disabled={sending || !msg.trim()}
+          style={{ width: 48, height: 48, borderRadius: 12, border: "none", background: msg.trim() ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#ece8f4", color: msg.trim() ? "#fff" : "#8a849c", cursor: msg.trim() ? "pointer" : "default", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          ↑
+        </button>
       </div>
     </div>
   );
@@ -2088,7 +2115,7 @@ function App() {
       )}
       {view === "help" && (
         <main>
-          <HelpPage t={t} onHome={goHome} user={user} />
+          <HelpPage t={t} onHome={goHome} user={user} onLogin={() => setAuthOpen(true)} />
           <Footer t={t} />
         </main>
       )}
