@@ -555,53 +555,120 @@ function deleteOrder(id, num) {
 
 function loadImport() {
   var cont = document.getElementById("content");
-  cont.innerHTML =
-    '<div class="import-box">'+
-      '<h3>📥 Mahsulot import qilish</h3>'+
-      '<p>Taobao yoki Pinduoduo dan mahsulot linkini tashlang — ma&#39;lumotlar avtomatik tortib olinadi</p>'+
-      '<label>Mahsulot linki</label>'+
-      '<input id="importUrl" placeholder="https://item.taobao.com/item.htm?id=... yoki https://pinduoduo.com/goods.html?goodsId=..." style="margin-bottom:8px" />'+
-      '<div style="display:flex;gap:10px;margin-bottom:4px">'+
-        '<button class="btn" id="importBtn" style="flex:1">🔍 Ma&#39;lumot olish</button>'+
-        '<button class="btn btn-ghost" style="width:auto;padding:0 16px" onclick="document.getElementById('importUrl').value='';document.getElementById('importResult').className='import-result';document.getElementById('importStatus').className='import-status'">✕</button>'+
-      '</div>'+
-      '<div id="importStatus" class="import-status"></div>'+
-      '<div id="importResult" class="import-result">'+
-        '<div class="import-preview">'+
-          '<div id="importImgWrap"><div class="import-img-ph">📦</div></div>'+
-          '<div>'+
-            '<div id="importBadge" class="platform-badge badge-taobao">Taobao</div>'+
-            '<div class="import-field"><label>Nomi</label><div class="val" id="importName">—</div></div>'+
-            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
-              '<div class="import-field"><label>Xitoy narxi (so'&#39;m)</label><input id="importChina" type="number" placeholder="95000" /></div>'+
-              '<div class="import-field"><label>Bozor narxi (so'&#39;m)</label><input id="importMarket" type="number" placeholder="650000" /></div>'+
-            '</div>'+
-            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
-              '<div class="import-field"><label>Vazni (kg)</label><input id="importWeight" type="number" step="0.01" placeholder="0.5" /></div>'+
-              '<div class="import-field"><label>Kategoriya</label>'+
-                '<select id="importCat">'+CATS.map(function(c){return'<option value="'+c.id+'">'+c.label+'</option>';}).join("")+'</select>'+
-              '</div>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="import-actions">'+
-          '<button class="btn" id="importSaveBtn" style="flex:1">✅ Saqlash</button>'+
-          '<span id="importSaveStatus" style="font-size:13px;color:var(--ink-3)"></span>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
+  cont.innerHTML = "";
 
-  document.getElementById("importBtn").onclick = doImport;
-  document.getElementById("importUrl").addEventListener("keydown", function(e){ if(e.key==="Enter") doImport(); });
-  document.getElementById("importSaveBtn").onclick = doImportSave;
+  var box = document.createElement("div");
+  box.className = "import-box";
+
+  box.innerHTML = [
+    "<h3>Import qilish</h3>",
+    "<p>Taobao yoki Pinduoduo mahsulot linkini kiriting</p>",
+    "<label>Mahsulot linki</label>"
+  ].join("");
+
+  var urlInput = document.createElement("input");
+  urlInput.id = "importUrl";
+  urlInput.placeholder = "https://item.taobao.com/item.htm?id=...";
+  urlInput.style.marginBottom = "8px";
+  box.appendChild(urlInput);
+
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText = "display:flex;gap:10px;margin-bottom:4px";
+
+  var fetchBtn = document.createElement("button");
+  fetchBtn.id = "importBtn";
+  fetchBtn.className = "btn";
+  fetchBtn.style.flex = "1";
+  fetchBtn.textContent = "Ma'lumot olish";
+  btnRow.appendChild(fetchBtn);
+
+  var clearBtn = document.createElement("button");
+  clearBtn.className = "btn btn-ghost";
+  clearBtn.style.cssText = "width:auto;padding:0 16px";
+  clearBtn.textContent = "X";
+  clearBtn.onclick = function() {
+    urlInput.value = "";
+    statusDiv.className = "import-status";
+    resultDiv.className = "import-result";
+  };
+  btnRow.appendChild(clearBtn);
+  box.appendChild(btnRow);
+
+  var statusDiv = document.createElement("div");
+  statusDiv.id = "importStatus";
+  statusDiv.className = "import-status";
+  box.appendChild(statusDiv);
+
+  var resultDiv = document.createElement("div");
+  resultDiv.id = "importResult";
+  resultDiv.className = "import-result";
+
+  // Preview grid
+  var preview = document.createElement("div");
+  preview.className = "import-preview";
+
+  var imgWrap = document.createElement("div");
+  imgWrap.id = "importImgWrap";
+  imgWrap.innerHTML = "<div class=\"import-img-ph\">📦</div>";
+  preview.appendChild(imgWrap);
+
+  var infoDiv = document.createElement("div");
+
+  var badge = document.createElement("div");
+  badge.id = "importBadge";
+  badge.className = "platform-badge badge-taobao";
+  badge.textContent = "Taobao";
+  infoDiv.appendChild(badge);
+
+  var nameField = document.createElement("div");
+  nameField.className = "import-field";
+  nameField.innerHTML = "<label>Nomi</label><div class=\"val\" id=\"importName\">—</div>";
+  infoDiv.appendChild(nameField);
+
+  var priceRow = document.createElement("div");
+  priceRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:12px";
+  priceRow.innerHTML = [
+    "<div class=\"import-field\"><label>Xitoy narxi (som)</label><input id=\"importChina\" type=\"number\" placeholder=\"95000\" /></div>",
+    "<div class=\"import-field\"><label>Bozor narxi (som)</label><input id=\"importMarket\" type=\"number\" placeholder=\"650000\" /></div>"
+  ].join("");
+  infoDiv.appendChild(priceRow);
+
+  var weightRow = document.createElement("div");
+  weightRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:12px";
+  var catOptions = CATS.map(function(c){ return "<option value=\""+c.id+"\">"+c.label+"</option>"; }).join("");
+  weightRow.innerHTML = [
+    "<div class=\"import-field\"><label>Vazni (kg)</label><input id=\"importWeight\" type=\"number\" step=\"0.01\" placeholder=\"0.5\" /></div>",
+    "<div class=\"import-field\"><label>Kategoriya</label><select id=\"importCat\">"+catOptions+"</select></div>"
+  ].join("");
+  infoDiv.appendChild(weightRow);
+
+  preview.appendChild(infoDiv);
+  resultDiv.appendChild(preview);
+
+  var actions = document.createElement("div");
+  actions.className = "import-actions";
+
+  var saveBtn = document.createElement("button");
+  saveBtn.id = "importSaveBtn";
+  saveBtn.className = "btn";
+  saveBtn.style.flex = "1";
+  saveBtn.textContent = "Saqlash";
+  saveBtn.onclick = doImportSave;
+  actions.appendChild(saveBtn);
+
+  var saveStatus = document.createElement("span");
+  saveStatus.id = "importSaveStatus";
+  saveStatus.style.cssText = "font-size:13px;color:var(--ink-3)";
+  actions.appendChild(saveStatus);
+
+  resultDiv.appendChild(actions);
+  box.appendChild(resultDiv);
+  cont.appendChild(box);
+
+  fetchBtn.onclick = doImport;
+  urlInput.addEventListener("keydown", function(e){ if(e.key === "Enter") doImport(); });
 }
 
-function detectPlatform(url) {
-  if(url.includes("taobao.com") || url.includes("tmall.com")) return "taobao";
-  if(url.includes("pinduoduo.com") || url.includes("pdd")) return "pdd";
-  if(url.includes("1688.com")) return "1688";
-  return null;
-}
 
 function doImport() {
   var url = document.getElementById("importUrl").value.trim();
@@ -643,7 +710,13 @@ function doImport() {
       var imgWrap = document.getElementById("importImgWrap");
       window._importImages = info.images || [];
       if(info.images && info.images[0]) {
-        imgWrap.innerHTML = '<img class="import-img" id="importMainImg" src="'+info.images[0]+'" onerror="this.parentNode.innerHTML='<div class=\"import-img-ph\">📦</div>'" />';
+        var img = document.createElement("img");
+        img.className = "import-img";
+        img.id = "importMainImg";
+        img.src = info.images[0];
+        img.onerror = function(){ this.parentNode.innerHTML = '<div class="import-img-ph">📦</div>'; };
+        imgWrap.innerHTML = "";
+        imgWrap.appendChild(img);
       } else {
         imgWrap.innerHTML = '<div class="import-img-ph">📦</div>';
       }
