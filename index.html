@@ -230,6 +230,24 @@
   .pd-thumbs { display: flex; gap: 12px; margin-top: 12px; }
   .pd-thumb { position: relative; width: 76px; height: 76px; border-radius: 14px; overflow: hidden; border: 2px solid var(--line); cursor: pointer; }
   .pd-thumb.on { border-color: var(--brand); }
+  /* ---------- Image Swiper ---------- */
+  .swiper-wrap { position: relative; aspect-ratio: 4/3; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); touch-action: pan-y; user-select: none; }
+  .swiper-track { display: flex; height: 100%; transition: transform .32s cubic-bezier(.4,0,.2,1); will-change: transform; }
+  .swiper-track.no-anim { transition: none; }
+  .swiper-slide { flex: none; width: 100%; height: 100%; position: relative; }
+  .swiper-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .swiper-slide .ph { position: absolute; inset: 0; }
+  .swiper-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+  .swiper-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--line-2); transition: .2s; border: none; padding: 0; cursor: pointer; }
+  .swiper-dot.on { background: var(--brand); width: 20px; }
+  .swiper-thumbs { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; }
+  .swiper-thumbs::-webkit-scrollbar { display: none; }
+  .swiper-thumb { flex: none; width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--line); cursor: pointer; position: relative; background: var(--surface-2); transition: border-color .15s; }
+  .swiper-thumb.on { border-color: var(--brand); }
+  .swiper-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .swiper-thumb .ph { position: absolute; inset: 0; }
+  .swiper-badge { position: absolute; top: 14px; left: 14px; z-index: 3; }
+
   .pd-src { display: inline-flex; align-items: center; gap: 8px; background: var(--hot-soft); color: var(--hot); font-weight: 700; font-size: 13px; padding: 7px 13px; border-radius: var(--r-pill); margin-bottom: 14px; }
   .pd-title { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1.08; letter-spacing: -.025em; margin: 0 0 6px; }
   .pd-sub { color: var(--ink-3); font-size: 15px; margin: 0 0 14px; }
@@ -591,7 +609,8 @@
             sold: r.sold,
             days: r.days,
             hit: r.hit,
-            image_url: r.image_url || null
+            image_url: r.image_url || null,
+            image_urls: r.image_urls || (r.image_url ? [r.image_url] : [])
           };
         });
         // Har sahifa ochilganda random tartib
@@ -1855,6 +1874,61 @@ const { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage } = wi
 const Ico = window.Icons;
 const D = window.SAVAT;
 
+/* ---- Image Swiper ---- */
+function ImageSwiper({ p, lang }) {
+  const imgs = (p.image_urls && p.image_urls.length > 0) ? p.image_urls : (p.image_url ? [p.image_url] : []);
+  const total = imgs.length || 1;
+  const [idx, setIdx] = React.useState(0);
+  const startX = React.useRef(null);
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  const [dragX, setDragX] = React.useState(0);
+
+  const goTo = (i) => setIdx(Math.max(0, Math.min(total - 1, i)));
+
+  const onTouchStart = (e) => { startX.current = e.touches[0].clientX; setDragging(true); setDragX(0); };
+  const onTouchMove = (e) => { if (startX.current === null) return; setDragX(e.touches[0].clientX - startX.current); };
+  const onTouchEnd = () => {
+    if (Math.abs(dragX) > 40) { dragX < 0 ? goTo(idx + 1) : goTo(idx - 1); }
+    setDragging(false); setDragX(0); startX.current = null;
+  };
+
+  const offset = -(idx * 100) + (dragging ? (dragX / (trackRef.current?.offsetWidth || 300)) * 100 : 0);
+
+  return (
+    <div>
+      <div className="swiper-wrap" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} ref={trackRef}>
+        <div className={"swiper-track" + (dragging ? " no-anim" : "")} style={{ transform: `translateX(${offset}%)` }}>
+          {total === 0 || imgs.length === 0 ? (
+            <div className="swiper-slide"><div className="ph" style={{ background: p.tile }}><span className="ph-label">{p.name[lang || "uz"].toLowerCase()}</span></div></div>
+          ) : imgs.map((url, i) => (
+            <div className="swiper-slide" key={i}>
+              <img src={url} alt={p.name[lang || "uz"]} />
+            </div>
+          ))}
+        </div>
+        <div className="swiper-badge">
+          <span className="badge-disc" style={{ fontSize: 15, padding: "7px 14px" }}>−{window.SAVAT.breakdown(p).pct}%</span>
+        </div>
+      </div>
+      {total > 1 && (
+        <>
+          <div className="swiper-dots">
+            {imgs.map((_, i) => <button key={i} className={"swiper-dot" + (i === idx ? " on" : "")} onClick={() => goTo(i)} />)}
+          </div>
+          <div className="swiper-thumbs">
+            {imgs.map((url, i) => (
+              <div key={i} className={"swiper-thumb" + (i === idx ? " on" : "")} onClick={() => goTo(i)}>
+                <img src={url} alt={"" + (i+1)} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Product Detail ---------- */
 function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }) {
   const b = D.breakdown(p);
@@ -1876,11 +1950,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
       <div className="pd-grid">
         {/* gallery */}
         <div className="pd-gallery">
-          <div className="pd-main-media">
-            <span className="badge-disc" style={{ top: 16, left: 16, fontSize: 15, padding: "7px 14px" }}>−{b.pct}%</span>
-            <Media p={p} label={p.name[lang].toLowerCase()} />
-          </div>
-
+          <ImageSwiper p={p} lang={lang} />
         </div>
 
         {/* info */}
