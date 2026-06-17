@@ -158,6 +158,32 @@
   }
 
 
+
+  /* Search dropdown */
+  .search-wrap { position: relative; flex: 1; max-width: 460px; }
+  .search-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #fff; border: 1.5px solid var(--line-2); border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(27,20,48,.14); z-index: 200;
+    overflow: hidden; max-height: 360px; overflow-y: auto;
+  }
+  .sd-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; cursor: pointer; transition: background .12s;
+    border-bottom: 1px solid var(--line);
+  }
+  .sd-item:last-child { border-bottom: none; }
+  .sd-item:hover { background: var(--brand-soft); }
+  .sd-img { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: none; background: var(--surface-2); }
+  .sd-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sd-info { flex: 1; min-width: 0; }
+  .sd-name { font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sd-price { font-size: 12px; color: var(--brand); font-weight: 700; margin-top: 2px; }
+  .sd-empty { padding: 20px; text-align: center; color: var(--ink-3); font-size: 14px; }
+  @media (max-width: 980px) {
+    .search-wrap { max-width: 100%; }
+    .search-dropdown { border-radius: 12px; }
+  }
   /* Mobile search bar */
   .mobile-search { display: none; }
   @media (max-width: 980px) {
@@ -1022,7 +1048,7 @@ function useCountUp(target, on) {
 }
 
 /* ---- Header ---- */
-function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu, onMyOrders, onHelp, onCatalog, query, onSearch }) {
+function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu, onMyOrders, onHelp, onCatalog, query, onSearch, products, onSelect }) {
   return (
     <header className="hdr">
       <div className="wrap hdr-row">
@@ -1040,10 +1066,7 @@ function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, 
           {user && <button onClick={onMyOrders}>{t.nav_track}</button>}
           <button onClick={onHelp}>{t.nav_help}</button>
         </nav>
-        <div className="search">
-          <I.search />
-          <input placeholder={t.search} value={query} onChange={(e) => onSearch(e.target.value)} onKeyDown={(e) => { if(e.key==="Escape") onSearch(""); }} />
-        </div>
+        <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
         <div className="hdr-actions">
           <div className="lang">
             <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
@@ -1065,24 +1088,70 @@ function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, 
 }
 
 
-/* ---- Mobile Search ---- */
-function MobileSearch({ t, query, onSearch }) {
-  return (
-    <div className="mobile-search">
+/* ---- Search with Dropdown ---- */
+function SearchBox({ t, query, onSearch, products, onSelect, lang, mobile }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  const fmt = window.SAVAT.fmt;
+  const bd = window.SAVAT.breakdown;
+
+  const suggestions = query.trim().length > 0
+    ? products.filter(p => {
+        const q = query.trim().toLowerCase();
+        return p.name.uz.toLowerCase().includes(q) || p.name.ru.toLowerCase().includes(q);
+      }).slice(0, 6)
+    : [];
+
+  React.useEffect(() => {
+    const handler = (e) => { if(ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
+  }, []);
+
+  const inner = (
+    <div className="search-wrap" ref={ref}>
       <div className="search">
         <I.search />
         <input
           placeholder={t.search}
           value={query}
-          onChange={(e) => onSearch(e.target.value)}
-          onKeyDown={(e) => { if(e.key === "Escape") onSearch(""); }}
+          onChange={(e) => { onSearch(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(e) => { if(e.key === "Escape") { onSearch(""); setOpen(false); } }}
         />
-        {query && (
-          <button className="search-clear" onClick={() => onSearch("")}>×</button>
-        )}
+        {query && <button className="search-clear" onClick={() => { onSearch(""); setOpen(false); }}>×</button>}
       </div>
+      {open && query.trim().length > 0 && (
+        <div className="search-dropdown">
+          {suggestions.length === 0 ? (
+            <div className="sd-empty">🔍 {lang === "ru" ? "Ничего не найдено" : "Hech narsa topilmadi"}</div>
+          ) : suggestions.map(p => {
+            const b = bd(p);
+            const imgUrl = (p.image_urls && p.image_urls[0]) || p.image_url;
+            return (
+              <div className="sd-item" key={p.id} onMouseDown={(e) => { e.preventDefault(); onSelect(p); onSearch(""); setOpen(false); }}>
+                <div className="sd-img">
+                  {imgUrl ? <img src={imgUrl} alt={p.name[lang||"uz"]} /> : <div style={{width:"100%",height:"100%",background:p.tile,borderRadius:10}}/>}
+                </div>
+                <div className="sd-info">
+                  <div className="sd-name">{p.name[lang||"uz"]}</div>
+                  <div className="sd-price">{fmt(b.total)} so'm</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
+
+  if(mobile) return <div className="mobile-search">{inner}</div>;
+  return inner;
+}
+
+function MobileSearch({ t, query, onSearch, products, onSelect, lang }) {
+  return <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} mobile={true} />;
 }
 
 /* ---- Hero ---- */
@@ -1253,7 +1322,7 @@ function Footer({ t }) {
   );
 }
 
-window.SC = { Media, useCountUp, Header, MobileSearch, Hero, Cats, ProductCard, Bestsellers, Why, Footer };
+window.SC = { Media, useCountUp, Header, SearchBox, MobileSearch, Hero, Cats, ProductCard, Bestsellers, Why, Footer };
 
 </script>
   <script type="text/babel">
@@ -1944,7 +2013,7 @@ window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage 
 </script>
   <script type="text/babel">
 /* ============ SAVAT.UZ — product detail, cart, app ============ */
-const { Media, useCountUp, Header, MobileSearch, Hero, Cats, ProductCard, Bestsellers, Why, Footer } = window.SC;
+const { Media, useCountUp, Header, SearchBox, MobileSearch, Hero, Cats, ProductCard, Bestsellers, Why, Footer } = window.SC;
 const { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage } = window.AC;
 const Ico = window.Icons;
 const D = window.SAVAT;
@@ -2308,8 +2377,11 @@ function App() {
         onCart={() => setCartOpen(true)} onHome={goHome}
         user={user} onAccount={onAccount} onMenu={() => setMenuOpen(true)}
         onMyOrders={() => setView("myorders")} onHelp={() => setView("help")} onCatalog={() => { goHome(); document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}); }}
-        query={query} onSearch={(v) => { setQuery(v); if(view !== "home") { setView("home"); } }} />
-      <MobileSearch t={t} query={query} onSearch={(v) => { setQuery(v); if(view !== "home") setView("home"); }} />
+        query={query} onSearch={(v) => { setQuery(v); if(view !== "home") setView("home"); }}
+        products={products} onSelect={(p) => { setQuery(""); openProduct(p); }} />
+      <MobileSearch t={t} query={query} lang={lang}
+        onSearch={(v) => { setQuery(v); if(view !== "home") setView("home"); }}
+        products={products} onSelect={(p) => { setQuery(""); openProduct(p); }} />
 
       {view === "home" && (
         <main>
