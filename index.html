@@ -1884,7 +1884,7 @@ function ImageSwiper({ p, lang }) {
   const [dragging, setDragging] = React.useState(false);
   const [dragX, setDragX] = React.useState(0);
 
-  const goTo = (i) => setIdx(Math.max(0, Math.min(total - 1, i)));
+  const goTo = (i) => setIdx((i + total) % total); // loop
 
   const onTouchStart = (e) => { startX.current = e.touches[0].clientX; setDragging(true); setDragX(0); };
   const onTouchMove = (e) => { if (startX.current === null) return; setDragX(e.touches[0].clientX - startX.current); };
