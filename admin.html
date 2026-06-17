@@ -124,6 +124,8 @@ var SB = "https://gjsaelqqubmlwnmfyuso.supabase.co";
 var KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
 var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 var SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTQ0NjkzMCwiZXhwIjoyMDk3MDIyOTMwfQ.U8GjwhhY5_aiLxHtXBCF3l8_PfdUMTrQRPTRtiZtJL4";
+var SCRAPER_API_KEY = "49ca405dd29931f0e1faa9763c90363b";
+
 var CATS = [
   {id:"tech",label:"Texnika"},{id:"shoes",label:"Oyoq kiyim"},
   {id:"fashion",label:"Kiyim"},{id:"home",label:"Uy-ro'zg'or"}
@@ -694,11 +696,11 @@ function doImport() {
   function showResult(info) {
     btn.disabled=false; btn.textContent="Ma'lumot olish";
     result.className="import-result show";
-    document.getElementById("importName").textContent = info.name || "";
 
     var nameEl = document.getElementById("importName");
+    nameEl.textContent = info.name || "";
     nameEl.contentEditable = "true";
-    nameEl.style.cssText = "border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;min-height:28px;outline:none;";
+    nameEl.style.cssText = "border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;min-height:28px;outline:none;cursor:text;";
 
     var badge = document.getElementById("importBadge");
     if(platform==="pdd"){ badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
@@ -708,35 +710,30 @@ function doImport() {
     var imgWrap = document.getElementById("importImgWrap");
     window._importImages = info.images || [];
     if(info.images && info.images.length > 0) {
-      var grid = document.createElement("div");
-      grid.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;";
-      info.images.slice(0,6).forEach(function(src, i) {
-        var thumb = document.createElement("img");
-        thumb.src = src;
-        thumb.style.cssText = "width:52px;height:52px;object-fit:cover;border-radius:6px;border:2px solid "+(i===0?"var(--brand)":"var(--line)")+";cursor:pointer;";
-        thumb.onclick = function() {
-          grid.querySelectorAll("img").forEach(function(t){ t.style.borderColor="var(--line)"; });
-          this.style.borderColor = "var(--brand)";
-          window._importImages = [src].concat(info.images.filter(function(u){ return u!==src; }));
-          mainImg.src = src;
-        };
-        if(i===0) {
-          var mainImg = document.createElement("img");
-          mainImg.className = "import-img";
-          mainImg.src = src;
-          mainImg.onerror = function(){ this.src=""; this.parentNode.innerHTML="<div class=\"import-img-ph\">📦</div>"; };
-          imgWrap.innerHTML = "";
-          imgWrap.appendChild(mainImg);
-        }
-        grid.appendChild(thumb);
-      });
-      // Add thumb grid below main image
-      var existing = imgWrap.querySelector(".thumb-grid");
-      if(existing) existing.remove();
-      var tg = document.createElement("div");
-      tg.className = "thumb-grid";
-      tg.appendChild(grid);
-      imgWrap.appendChild(tg);
+      var mainImg = document.createElement("img");
+      mainImg.className = "import-img";
+      mainImg.src = info.images[0];
+      mainImg.onerror = function(){ this.parentNode.innerHTML="<div class=\"import-img-ph\">📦</div>"; };
+      imgWrap.innerHTML = "";
+      imgWrap.appendChild(mainImg);
+
+      if(info.images.length > 1) {
+        var thumbRow = document.createElement("div");
+        thumbRow.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;";
+        info.images.slice(0,8).forEach(function(src, i) {
+          var t = document.createElement("img");
+          t.src = src;
+          t.style.cssText = "width:40px;height:40px;object-fit:cover;border-radius:5px;border:2px solid "+(i===0?"var(--brand)":"var(--line)")+";cursor:pointer;";
+          t.onclick = function() {
+            thumbRow.querySelectorAll("img").forEach(function(x){ x.style.borderColor="var(--line)"; });
+            t.style.borderColor = "var(--brand)";
+            mainImg.src = src;
+            window._importImages = [src].concat(info.images.filter(function(u){ return u!==src; }));
+          };
+          thumbRow.appendChild(t);
+        });
+        imgWrap.appendChild(thumbRow);
+      }
     } else {
       imgWrap.innerHTML = "<div class=\"import-img-ph\">📦</div>";
     }
@@ -751,51 +748,45 @@ function doImport() {
 
     if(info.name) {
       status.className="import-status ok";
-      status.textContent = "Ma'lumot olindi!";
+      status.textContent = "✅ Ma'lumot olindi! Narx va vaznni to'ldiring.";
     } else {
       status.className="import-status err";
-      status.textContent = "Nom topilmadi — yuqoridagi maydonga kiriting.";
+      status.textContent = "⚠️ Nom topilmadi — yuqoridagi maydonga kiriting.";
     }
   }
 
-  // Try direct fetch first (works if VPN is on + CORS extension)
-  // Then try proxies
-  var proxies = [
-    { url: url, isJson: false, direct: true },
-    { url: "https://api.allorigins.win/get?url=" + encodeURIComponent(url), isJson: true },
-    { url: "https://corsproxy.io/?" + encodeURIComponent(url), isJson: false },
-    { url: "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url), isJson: false }
-  ];
+  // ScraperAPI - renders JS, bypasses blocks
+  var scraperUrl = "https://api.scraperapi.com/?api_key=" + SCRAPER_API_KEY +
+    "&url=" + encodeURIComponent(url) +
+    "&render=true&country_code=cn";
 
-  function tryProxy(idx) {
-    if(idx >= proxies.length) {
-      btn.disabled=false; btn.textContent="Ma'lumot olish";
-      status.className="import-status err";
-      status.textContent = "Avtomatik olinmadi — qo'lda to'ldiring.";
-      showResult({ name:"", images:[], price:"" });
-      return;
-    }
-    var p = proxies[idx];
-    fetch(p.url, { mode: p.direct ? "no-cors" : "cors" })
-      .then(function(r) {
-        if(p.direct) {
-          // no-cors returns opaque response — can't read body
-          // If we got here without error, try next proxy that can read body
-          tryProxy(idx+1); return;
-        }
-        return p.isJson ? r.json() : r.text();
-      })
-      .then(function(data) {
-        if(!data) return;
-        var html = p.isJson ? (data.contents||"") : data;
-        if(!html || html.length < 500) { tryProxy(idx+1); return; }
-        var info = parseProductPage(html, platform);
-        showResult(info);
-      })
-      .catch(function() { tryProxy(idx+1); });
-  }
-
-  tryProxy(0);
+  fetch(scraperUrl)
+    .then(function(r) {
+      if(!r.ok) throw new Error("ScraperAPI: " + r.status);
+      return r.text();
+    })
+    .then(function(html) {
+      if(!html || html.length < 500) throw new Error("Bo'sh sahifa");
+      var info = parseProductPage(html, platform);
+      showResult(info);
+    })
+    .catch(function(e) {
+      // Fallback: allorigins proxy
+      fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url))
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          var html = data.contents || "";
+          if(html.length < 500) throw new Error("Proxy ham ishlamadi");
+          var info = parseProductPage(html, platform);
+          showResult(info);
+        })
+        .catch(function() {
+          btn.disabled=false; btn.textContent="Ma'lumot olish";
+          status.className="import-status err";
+          status.textContent = "⚠️ Avtomatik olinmadi — qo'lda to'ldiring.";
+          showResult({ name:"", images:[], price:"" });
+        });
+    });
 }
 
 
