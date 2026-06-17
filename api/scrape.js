@@ -151,15 +151,22 @@ function parseProduct(html, sourceUrl) {
 }
 
 function isProductImage(url) {
-  if (url.length < 30) return false;
-  // Must look like a product image, not an icon/app
-  if (url.match(/icon|logo|avatar|badge|star|rating|favicon|app_|banner_ad|category|tab_|nav_|btn_|arrow|loading|placeholder/i)) return false;
-  // PDD product images are large (contain size hints or are from product CDNs)
-  if (url.includes("img.kwcdn.com/product/")) return true;
-  if (url.includes("img.pddpic.com/")) return true;
+  if (url.length < 40) return false;
+  // Block app icons, logos, ui elements
+  if (url.match(/icon|logo|avatar|badge|star|rating|favicon|app_|banner_ad|category|tab_|nav_|btn_|arrow|loading|placeholder|splash|launch|default|empty|noimg|watermark/i)) return false;
+  // Block tiny images (thumbnail params suggest small size)
+  if (url.match(/(\.|\/)(16|24|32|48|64|96)x\1/)) return false;
+  // PDD product images - must contain /product/ or /goods/ path
+  if (url.includes("img.kwcdn.com")) {
+    return url.includes("/product/") || url.includes("/goods/") || url.includes("/creative/");
+  }
+  if (url.includes("img.pddpic.com")) {
+    return !url.match(/\/icon\/|\/logo\/|\/app\/|\/ui\//i);
+  }
+  // Taobao product images
   if (url.includes("img.alicdn.com/imgextra/")) return true;
   if (url.includes("gw.alicdn.com/bao/")) return true;
-  // Generic: must be jpg/png/webp
-  if (!url.match(/\.(jpg|jpeg|png|webp)/i) && !url.match(/format.*jpg|format.*png/i)) return false;
+  // Must end with image extension
+  if (!url.match(/\.(jpg|jpeg|png|webp)(\?|$)/i)) return false;
   return true;
 }
