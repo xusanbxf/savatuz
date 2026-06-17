@@ -328,12 +328,12 @@ function openProductModal(p) {
     grid.innerHTML = window._imgList.map(function(item, idx){
       return '<div class="img-thumb-wrap">'+
         '<img src="'+h(item.url)+'" />'+
-        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="O'chirish">×</button>'+
+        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="Ochirish">×</button>'+
       '</div>';
     }).join("") +
     (window._imgList.length < 8 ?
-      '<div class="img-add-box" onclick="document.getElementById('f_img_add').click()">'+
-        '<span style="font-size:22px">+</span><span>Rasm qo'shish</span>'+
+      '<div class="img-add-box" onclick="document.getElementById(\"f_img_add\").click()">'+
+        '<span style="font-size:22px">+</span><span>Rasm kushish</span>'+
       '</div><input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />' : "");
     var inp = document.getElementById("f_img_add");
     if(inp) inp.onchange = function(){ addImages(this.files); };
@@ -381,7 +381,7 @@ function openProductModal(p) {
 
   document.getElementById("cancelBtn").onclick = closeModal;
   document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
-  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null, p?p.image_url:null); };
+  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null); };
 }
 
 function closeModal() {
