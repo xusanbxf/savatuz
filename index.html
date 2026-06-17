@@ -418,30 +418,123 @@
     .co-grid { grid-template-columns: 1fr; }
     .co-summary { position: static; }
   }
+
   @media (max-width: 560px) {
-    .hdr-row { height: 64px; gap: 12px; }
-    .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .wrap { padding: 0 14px; }
-    .hero { padding: 18px 0 4px; }
-    .hero-left { padding: 28px 24px 26px; border-radius: var(--r); }
-    .hero-h1 { font-size: 30px; }
-    .hero-lead { max-width: 100%; font-size: 14.5px; }
-    .hero-cta-row { flex-direction: column; }
-    .btn-primary, .btn-ghost { width: 100%; justify-content: center; height: 50px; }
-    .pd-title { font-size: 26px; }
+    /* Header */
+    .hdr { position: sticky; top: 0; z-index: 80; backdrop-filter: blur(12px); background: rgba(247,245,251,.92); border-bottom: 1px solid var(--line); }
+    .hdr-row { height: 60px; gap: 10px; }
     .brand-tag, .acct-label, .cart-word { display: none; }
-    .acct-btn { padding: 0; width: 44px; justify-content: center; }
-    .cart-btn { padding: 0 14px; }
-    .sec-title { font-size: 23px; }
-    .calc, .co-card, .co-summary { padding: 18px; }
-    .co-form { grid-template-columns: 1fr; }
-    .calc-total .now { font-size: 28px; }
-    .pd-meta { gap: 9px; }
-    .success-card { padding: 36px 22px 30px; }
-    .success-order { flex-direction: column; gap: 10px; text-align: left; }
+    .acct-btn { padding: 0; width: 42px; justify-content: center; border-radius: 50%; }
+    .cart-btn { padding: 0 12px; height: 42px; border-radius: 999px; }
+    .brand-name { font-size: 17px; }
+    .wrap { padding: 0 14px; }
+
+    /* Hero — mobile card style */
+    .hero { padding: 14px 0 2px; }
+    .hero-left {
+      padding: 24px 20px 22px;
+      border-radius: var(--r);
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a855f7 100%);
+    }
+    .hero-h1 { font-size: 26px; line-height: 1.18; letter-spacing: -.03em; }
+    .hero-lead { font-size: 13.5px; margin-bottom: 18px; }
+    .hero-cta-row { flex-direction: column; gap: 10px; }
+    .btn-primary, .btn-ghost { width: 100%; justify-content: center; height: 48px; font-size: 14.5px; }
+    .btn-ghost { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.3); color: #fff; }
+
+    /* Grid — 2 columns, nicer cards */
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .card { border-radius: 16px; }
+    .ph { height: 140px; border-radius: 12px 12px 0 0; }
+    .card-body { padding: 12px; }
+    .card-name { font-size: 13.5px; }
+    .card-sub { font-size: 12px; }
+    .card-price-now { font-size: 17px; }
+    .card-price-was { font-size: 12px; }
+    .card-save { font-size: 11px; }
+
+    /* Categories */
+    .cats { gap: 7px; padding-bottom: 4px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .cats::-webkit-scrollbar { display: none; }
+    .cat-btn { flex-shrink: 0; height: 36px; padding: 0 14px; font-size: 13px; }
+
+    /* Section titles */
+    .sec-title { font-size: 20px; }
+
+    /* Product detail */
+    .pd-title { font-size: 22px; }
+    .pd-meta { gap: 8px; flex-wrap: wrap; }
+    .calc, .co-card, .co-summary { padding: 16px; border-radius: 14px; }
+    .calc-total .now { font-size: 26px; }
+
+    /* Checkout form */
+    .co-form { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Success */
+    .success-card { padding: 30px 18px 26px; margin: 12px; border-radius: 20px; }
+    .success-order { flex-direction: column; gap: 8px; text-align: left; }
+
+    /* Bottom padding for bottom nav */
+    main { padding-bottom: 72px; }
   }
+
   @media (max-width: 400px) {
-    .grid { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr; gap: 10px; }
+    .hero-h1 { font-size: 23px; }
+  }
+
+  /* Bottom navigation — faqat mobile */
+  .bottom-nav {
+    display: none;
+  }
+  @media (max-width: 560px) {
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 62px;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--line);
+      z-index: 80;
+      padding: 0 4px;
+      align-items: stretch;
+    }
+    .bottom-nav button {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--ink-3);
+      padding: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color .15s;
+      font-family: inherit;
+    }
+    .bottom-nav button.active, .bottom-nav button:hover { color: var(--brand); }
+    .bottom-nav button svg { width: 22px; height: 22px; }
+    .bottom-nav .bn-cart { position: relative; }
+    .bottom-nav .bn-badge {
+      position: absolute;
+      top: 4px; right: calc(50% - 18px);
+      background: var(--brand);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+    }
   }
 </style>
 </head>
@@ -802,6 +895,9 @@ const Icons = {
   phone: (p) => <S {...p}><path d="M5 4h3.5l1.5 4-2 1.5a11 11 0 0 0 5 5L19 16l1.5 3.5V20a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></S>,
   card: (p) => <S {...p}><rect x="3" y="6" width="18" height="12" rx="2.4"/><path d="M3 10h18"/></S>,
   spark: (p) => <S {...p}><path d="M12 4v16M4 12h16M6.5 6.5l11 11M17.5 6.5l-11 11"/></S>,
+  home: (p) => <S {...p}><path d="M3 12L12 4l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z"/></S>,
+  grid: (p) => <S {...p}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></S>,
+  box: (p) => <S {...p}><path d="M12 3L3 8v8l9 5 9-5V8L12 3Z"/><path d="M3 8l9 5 9-5M12 13v8"/></S>,
 };
 
 window.Icons = Icons;
@@ -853,7 +949,7 @@ function useCountUp(target, on) {
 }
 
 /* ---- Header ---- */
-function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu }) {
+function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu, onMyOrders, onHelp, onCatalog }) {
   return (
     <header className="hdr">
       <div className="wrap hdr-row">
@@ -867,9 +963,9 @@ function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, 
         </div>
         <nav className="nav">
           <button onClick={onHome}>{t.nav_home}</button>
-          <button onClick={onHome}>{t.nav_catalog}</button>
-          <button onClick={onHome}>{t.nav_track}</button>
-          <button onClick={onHome}>{t.nav_help}</button>
+          <button onClick={onCatalog}>{t.nav_catalog}</button>
+          {user && <button onClick={onMyOrders}>{t.nav_track}</button>}
+          <button onClick={onHelp}>{t.nav_help}</button>
         </nav>
         <div className="search">
           <I.search />
@@ -1836,7 +1932,8 @@ function App() {
     <>
       <Header t={t} lang={lang} setLang={setLang} cartCount={cartCount}
         onCart={() => setCartOpen(true)} onHome={goHome}
-        user={user} onAccount={onAccount} onMenu={() => setMenuOpen(true)} />
+        user={user} onAccount={onAccount} onMenu={() => setMenuOpen(true)}
+        onMyOrders={() => setView("myorders")} onHelp={() => setView("help")} onCatalog={() => { goHome(); document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}); }} />
 
       {view === "home" && (
         <main>
@@ -1886,6 +1983,35 @@ function App() {
         onClose={() => setMenuOpen(false)} onHome={goHome}
         user={user} onAccount={() => setAuthOpen(true)} onLogout={onLogout}
         onMyOrders={() => setView("myorders")} />
+
+      {/* Bottom Navigation — faqat mobile */}
+      <nav className="bottom-nav">
+        <button className={view === "home" ? "active" : ""} onClick={goHome}>
+          <Ico.home style={{ width: 22, height: 22 }} />
+          <span>Bosh</span>
+        </button>
+        <button onClick={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 100); }}>
+          <Ico.grid style={{ width: 22, height: 22 }} />
+          <span>Katalog</span>
+        </button>
+        {user && (
+          <button className={view === "myorders" ? "active" : ""} onClick={() => setView("myorders")}>
+            <Ico.box style={{ width: 22, height: 22 }} />
+            <span>Buyurtmalar</span>
+          </button>
+        )}
+        {!user && (
+          <button onClick={() => setAuthOpen(true)}>
+            <Ico.user style={{ width: 22, height: 22 }} />
+            <span>Kirish</span>
+          </button>
+        )}
+        <button className="bn-cart" onClick={() => setCartOpen(true)}>
+          <Ico.cart style={{ width: 22, height: 22 }} />
+          {cartCount > 0 && <span className="bn-badge">{cartCount}</span>}
+          <span>Savat</span>
+        </button>
+      </nav>
 
       <div className={"toast" + (toast ? " on" : "")}>
         <span className="ok"><Ico.check style={{ width: 13, height: 13, color: "#fff" }} /></span>
