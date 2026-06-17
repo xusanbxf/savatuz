@@ -3,2144 +3,495 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SAVAT.UZ — Xitoydan to'g'ridan-to'g'ri</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<title>SAVAT.UZ — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f7f5fb;
-    --surface: #ffffff;
-    --surface-2: #faf8fe;
-    --ink: #1b1430;
-    --ink-2: #4a4360;
-    --ink-3: #8a849c;
-    --line: #ece8f4;
-    --line-2: #e0dbee;
-    --brand: #6c2bd9;
-    --brand-2: #9333ea;
-    --brand-ink: #4a1a9e;
-    --brand-soft: #f1ebff;
-    --hot: #f0432e;
-    --hot-soft: #ffece8;
-    --gold: #f5a623;
-    --save: #12a150;
-    --save-soft: #e7f7ee;
-    --r-lg: 24px;
-    --r: 18px;
-    --r-sm: 12px;
-    --r-pill: 999px;
-    --sh-1: 0 1px 2px rgba(27,20,48,.05), 0 4px 16px rgba(27,20,48,.04);
-    --sh-2: 0 8px 30px rgba(27,20,48,.10);
-    --sh-brand: 0 10px 30px rgba(108,43,217,.28);
-    --maxw: 1200px;
+    --bg: #f7f5fb; --surface: #ffffff; --ink: #1b1430; --ink-2: #4a4360;
+    --ink-3: #8a849c; --line: #ece8f4; --brand: #6c2bd9; --r: 14px; --r-sm: 10px;
     --font: "Plus Jakarta Sans", system-ui, sans-serif;
     --display: "Sora", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
+  .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
+  .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+  input, textarea, select {
+    width: 100%; border-radius: var(--r-sm); border: 1.5px solid var(--line);
+    padding: 10px 14px; font-size: 15px; font-family: inherit; margin-bottom: 14px;
+    background: var(--bg); color: var(--ink);
   }
-  ::selection { background: var(--brand); color: #fff; }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-  img { max-width: 100%; display: block; }
-  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  input[type=file] { padding: 8px 14px; height: auto; cursor: pointer; }
+  input { height: 46px; }
+  textarea { height: 80px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); }
+  .btn { height: 46px; border-radius: var(--r-sm); border: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 15px; color: #fff; background: linear-gradient(140deg, #7c3aed 0%, #c026d3 100%); width: 100%; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn-sm { width: auto; padding: 0 16px; height: 36px; font-size: 13px; }
+  .btn-danger { background: #e11d48; }
+  .btn-ghost { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+  .err { color: #e11d48; font-size: 13.5px; margin: -6px 0 12px; min-height: 1em; }
 
-  /* ---------- Header ---------- */
-  .hdr {
-    position: sticky; top: 0; z-index: 60;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: saturate(1.4) blur(14px);
-    border-bottom: 1px solid var(--line);
-  }
-  .hdr-row { display: flex; align-items: center; gap: 22px; height: 72px; }
-  .brand { display: flex; align-items: center; gap: 11px; cursor: pointer; user-select: none; }
-  .brand-mark {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: linear-gradient(140deg, #7c3aed 0%, #c026d3 100%);
-    box-shadow: var(--sh-brand);
-    display: grid; place-items: center; position: relative; flex: none;
-  }
-  .brand-mark svg { width: 23px; height: 23px; }
-  .brand-name { font-family: var(--display); font-weight: 800; font-size: 21px; letter-spacing: -.02em; line-height: 1; }
-  .brand-name .uz { color: var(--brand); }
-  .brand-tag { font-size: 10.5px; color: var(--ink-3); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; margin-top: 3px; }
-  .nav { display: flex; gap: 4px; margin-left: 8px; }
-  .nav button { padding: 9px 15px; border-radius: var(--r-pill); font-weight: 600; font-size: 14.5px; color: var(--ink-2); background: transparent; border: 1.5px solid transparent; cursor: pointer; transition: .15s; font-family: inherit; }
-  .nav button:hover { background: var(--brand-soft); color: var(--brand-ink); border-color: var(--line-2); transform: translateY(-1px); }
-  .nav button:active { transform: translateY(0); }
-  .burger { display: none; width: 42px; height: 42px; border-radius: 12px; align-items: center; justify-content: center; color: var(--ink); border: 1.5px solid var(--line-2); background: var(--surface-2); }
-  .burger svg { width: 22px; height: 22px; }
-  .search { flex: 1; max-width: 460px; position: relative; }
-  .search input {
-    width: 100%; height: 44px; border-radius: var(--r-pill);
-    border: 1.5px solid var(--line-2); background: var(--surface-2);
-    padding: 0 18px 0 44px; font-size: 14.5px; font-family: inherit; color: var(--ink);
-    transition: .18s; outline: none;
-  }
-  .search input:focus { border-color: var(--brand); background: #fff; box-shadow: 0 0 0 4px var(--brand-soft); }
-  .search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--ink-3); }
-  .hdr-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-  .acct-btn { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 15px; background: var(--surface-2); border: 1.5px solid var(--line-2); border-radius: var(--r-pill); font-weight: 700; font-size: 14px; color: var(--ink); transition: .18s; cursor: pointer; }
-  .acct-btn:hover { border-color: var(--brand); color: var(--brand-ink); }
-  .acct-label { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .lang { display: flex; background: var(--surface-2); border: 1.5px solid var(--line-2); border-radius: var(--r-pill); padding: 3px; }
-  .lang button { padding: 6px 12px; border-radius: var(--r-pill); font-weight: 700; font-size: 13px; color: var(--ink-3); transition: .15s; }
-  .lang button.on { background: var(--ink); color: #fff; }
-  .cart-btn {
-    display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 18px;
-    background: var(--ink); color: #fff; border-radius: var(--r-pill); font-weight: 700; font-size: 14.5px;
-    transition: .18s; position: relative;
-  }
-  .cart-btn:hover { background: var(--brand); transform: translateY(-1px); }
-  .cart-btn svg { width: 18px; height: 18px; }
-  .cart-count {
-    position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px; padding: 0 5px;
-    background: var(--hot); color: #fff; border-radius: 999px; font-size: 11.5px; font-weight: 800;
-    display: grid; place-items: center; border: 2px solid #fff;
-  }
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .top-title { font-family: var(--display); font-weight: 800; font-size: 22px; margin: 0; flex: 1; }
+  .nav-tabs { display: flex; gap: 6px; }
+  .tab { height: 38px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line); font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer; background: var(--surface); color: var(--ink-2); }
+  .tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-weight: 700; }
 
-  /* ---------- Hero ---------- */
-  .hero { padding: 30px 0 8px; }
-  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 28px; align-items: stretch; }
-  .hero-left {
-    background: linear-gradient(160deg, #2a1257 0%, #6c2bd9 78%, #8b2fd6 100%);
-    color: #fff; border-radius: var(--r-lg); padding: 40px 40px 34px; position: relative; overflow: hidden;
-    display: flex; flex-direction: column;
-  }
-  .hero-left::after {
-    content: ""; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none;
-  }
-  .kicker {
-    display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
-    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
-    padding: 7px 13px; border-radius: var(--r-pill); font-weight: 700; font-size: 12px; letter-spacing: .06em;
-  }
-  .kicker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(245,166,35,.3); }
-  .hero-h1 { font-family: var(--display); font-weight: 800; font-size: 46px; line-height: 1.04; letter-spacing: -.025em; margin: 20px 0 14px; white-space: pre-line; }
-  .hero-lead { font-size: 15.5px; line-height: 1.55; color: rgba(255,255,255,.82); max-width: 92%; margin: 0 0 24px; }
-  .hero-cta-row { display: flex; gap: 12px; margin-top: auto; }
-  .btn-primary {
-    background: #fff; color: var(--brand-ink); height: 52px; padding: 0 26px; border-radius: var(--r-pill);
-    font-weight: 800; font-size: 15.5px; display: inline-flex; align-items: center; gap: 9px; transition: .18s;
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.22); }
-  .btn-ghost {
-    background: rgba(255,255,255,.1); color: #fff; height: 52px; padding: 0 22px; border-radius: var(--r-pill);
-    font-weight: 700; font-size: 15px; border: 1px solid rgba(255,255,255,.25); transition: .18s;
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,.18); }
+  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
+  .order-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
+  .order-num { font-family: var(--display); font-weight: 800; font-size: 17px; }
+  .order-date { color: var(--ink-3); font-size: 13px; }
+  .order-total { font-family: var(--display); font-weight: 800; font-size: 18px; }
+  .order-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } }
+  .items-list { font-size: 14px; line-height: 1.8; color: var(--ink-2); }
+  .items-list b { color: var(--ink); }
+  .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
+  .info-row b { color: var(--ink); font-weight: 600; }
+  select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; width: auto; margin-bottom: 0; }
+  .status-yangi { background-color: #f59e0b; }
+  .status-tasdiqlangan { background-color: #2563eb; }
+  .status-yetkazilmoqda { background-color: #7c3aed; }
+  .status-yakunlangan { background-color: #12a150; }
+  .status-bekor { background-color: #e11d48; }
 
-  /* Hero featured card */
-  .hero-card { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--sh-1); border: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; }
-  .hero-media { border-radius: var(--r); overflow: hidden; flex: 1; min-height: 220px; position: relative; }
-  .hero-card-body { padding: 16px 8px 6px; }
-  .hero-card-title { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -.02em; margin: 0 0 4px; }
-  .hero-card-sub { color: var(--ink-3); font-size: 13.5px; margin: 0 0 14px; }
-  .hero-price-row { display: flex; align-items: flex-end; justify-content: space-between; }
-  .hero-now { font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: -.02em; color: var(--ink); }
-  .hero-now small { font-size: 15px; font-weight: 700; color: var(--ink-3); }
-  .hero-was { font-size: 14px; color: var(--ink-3); text-decoration: line-through; }
-  .save-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--save-soft); color: var(--save); font-weight: 800; font-size: 13px; padding: 7px 12px; border-radius: var(--r-pill); }
+  .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 4px; }
+  .prod-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+  .prod-img { width: 100%; height: 140px; border-radius: var(--r-sm); margin-bottom: 12px; object-fit: cover; }
+  .prod-tile { width: 100%; height: 140px; border-radius: var(--r-sm); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .prod-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .prod-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 10px; }
+  .prod-prices { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; }
+  .prod-actions { display: flex; gap: 8px; }
 
-  /* ---------- Placeholder media ---------- */
-  .ph { position: absolute; inset: 0; display: grid; place-items: center; }
-  .ph-label { font-family: "Sora", monospace; font-size: 12px; font-weight: 600; color: rgba(0,0,0,.34); letter-spacing: .02em; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.55); }
-  .ph::before {
-    content: ""; position: absolute; inset: 0;
-    background-image: repeating-linear-gradient(135deg, rgba(0,0,0,.035) 0 2px, transparent 2px 11px);
-  }
-
-  /* ---------- Category strip ---------- */
-  .cats { display: flex; gap: 10px; padding: 26px 0 6px; flex-wrap: wrap; }
-  .cat {
-    display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: var(--r-pill);
-    background: var(--surface); border: 1.5px solid var(--line-2); font-weight: 700; font-size: 14px; color: var(--ink-2); transition: .15s;
-  }
-  .cat:hover { border-color: var(--brand); color: var(--brand-ink); }
-  .cat.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .cat-emoji { font-size: 16px; line-height: 1; }
-
-  /* ---------- Section ---------- */
-  .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin: 34px 0 18px; }
-  .sec-title { font-family: var(--display); font-weight: 800; font-size: 28px; letter-spacing: -.02em; margin: 0; white-space: nowrap; }
-  .sec-sub { color: var(--ink-3); font-size: 14.5px; margin: 5px 0 0; }
-  .sec-flame { color: var(--hot); }
-
-  /* ---------- Product grid ---------- */
-  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-  .card {
-    background: var(--surface); border-radius: var(--r); border: 1px solid var(--line);
-    overflow: hidden; cursor: pointer; transition: .2s; display: flex; flex-direction: column;
-  }
-  .card:hover { transform: translateY(-4px); box-shadow: var(--sh-2); border-color: var(--line-2); }
-  .card-media { position: relative; aspect-ratio: 1/1; overflow: hidden; }
-  .badge-disc { position: absolute; top: 12px; left: 12px; background: var(--hot); color: #fff; font-weight: 800; font-size: 13px; padding: 5px 11px; border-radius: var(--r-pill); box-shadow: 0 4px 12px rgba(240,67,46,.35); z-index: 2; }
-  .badge-hit { position: absolute; top: 12px; right: 12px; background: rgba(27,20,48,.86); color: #fff; font-weight: 700; font-size: 11px; padding: 5px 10px; border-radius: var(--r-pill); z-index: 2; display: inline-flex; gap: 5px; align-items: center; }
-  .card-body { padding: 14px 15px 16px; display: flex; flex-direction: column; flex: 1; }
-  .card-name { font-weight: 700; font-size: 15px; line-height: 1.3; margin: 0 0 3px; letter-spacing: -.01em; }
-  .card-sub { color: var(--ink-3); font-size: 12.5px; margin: 0 0 9px; }
-  .card-rate { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); margin-bottom: 11px; }
-  .stars { color: var(--gold); letter-spacing: -1px; font-size: 13px; }
-  .card-foot { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
-  .card-price { font-family: var(--display); font-weight: 800; font-size: 19px; letter-spacing: -.02em; }
-  .card-price small { font-size: 12px; font-weight: 700; color: var(--ink-3); }
-  .card-was { font-size: 12px; color: var(--ink-3); text-decoration: line-through; display: block; }
-  .card-add { width: 40px; height: 40px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; transition: .15s; flex: none; }
-  .card-add:hover { background: var(--brand); color: #fff; transform: scale(1.06); }
-  .card-add svg { width: 19px; height: 19px; }
-  .stepper { display: inline-flex; align-items: center; gap: 2px; background: var(--surface); border: 1.5px solid var(--brand); border-radius: var(--r-pill); height: 40px; padding: 0 4px; box-shadow: 0 2px 10px rgba(108,43,217,.13); }
-  .stepper button { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--brand); transition: .14s; }
-  .stepper button:hover { background: var(--brand); color: #fff; }
-  .stepper button:active { transform: scale(.9); }
-  .stepper button svg { width: 16px; height: 16px; }
-  .stepper span { min-width: 24px; text-align: center; font-weight: 800; color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
-  .stepper.stepper-lg { height: 56px; padding: 0 8px; gap: 4px; border-radius: var(--r); }
-  .stepper.stepper-lg button { width: 42px; height: 42px; border-radius: 13px; }
-  .stepper.stepper-lg button svg { width: 19px; height: 19px; }
-  .stepper.stepper-lg span { min-width: 36px; font-size: 18px; }
-  .badge-incart { position: absolute; top: 12px; right: 12px; background: var(--save); color: #fff; font-weight: 800; font-size: 11.5px; padding: 5px 10px; border-radius: var(--r-pill); z-index: 2; display: inline-flex; gap: 5px; align-items: center; box-shadow: 0 4px 12px rgba(18,161,80,.32); }
-
-  /* ---------- Why strip ---------- */
-  .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 44px 0 10px; }
-  .why-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; }
-  .why-ic { width: 46px; height: 46px; border-radius: 13px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; margin-bottom: 14px; }
-  .why-ic svg { width: 23px; height: 23px; }
-  .why-t { font-family: var(--display); font-weight: 700; font-size: 17px; margin: 0 0 5px; }
-  .why-d { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin: 0; }
-
-  /* ---------- Footer ---------- */
-  .ftr { margin-top: 56px; border-top: 1px solid var(--line); background: var(--surface); }
-  .ftr-row { display: flex; align-items: center; justify-content: space-between; padding: 28px 0; gap: 20px; flex-wrap: wrap; }
-  .ftr small { color: var(--ink-3); font-size: 13px; }
-
-  /* ---------- Product detail ---------- */
-  .pd { padding: 22px 0 10px; }
-  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 700; font-size: 14.5px; padding: 8px 0; margin-bottom: 6px; }
-  .back-link:hover { color: var(--brand); }
-  .pd-grid { display: grid; grid-template-columns: 1fr 1.02fr; gap: 36px; align-items: start; }
-  .pd-gallery { position: sticky; top: 92px; }
-  .pd-main-media { position: relative; aspect-ratio: 1/1; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); }
-  .pd-thumbs { display: flex; gap: 12px; margin-top: 12px; }
-  .pd-thumb { position: relative; width: 76px; height: 76px; border-radius: 14px; overflow: hidden; border: 2px solid var(--line); cursor: pointer; }
-  .pd-thumb.on { border-color: var(--brand); }
-  .pd-src { display: inline-flex; align-items: center; gap: 8px; background: var(--hot-soft); color: var(--hot); font-weight: 700; font-size: 13px; padding: 7px 13px; border-radius: var(--r-pill); margin-bottom: 14px; }
-  .pd-title { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1.08; letter-spacing: -.025em; margin: 0 0 6px; }
-  .pd-sub { color: var(--ink-3); font-size: 15px; margin: 0 0 14px; }
-  .pd-meta { display: flex; align-items: center; gap: 14px; font-size: 13.5px; color: var(--ink-2); margin-bottom: 22px; flex-wrap: wrap; }
-  .pd-meta .sep { width: 4px; height: 4px; border-radius: 50%; background: var(--line-2); }
-
-  .calc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; box-shadow: var(--sh-1); }
-  .calc-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .calc-h h3 { font-family: var(--display); font-weight: 700; font-size: 16px; margin: 0; }
-  .calc-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; font-size: 14.5px; border-bottom: 1px dashed var(--line); }
-  .calc-row .lbl { display: flex; align-items: center; gap: 10px; color: var(--ink-2); }
-  .calc-row .lbl .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); flex: none; }
-  .calc-row .lbl .ic svg { width: 16px; height: 16px; }
-  .calc-row .val { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .calc-total { background: linear-gradient(150deg, #f3edff, #faf6ff); border-radius: var(--r); padding: 18px 20px; margin-top: 16px; border: 1px solid var(--line-2); }
-  .calc-total .was { font-size: 13.5px; color: var(--ink-3); }
-  .calc-total .was s { opacity: .8; }
-  .calc-total .now-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
-  .calc-total .now-lbl { font-weight: 700; font-size: 15px; color: var(--ink-2); white-space: nowrap; }
-  .calc-total .now { font-family: var(--display); font-weight: 800; font-size: 34px; letter-spacing: -.02em; line-height: 1; white-space: nowrap; }
-  .calc-total .now small { font-size: 16px; }
-  .calc-save { display: flex; align-items: center; gap: 7px; background: var(--save); color: #fff; font-weight: 800; font-size: 13.5px; padding: 9px 14px; border-radius: var(--r); margin-top: 14px; }
-
-  /* service explainer */
-  .svc { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-  .svc-q { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; font-weight: 700; font-size: 14.5px; text-align: left; background: var(--surface-2); }
-  .svc-q .chev { transition: .2s; color: var(--ink-3); }
-  .svc-q.open .chev { transform: rotate(180deg); }
-  .svc-body { padding: 4px 18px 18px; }
-  .svc-rule { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--line); }
-  .svc-rule:last-child { border-bottom: none; }
-  .svc-rule .k { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink-2); font-size: 14px; }
-  .svc-rule .badge { width: 30px; height: 30px; border-radius: 9px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
-  .svc-rule .v { font-weight: 800; color: var(--brand-ink); font-size: 14.5px; }
-  .svc-note { font-size: 13px; color: var(--ink-3); margin: 12px 0 0; }
-  .svc-active { background: var(--save-soft); border-radius: 10px; padding: 0 8px; }
-
-  .pd-cta { display: flex; gap: 12px; margin-top: 20px; }
-  .pd-cta .order { flex: 1; height: 56px; background: var(--ink); color: #fff; border-radius: var(--r); font-weight: 800; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: .18s; }
-  .pd-cta .order:hover { background: var(--brand); transform: translateY(-2px); box-shadow: var(--sh-brand); }
-  .pd-cta .addc { width: 56px; height: 56px; background: var(--brand-soft); color: var(--brand); border-radius: var(--r); display: grid; place-items: center; transition: .15s; }
-  .pd-cta .addc:hover { background: var(--brand); color: #fff; }
-
-  /* ---------- Cart drawer ---------- */
-  .scrim { position: fixed; inset: 0; background: rgba(27,20,48,.42); backdrop-filter: blur(3px); z-index: 90; opacity: 0; pointer-events: none; transition: .25s; }
-  .scrim.on { opacity: 1; pointer-events: auto; }
-  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 92vw; background: var(--bg); z-index: 100; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: -10px 0 40px rgba(0,0,0,.18); }
-  .drawer.on { transform: translateX(0); }
-  .drawer-h { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
-  .drawer-h h3 { font-family: var(--display); font-weight: 800; font-size: 20px; margin: 0; white-space: nowrap; }
-  .x-btn { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: var(--ink-2); transition: .15s; }
-  .x-btn:hover { background: var(--line); }
-  .drawer-body { flex: 1; overflow-y: auto; padding: 18px 24px; }
-  .ci { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
-  .ci-media { width: 72px; height: 72px; border-radius: 12px; overflow: hidden; position: relative; flex: none; }
-  .ci-info { flex: 1; min-width: 0; }
-  .ci-name { font-weight: 700; font-size: 14.5px; margin: 0 0 3px; }
-  .ci-price { font-family: var(--display); font-weight: 800; font-size: 16px; }
-  .ci-qty { display: inline-flex; align-items: center; gap: 0; background: var(--surface); border: 1.5px solid var(--line-2); border-radius: var(--r-pill); margin-top: 8px; }
-  .ci-qty button { width: 30px; height: 30px; display: grid; place-items: center; color: var(--ink-2); font-weight: 800; }
-  .ci-qty span { min-width: 26px; text-align: center; font-weight: 700; font-size: 14px; }
-  .ci-rm { color: var(--ink-3); font-size: 12px; font-weight: 600; margin-top: 6px; }
-  .ci-rm:hover { color: var(--hot); }
-  .cart-empty { text-align: center; padding: 60px 20px; color: var(--ink-3); }
-  .cart-empty .big { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 18px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; }
-  .drawer-foot { padding: 20px 24px 24px; border-top: 1px solid var(--line); background: var(--surface); }
-  .drawer-total { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
-  .drawer-total .t-l { font-weight: 700; color: var(--ink-2); font-size: 15px; }
-  .drawer-total .t-v { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: -.02em; }
-  .checkout { width: 100%; height: 54px; background: var(--ink); color: #fff; border-radius: var(--r); font-weight: 800; font-size: 16px; transition: .18s; }
-  .checkout:hover { background: var(--brand); }
-
-  /* toast */
-  .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 14px 22px; border-radius: var(--r-pill); font-weight: 700; font-size: 14.5px; box-shadow: var(--sh-2); z-index: 120; opacity: 0; transition: .3s; display: flex; align-items: center; gap: 10px; }
-  .toast.on { transform: translateX(-50%) translateY(0); opacity: 1; }
-  .toast .ok { width: 22px; height: 22px; border-radius: 50%; background: var(--save); display: grid; place-items: center; }
-
-  /* anim */
-  @keyframes pop { 0%{transform:scale(.97)} 100%{transform:scale(1)} }
-  .pop { animation: pop .3s cubic-bezier(.34,1.4,.64,1); }
-  @keyframes up { from{transform:translateY(16px)} to{transform:translateY(0)} }
-  .up { animation: up .5s cubic-bezier(.22,1,.36,1); }
-  @media (prefers-reduced-motion: reduce) { .up, .pop { animation: none; } }
-
-  /* ---------- Auth modal ---------- */
-  .modal-scrim { position: fixed; inset: 0; background: rgba(27,20,48,.5); backdrop-filter: blur(4px); z-index: 130; display: grid; place-items: center; padding: 20px; }
-  .modal { position: relative; width: 100%; max-width: 420px; background: var(--surface); border-radius: var(--r-lg); padding: 32px 30px 26px; box-shadow: var(--sh-2); }
-  .modal-x { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: var(--ink-3); }
-  .modal-x:hover { background: var(--line); color: var(--ink); }
-  .modal-brand { display: flex; align-items: center; gap: 11px; justify-content: center; margin-bottom: 20px; }
-  .auth-tabs { display: flex; gap: 4px; background: var(--surface-2); border: 1.5px solid var(--line-2); border-radius: var(--r-pill); padding: 4px; margin-bottom: 22px; }
-  .auth-tabs button { flex: 1; padding: 11px; border-radius: var(--r-pill); font-weight: 700; font-size: 14.5px; color: var(--ink-3); transition: .15s; }
-  .auth-tabs button.on { background: var(--ink); color: #fff; }
-  .auth-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
-  .field { display: flex; flex-direction: column; gap: 7px; }
-  .field > span { font-weight: 600; font-size: 13px; color: var(--ink-2); }
-  .field-in { display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 14px; border: 1.5px solid var(--line-2); border-radius: var(--r); background: var(--surface-2); transition: .15s; color: var(--ink-3); }
-  .field-in:focus-within { border-color: var(--brand); background: #fff; box-shadow: 0 0 0 4px var(--brand-soft); color: var(--brand); }
-  .field-in.bad { border-color: var(--hot); background: var(--hot-soft); }
-  .field-in input, .field-in select { flex: 1; border: none; background: none; outline: none; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--ink); min-width: 0; }
-  .field-in select { cursor: pointer; }
-  .field-err { color: var(--hot); font-size: 13px; font-weight: 600; margin: 0; }
-  .auth-submit { width: 100%; height: 52px; background: var(--brand); color: #fff; border-radius: var(--r); font-weight: 800; font-size: 15.5px; display: flex; align-items: center; justify-content: center; gap: 9px; transition: .18s; }
-  .auth-submit:hover { background: var(--brand-ink); transform: translateY(-1px); box-shadow: var(--sh-brand); }
-  .auth-note { text-align: center; color: var(--ink-3); font-size: 12px; line-height: 1.5; margin: 14px 0 0; }
-
-  /* ---------- Mobile menu ---------- */
-  .mm-scrim { position: fixed; inset: 0; background: rgba(27,20,48,.42); backdrop-filter: blur(3px); z-index: 110; opacity: 0; pointer-events: none; transition: .25s; }
-  .mm-scrim.on { opacity: 1; pointer-events: auto; }
-  .mm { position: fixed; top: 0; left: 0; bottom: 0; width: 320px; max-width: 86vw; background: var(--bg); z-index: 115; transform: translateX(-100%); transition: transform .3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: 10px 0 40px rgba(0,0,0,.16); }
-  .mm.on { transform: translateX(0); }
-  .mm-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
-  .mm-acct { display: flex; align-items: center; gap: 13px; padding: 18px 22px; cursor: pointer; border-bottom: 1px solid var(--line); }
-  .mm-acct:hover { background: var(--surface-2); }
-  .mm-acct-ic { width: 46px; height: 46px; border-radius: 14px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; flex: none; }
-  .mm-acct-name { font-weight: 700; font-size: 15px; }
-  .mm-acct-sub { color: var(--ink-3); font-size: 13px; }
-  .mm-nav { display: flex; flex-direction: column; padding: 12px; gap: 2px; flex: 1; }
-  .mm-nav button { text-align: left; padding: 14px 16px; border-radius: 12px; font-weight: 700; font-size: 15.5px; color: var(--ink-2); transition: .15s; }
-  .mm-nav button:hover { background: var(--brand-soft); color: var(--brand-ink); }
-  .mm-foot { padding: 18px 22px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; background: var(--surface); }
-  .mm-logout { color: var(--hot); font-weight: 700; font-size: 14px; padding: 8px 14px; border-radius: 10px; }
-  .mm-logout:hover { background: var(--hot-soft); }
-
-  /* ---------- Checkout ---------- */
-  .co-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 26px; align-items: start; }
-  .co-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; margin-bottom: 20px; box-shadow: var(--sh-1); }
-  .co-h { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 700; font-size: 18px; margin: 0 0 18px; }
-  .co-num { width: 28px; height: 28px; border-radius: 8px; background: var(--brand); color: #fff; display: grid; place-items: center; font-size: 14px; font-weight: 800; flex: none; }
-  .co-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .co-form .span2 { grid-column: 1 / -1; }
-  .pay-list { display: flex; flex-direction: column; gap: 12px; }
-  .pay { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px; border: 1.5px solid var(--line-2); border-radius: var(--r); background: var(--surface); transition: .15s; text-align: left; cursor: pointer; }
-  .pay:hover:not(.soon) { border-color: var(--brand); }
-  .pay.on { border-color: var(--brand); background: var(--brand-soft); }
-  .pay.soon { opacity: .62; cursor: not-allowed; }
-  .pay-ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: none; }
-  .pay-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .pay-name { font-weight: 700; font-size: 15px; }
-  .pay-sub { color: var(--ink-3); font-size: 12.5px; }
-  .pay-radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line-2); flex: none; transition: .15s; }
-  .pay-radio.on { border-color: var(--brand); background: radial-gradient(circle, var(--brand) 0 5px, transparent 6px); }
-  .pay-soon { display: inline-flex; align-items: center; gap: 5px; background: var(--ink); color: #fff; font-weight: 700; font-size: 11.5px; padding: 5px 10px; border-radius: var(--r-pill); flex: none; }
-
-  .co-summary { position: sticky; top: 92px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px; box-shadow: var(--sh-1); }
-  .co-items { display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto; margin-bottom: 16px; }
-  .co-item { display: flex; align-items: center; gap: 12px; }
-  .co-item-media { width: 52px; height: 52px; border-radius: 11px; overflow: hidden; position: relative; flex: none; }
-  .co-item-info { flex: 1; min-width: 0; }
-  .co-item-name { font-weight: 600; font-size: 13.5px; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .co-item-qty { color: var(--ink-3); font-size: 12.5px; }
-  .co-item-sum { font-family: var(--display); font-weight: 800; font-size: 14.5px; white-space: nowrap; }
-  .co-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; font-size: 14.5px; color: var(--ink-2); border-top: 1px solid var(--line); white-space: nowrap; }
-  .co-line b { color: var(--ink); font-weight: 700; }
-  .co-line .free { color: var(--save); }
-  .co-total { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 6px; margin-top: 6px; border-top: 2px solid var(--line-2); font-weight: 700; font-size: 16px; }
-  .co-total-v { font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: -.02em; }
-  .co-total-v small { font-size: 14px; }
-  .co-place { width: 100%; height: 54px; background: var(--ink); color: #fff; border-radius: var(--r); font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 14px; transition: .18s; }
-  .co-place:hover { background: var(--brand); transform: translateY(-2px); box-shadow: var(--sh-brand); }
-
-  .login-req { max-width: 460px; margin: 40px auto; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 44px 32px; box-shadow: var(--sh-1); }
-  .login-req-ic { width: 72px; height: 72px; margin: 0 auto 18px; border-radius: 20px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; }
-  .login-req h2 { font-family: var(--display); font-weight: 800; font-size: 24px; margin: 0 0 8px; }
-  .login-req p { color: var(--ink-2); font-size: 15px; line-height: 1.55; margin: 0 0 22px; }
-
-  /* ---------- Success ---------- */
-  .success { padding: 40px 0; }
-  .success-card { max-width: 500px; margin: 0 auto; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 48px 36px 40px; box-shadow: var(--sh-2); }
-  .success-ic { width: 88px; height: 88px; margin: 0 auto 22px; border-radius: 50%; background: var(--save); color: #fff; display: grid; place-items: center; box-shadow: 0 12px 30px rgba(18,161,80,.32); }
-  .success-card h1 { font-family: var(--display); font-weight: 800; font-size: 30px; margin: 0 0 10px; }
-  .success-card > p { color: var(--ink-2); font-size: 15.5px; line-height: 1.55; margin: 0 0 26px; }
-  .success-order { display: flex; justify-content: space-between; gap: 16px; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--r); padding: 20px 22px; margin-bottom: 26px; }
-  .success-order .lbl { display: block; color: var(--ink-3); font-size: 12.5px; font-weight: 600; margin-bottom: 4px; }
-  .success-order .num { font-family: var(--display); font-weight: 800; font-size: 18px; }
-
-  /* responsive */
-  @media (max-width: 980px) {
-    .hero-grid { grid-template-columns: 1fr; }
-    .pd-grid { grid-template-columns: 1fr; }
-    .pd-gallery { position: static; }
-    .grid { grid-template-columns: repeat(3, 1fr); }
-    .why { grid-template-columns: 1fr; }
-    .nav, .search { display: none; }
-    .burger { display: flex; }
-    .hero-h1 { font-size: 36px; }
-    .co-grid { grid-template-columns: 1fr; }
-    .co-summary { position: static; }
-  }
-
-  @media (max-width: 560px) {
-    /* Header */
-    .hdr { position: sticky; top: 0; z-index: 80; backdrop-filter: blur(12px); background: rgba(247,245,251,.92); border-bottom: 1px solid var(--line); }
-    .hdr-row { height: 60px; gap: 10px; }
-    .brand-tag, .acct-label, .cart-word { display: none; }
-    .acct-btn { padding: 0; width: 42px; justify-content: center; border-radius: 50%; }
-    .cart-btn { padding: 0 12px; height: 42px; border-radius: 999px; }
-    .brand-name { font-size: 17px; }
-    .wrap { padding: 0 14px; }
-
-    /* Hero — mobile card style */
-    .hero { padding: 14px 0 2px; }
-    .hero-left {
-      padding: 24px 20px 22px;
-      border-radius: var(--r);
-      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a855f7 100%);
-    }
-    .hero-h1 { font-size: 26px; line-height: 1.18; letter-spacing: -.03em; }
-    .hero-lead { font-size: 13.5px; margin-bottom: 18px; }
-    .hero-cta-row { flex-direction: column; gap: 10px; }
-    .btn-primary, .btn-ghost { width: 100%; justify-content: center; height: 48px; font-size: 14.5px; }
-    .btn-ghost { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.3); color: #fff; }
-
-    /* Grid — 2 columns, nicer cards */
-    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card { border-radius: 16px; }
-    .ph { height: 140px; border-radius: 12px 12px 0 0; }
-    .card-body { padding: 12px; }
-    .card-name { font-size: 13.5px; }
-    .card-sub { font-size: 12px; }
-    .card-price-now { font-size: 17px; }
-    .card-price-was { font-size: 12px; }
-    .card-save { font-size: 11px; }
-
-    /* Categories */
-    /* Categories — 2 qatorli grid */
-    .cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px 0 8px; flex-wrap: unset; overflow: unset; }
-    .cat { padding: 12px 8px; border-radius: 14px; flex-direction: column; gap: 4px; justify-content: center; font-size: 12px; text-align: center; height: auto; flex-shrink: unset; }
-    .cat-emoji { font-size: 22px; }
-    .cat.on { background: var(--brand); border-color: var(--brand); color: #fff; }
-
-    /* Section titles */
-    .sec-title { font-size: 20px; }
-
-    /* Product detail */
-    .pd-title { font-size: 22px; }
-    .pd-meta { gap: 8px; flex-wrap: wrap; }
-    .calc, .co-card, .co-summary { padding: 16px; border-radius: 14px; }
-    .calc-total .now { font-size: 26px; }
-
-    /* Checkout form */
-    .co-form { grid-template-columns: 1fr; gap: 10px; }
-
-    /* Success */
-    .success-card { padding: 30px 18px 26px; margin: 12px; border-radius: 20px; }
-    .success-order { flex-direction: column; gap: 8px; text-align: left; }
-
-    /* Bottom padding for bottom nav */
-    main { padding-bottom: 72px; }
-  }
-
-  @media (max-width: 400px) {
-    .grid { grid-template-columns: 1fr; gap: 10px; }
-    .hero-h1 { font-size: 23px; }
-  }
-
-  /* Bottom navigation — faqat mobile */
-  .bottom-nav {
-    display: none;
-  }
-  @media (max-width: 560px) {
-    .bottom-nav {
-      display: flex;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 62px;
-      background: rgba(255,255,255,.96);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--line);
-      z-index: 80;
-      padding: 0 4px;
-      align-items: stretch;
-    }
-    .bottom-nav button {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      font-size: 10.5px;
-      font-weight: 600;
-      color: var(--ink-3);
-      padding: 0;
-      border: none;
-      background: none;
-      cursor: pointer;
-      transition: color .15s;
-      font-family: inherit;
-    }
-    .bottom-nav button.active, .bottom-nav button:hover { color: var(--brand); }
-    .bottom-nav button svg { width: 22px; height: 22px; }
-    .bottom-nav .bn-cart { position: relative; }
-    .bottom-nav .bn-badge {
-      position: absolute;
-      top: 4px; right: calc(50% - 18px);
-      background: var(--brand);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 800;
-      min-width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 3px;
-    }
-  }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: var(--surface); border-radius: var(--r); padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-family: var(--display); font-weight: 800; font-size: 20px; margin: 0 0 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .add-btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: var(--r-sm); margin-bottom: 10px; display: none; }
+  .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
+  .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
 </style>
 </head>
 <body>
-  <div id="root"></div>
-
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
-
-  <script>
-/* ============ SAVAT.UZ — data, i18n, narx mantiqi ============ */
-(function () {
-  // ---- Supabase ulanish ----
-  var SUPABASE_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
-  var SUPABASE_KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
-
-  // Supabase'dan mahsulotlarni olib, sahifa kutgan formatga o'tkazadi
-  function fetchProducts() {
-    return fetch(SUPABASE_URL + "/rest/v1/products?select=*&order=id", {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY
-      }
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Supabase so'rovida xato: " + res.status);
-        return res.json();
-      })
-      .then(function (rows) {
-        var mapped = rows.map(function (r) {
-          return {
-            id: r.id,
-            cat: r.cat,
-            tile: r.tile,
-            accent: r.accent,
-            name: { uz: r.name_uz, ru: r.name_ru },
-            sub: { uz: r.sub_uz, ru: r.sub_ru },
-            china: r.china,
-            market: r.market,
-            weight: r.weight,
-            rating: r.rating,
-            sold: r.sold,
-            days: r.days,
-            hit: r.hit,
-            image_url: r.image_url || null
-          };
-        });
-        // Har sahifa ochilganda random tartib
-        for (var i = mapped.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = mapped[i]; mapped[i] = mapped[j]; mapped[j] = tmp;
-        }
-        return mapped;
-      });
-  }
-
-  // Yangi buyurtmani Supabase'ning "orders" jadvaliga yozadi
-  function saveOrder(o) {
-    return fetch(SUPABASE_URL + "/rest/v1/orders", {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({
-        order_num: o.num,
-        items: o.items,
-        region: o.region,
-        city: o.city,
-        address: o.address,
-        phone: o.phone,
-        comment: o.comment,
-        pay_method: o.pay,
-        total: o.total,
-        count: o.count,
-        user_email: o.user_email || null
-      })
-    });
-  }
-
-  // ---- Narx qoidalari ----
-  var CARGO_PER_KG = 120000;       // kargo: 1 kg uchun
-  var SERVICE_UNDER = 20000;       // 1 kg gacha — sobit xizmat haqi
-  var SERVICE_PER_KG = 15000;      // 1 kg dan ortiq — har kg uchun
-
-  function serviceFee(weight) {
-    if (weight < 1) return SERVICE_UNDER;
-    return Math.ceil(weight) * SERVICE_PER_KG;
-  }
-  function cargoFee(weight) {
-    return Math.round(weight * CARGO_PER_KG / 1000) * 1000;
-  }
-  // Mahsulot uchun to'liq narx tahlili
-  function breakdown(p) {
-    var cargo = cargoFee(p.weight);
-    var service = serviceFee(p.weight);
-    var total = p.china + cargo + service;
-    var save = p.market - total;
-    var pct = Math.round(save / p.market * 100);
-    return { china: p.china, cargo: cargo, service: service, total: total, market: p.market, save: save, pct: pct };
-  }
-
-  // ---- Mahsulotlar ----
-  // china = Xitoy zavod narxi, market = O'zbek bozori narxi, weight = kg
-  var PRODUCTS = [
-    { id: 1, cat: "shoes", tile: "#ede4ff", accent: "#6c2bd9",
-      name: { uz: "Sport krossovka", ru: "Спортивные кроссовки" },
-      sub:  { uz: "Erkaklar uchun, nafas oluvchi", ru: "Мужские, дышащие" },
-      china: 95000, market: 650000, weight: 0.8, rating: 4.8, sold: 12400, days: 12, hit: true },
-
-    { id: 2, cat: "tech", tile: "#e3f0ff", accent: "#2563eb",
-      name: { uz: "Simsiz quloqchin", ru: "Беспроводные наушники" },
-      sub:  { uz: "TWS, shovqin bostirish", ru: "TWS, шумоподавление" },
-      china: 78000, market: 420000, weight: 0.25, rating: 4.7, sold: 23800, days: 10, hit: true },
-
-    { id: 3, cat: "tech", tile: "#e8f7ee", accent: "#12a150",
-      name: { uz: "Aqlli soat", ru: "Умные часы" },
-      sub:  { uz: "AMOLED, qon bosimi sensori", ru: "AMOLED, датчик давления" },
-      china: 130000, market: 690000, weight: 0.3, rating: 4.6, sold: 9100, days: 11 },
-
-    { id: 4, cat: "fashion", tile: "#fdeef0", accent: "#e11d6a",
-      name: { uz: "Demi-mavsum kurtka", ru: "Демисезонная куртка" },
-      sub:  { uz: "Suv o'tkazmaydigan", ru: "Водоотталкивающая" },
-      china: 165000, market: 880000, weight: 1.4, rating: 4.5, sold: 4300, days: 14 },
-
-    { id: 5, cat: "fashion", tile: "#fff2e0", accent: "#e67700",
-      name: { uz: "Charm sumka", ru: "Кожаная сумка" },
-      sub:  { uz: "Eko-charm, ayollar uchun", ru: "Эко-кожа, женская" },
-      china: 92000, market: 540000, weight: 0.7, rating: 4.7, sold: 7600, days: 12 },
-
-    { id: 6, cat: "home", tile: "#eef0f4", accent: "#475569",
-      name: { uz: "Portativ blender", ru: "Портативный блендер" },
-      sub:  { uz: "USB-akkumulyator, 380ml", ru: "USB-аккумулятор, 380мл" },
-      china: 58000, market: 290000, weight: 0.6, rating: 4.4, sold: 15200, days: 10 },
-
-    { id: 7, cat: "tech", tile: "#fdeede", accent: "#f0432e",
-      name: { uz: "Power Bank 30000mAh", ru: "Повербанк 30000mAh" },
-      sub:  { uz: "Tez quvvatlash, PD 22.5W", ru: "Быстрая зарядка, PD 22.5W" },
-      china: 84000, market: 380000, weight: 0.55, rating: 4.6, sold: 18900, days: 11, hit: true },
-
-    { id: 8, cat: "home", tile: "#eafaf3", accent: "#0d9488",
-      name: { uz: "LED stol chiroq", ru: "LED настольная лампа" },
-      sub:  { uz: "Dimmer, ko'z himoyasi", ru: "Диммер, защита глаз" },
-      china: 46000, market: 240000, weight: 0.5, rating: 4.5, sold: 6700, days: 9 },
-
-    { id: 9, cat: "home", tile: "#f0ecff", accent: "#7c3aed",
-      name: { uz: "Robot changyutgich", ru: "Робот-пылесос" },
-      sub:  { uz: "Lazerli navigatsiya", ru: "Лазерная навигация" },
-      china: 690000, market: 3200000, weight: 3.6, rating: 4.7, sold: 2100, days: 16 },
-
-    { id: 10, cat: "fashion", tile: "#fef0e8", accent: "#db5a2a",
-      name: { uz: "Sport krossovka Pro", ru: "Кроссовки Pro" },
-      sub:  { uz: "Yengil, yugurish uchun", ru: "Лёгкие, для бега" },
-      china: 110000, market: 720000, weight: 0.85, rating: 4.8, sold: 8800, days: 12 },
-
-    { id: 11, cat: "tech", tile: "#e6f7fb", accent: "#0891b2",
-      name: { uz: "Bluetooth kolonka", ru: "Bluetooth-колонка" },
-      sub:  { uz: "Suvga chidamli, 24W", ru: "Влагозащита, 24W" },
-      china: 72000, market: 360000, weight: 0.65, rating: 4.6, sold: 11300, days: 10 },
-
-    { id: 12, cat: "home", tile: "#fdecf2", accent: "#be185d",
-      name: { uz: "Pardoz oynasi LED", ru: "Зеркало с LED" },
-      sub:  { uz: "Sensorli, 3 rejim", ru: "Сенсор, 3 режима" },
-      china: 64000, market: 330000, weight: 0.9, rating: 4.5, sold: 5400, days: 11 }
-  ];
-
-  var REGIONS = [
-    { id: "tsh-c", uz: "Toshkent shahri", ru: "город Ташкент" },
-    { id: "tsh-v", uz: "Toshkent viloyati", ru: "Ташкентская обл." },
-    { id: "sam", uz: "Samarqand", ru: "Самарканд" },
-    { id: "bux", uz: "Buxoro", ru: "Бухара" },
-    { id: "and", uz: "Andijon", ru: "Андижан" },
-    { id: "far", uz: "Farg'ona", ru: "Фергана" },
-    { id: "nam", uz: "Namangan", ru: "Наманган" },
-    { id: "qash", uz: "Qashqadaryo", ru: "Кашкадарья" },
-    { id: "surx", uz: "Surxondaryo", ru: "Сурхандарья" },
-    { id: "xor", uz: "Xorazm", ru: "Хорезм" },
-    { id: "nav", uz: "Navoiy", ru: "Навои" },
-    { id: "jiz", uz: "Jizzax", ru: "Джизак" },
-    { id: "sir", uz: "Sirdaryo", ru: "Сырдарья" },
-    { id: "qor", uz: "Qoraqalpog'iston", ru: "Каракалпакстан" }
-  ];
-
-  var CATS = [
-    { id: "all",     uz: "Hammasi",     ru: "Всё" },
-    { id: "tech",    uz: "Texnika",     ru: "Техника" },
-    { id: "fashion", uz: "Kiyim",       ru: "Одежда" },
-    { id: "shoes",   uz: "Oyoq kiyim",  ru: "Обувь" },
-    { id: "home",    uz: "Uy-ro'zg'or", ru: "Для дома" }
-  ];
-
-  // ---- Tarjimalar ----
-  var I18N = {
-    uz: {
-      tag: "Xitoydan to'g'ridan-to'g'ri",
-      nav_home: "Bosh sahifa", nav_catalog: "Katalog", nav_track: "Buyurtmalar", nav_help: "Yordam",
-      search: "Mahsulot qidirish...",
-      hero_kicker: "HAFTANING HITI",
-      hero_title: "Xitoy narxida —\nuyingizgacha",
-      hero_lead: "Vositachisiz. Har bir so'm ochiq: zavod narxi, kargo va xizmat haqi — hammasini ko'rasiz.",
-      hero_save: "Tejaysiz",
-      hero_cta: "Hoziroq buyurtma",
-      hero_secondary: "Narxni ko'rish",
-      cats_title: "Kategoriyalar",
-      best_title: "Hit savdo",
-      best_sub: "Eng ko'p sotilayotgan mahsulotlar",
-      sold: "sotilgan", view: "Batafsil", add: "Savatga",
-      pc_title: "Narx qanday shakllanadi",
-      pc_china: "Xitoy narxi (zavod)", pc_cargo: "Kargo (yetkazish)",
-      pc_service: "Savat xizmati", pc_total: "Bizda jami",
-      pc_market: "O'zbek bozorida", pc_save: "Tejaysiz",
-      detail_order: "Buyurtma berish", detail_add: "Savatga qo'shish",
-      back: "Orqaga", weight: "Og'irligi", delivery_days: "kunda yetkazamiz",
-      service_q: "Xizmat haqi qanday hisoblanadi?",
-      service_r1: "1 kg gacha", service_r1v: "20 000 so'm",
-      service_r2: "1 kg dan ortiq", service_r2v: "15 000 so'm / kg",
-      service_note: "Mahsulot og'irligiga qarab avtomatik hisoblanadi.",
-      why_title: "Nega SAVAT.UZ?",
-      why1_t: "Vositachisiz narx", why1_d: "To'g'ridan-to'g'ri Xitoy zavodlaridan.",
-      why2_t: "Ochiq hisob-kitob", why2_d: "Kargo va xizmat haqi yashirilmaydi.",
-      why3_t: "Ishonchli yetkazish", why3_d: "9–16 kunda eshigingizgacha.",
-      cart_title: "Savat", cart_empty: "Savat hozircha bo'sh",
-      cart_total: "Jami", cart_checkout: "Rasmiylashtirish", added: "Qo'shildi",
-      unit: "so'm", market_label: "Bozor narxi", qty: "soni",
-      // hisob / auth
-      login: "Kirish", account: "Hisob", menu: "Menyu",
-      auth_login_tab: "Kirish", auth_reg_tab: "Ro'yxatdan o'tish",
-      auth_name: "Ismingiz", auth_phone: "Telefon raqam",
-      auth_continue: "Davom etish", auth_logout: "Chiqish",
-      auth_hello: "Salom", auth_note: "Davom etish orqali foydalanish shartlariga rozilik bildirasiz.",
-      auth_err_name: "Ismingizni kiriting", auth_err_phone: "To'g'ri raqam kiriting",
-      // checkout
-      checkout: "Rasmiylashtirish",
-      co_login_req_t: "Avval hisobga kiring",
-      co_login_req_d: "Buyurtmani rasmiylashtirish uchun ro'yxatdan o'ting yoki kiring.",
-      co_delivery: "Yetkazib berish manzili", co_region: "Viloyat",
-      co_region_ph: "Viloyatni tanlang", co_city: "Shahar / tuman",
-      co_address: "Ko'cha, uy, kvartira", co_comment: "Izoh (ixtiyoriy)",
-      co_payment: "To'lov usuli", co_summary: "Buyurtmangiz",
-      co_items: "Mahsulotlar", co_delivery_fee: "Yetkazib berish", co_free: "Bepul",
-      co_total: "Jami to'lov", co_place: "Buyurtmani tasdiqlash",
-      co_err: "Barcha maydonlarni to'ldiring",
-      pay_cash: "Naqd — yetkazganda", pay_cash_d: "Kuryerga qo'lda to'laysiz",
-      pay_payme_d: "Onlayn karta orqali", pay_click_d: "Onlayn karta orqali",
-      soon: "Tez orada",
-      ok_t: "Buyurtma qabul qilindi!", ok_d: "Operatorlarimiz 15 daqiqada siz bilan bog'lanadi.",
-      ok_num: "Buyurtma raqami", ok_home: "Bosh sahifaga qaytish", ok_items: "mahsulot"
-    },
-    ru: {
-      tag: "Напрямую из Китая",
-      nav_home: "Главная", nav_catalog: "Каталог", nav_track: "Заказы", nav_help: "Помощь",
-      search: "Поиск товаров...",
-      hero_kicker: "ХИТ НЕДЕЛИ",
-      hero_title: "Цена Китая —\nдо вашей двери",
-      hero_lead: "Без посредников. Каждый сум прозрачен: цена завода, карго и сервис — вы видите всё.",
-      hero_save: "Экономия",
-      hero_cta: "Заказать сейчас",
-      hero_secondary: "Смотреть цену",
-      cats_title: "Категории",
-      best_title: "Хиты продаж",
-      best_sub: "Самые покупаемые товары",
-      sold: "продано", view: "Подробнее", add: "В корзину",
-      pc_title: "Из чего складывается цена",
-      pc_china: "Цена в Китае (завод)", pc_cargo: "Карго (доставка)",
-      pc_service: "Сервис Savat", pc_total: "У нас итого",
-      pc_market: "На рынке Узбекистана", pc_save: "Вы экономите",
-      detail_order: "Оформить заказ", detail_add: "Добавить в корзину",
-      back: "Назад", weight: "Вес", delivery_days: "дней доставка",
-      service_q: "Как считается сервисный сбор?",
-      service_r1: "До 1 кг", service_r1v: "20 000 сум",
-      service_r2: "Свыше 1 кг", service_r2v: "15 000 сум / кг",
-      service_note: "Считается автоматически по весу товара.",
-      why_title: "Почему SAVAT.UZ?",
-      why1_t: "Цена без посредников", why1_d: "Напрямую с фабрик Китая.",
-      why2_t: "Прозрачный расчёт", why2_d: "Карго и сервис не скрыты.",
-      why3_t: "Надёжная доставка", why3_d: "9–16 дней до вашей двери.",
-      cart_title: "Корзина", cart_empty: "Корзина пока пуста",
-      cart_total: "Итого", cart_checkout: "Оформить", added: "Добавлено",
-      unit: "сум", market_label: "Рыночная цена", qty: "кол-во",
-      // auth
-      login: "Вход", account: "Аккаунт", menu: "Меню",
-      auth_login_tab: "Вход", auth_reg_tab: "Регистрация",
-      auth_name: "Ваше имя", auth_phone: "Номер телефона",
-      auth_continue: "Продолжить", auth_logout: "Выйти",
-      auth_hello: "Привет", auth_note: "Продолжая, вы соглашаетесь с условиями использования.",
-      auth_err_name: "Введите имя", auth_err_phone: "Введите верный номер",
-      // checkout
-      checkout: "Оформить заказ",
-      co_login_req_t: "Сначала войдите",
-      co_login_req_d: "Для оформления заказа зарегистрируйтесь или войдите.",
-      co_delivery: "Адрес доставки", co_region: "Регион",
-      co_region_ph: "Выберите регион", co_city: "Город / район",
-      co_address: "Улица, дом, квартира", co_comment: "Комментарий (необяз.)",
-      co_payment: "Способ оплаты", co_summary: "Ваш заказ",
-      co_items: "Товары", co_delivery_fee: "Доставка", co_free: "Бесплатно",
-      co_total: "Итого к оплате", co_place: "Подтвердить заказ",
-      co_err: "Заполните все поля",
-      pay_cash: "Наличными при получении", pay_cash_d: "Оплата курьеру наличными",
-      pay_payme_d: "Онлайн картой", pay_click_d: "Онлайн картой",
-      soon: "Скоро",
-      ok_t: "Заказ принят!", ok_d: "Наш оператор свяжется с вами в течение 15 минут.",
-      ok_num: "Номер заказа", ok_home: "Вернуться на главную", ok_items: "товаров"
-    }
-  };
-
-  function fmt(n) {
-    return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g, " ");
-  }
-
-  window.SAVAT = {
-    PRODUCTS: PRODUCTS, CATS: CATS, REGIONS: REGIONS, I18N: I18N,
-    breakdown: breakdown, fmt: fmt, fetchProducts: fetchProducts, saveOrder: saveOrder,
-    CARGO_PER_KG: CARGO_PER_KG, SERVICE_UNDER: SERVICE_UNDER, SERVICE_PER_KG: SERVICE_PER_KG
-  };
-})();
-
-</script>
-  <script type="text/babel">
-/* ============ SAVAT.UZ — icons (stroke, currentColor) ============ */
-const S = (p) => React.createElement("svg", Object.assign({
-  viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
-  strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round"
-}, p));
-
-const Icons = {
-  basket: (p) => <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path d="M5 9h14l-1.2 9.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 9Z" fill="#fff" opacity=".95"/>
-    <path d="M8.5 9 12 3.8 15.5 9" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="9.5" cy="13.5" r="1" fill="#7c3aed"/>
-    <circle cx="14.5" cy="13.5" r="1" fill="#7c3aed"/>
-  </svg>,
-  search: (p) => <S {...p}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></S>,
-  cart: (p) => <S {...p}><path d="M3 4h2l2.3 11.5a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L21 8H6"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></S>,
-  plus: (p) => <S {...p}><path d="M12 5v14M5 12h14"/></S>,
-  minus: (p) => <S {...p}><path d="M5 12h14"/></S>,
-  arrow: (p) => <S {...p}><path d="M5 12h14M13 6l6 6-6 6"/></S>,
-  back: (p) => <S {...p}><path d="M19 12H5M11 6l-6 6 6 6"/></S>,
-  chevron: (p) => <S {...p}><path d="m6 9 6 6 6-6"/></S>,
-  x: (p) => <S {...p}><path d="M6 6l12 12M18 6 6 18"/></S>,
-  check: (p) => <S strokeWidth="2.4" {...p}><path d="M4 12.5 9 17.5 20 6.5"/></S>,
-  factory: (p) => <S {...p}><path d="M3 21h18M4 21V10l5 3V10l5 3V6l5 2.5V21"/><path d="M8 21v-3M13 21v-3"/></S>,
-  plane: (p) => <S {...p}><path d="M21 5.5 3 12l6 2 2 6 3-5 5 4 2-13.5Z"/></S>,
-  tag: (p) => <S {...p}><path d="M12 3H5a2 2 0 0 0-2 2v7l9 9 9-9-9-9Z" transform="rotate(0)"/><circle cx="8" cy="8" r="1.4"/></S>,
-  truck: (p) => <S {...p}><path d="M2 7h11v9H2zM13 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></S>,
-  weight: (p) => <S {...p}><path d="M12 3a2.2 2.2 0 1 1-2.2 2.2A2.2 2.2 0 0 1 12 3Z"/><path d="M8.5 7.5h7l2.5 11.5a1 1 0 0 1-1 1.2H7a1 1 0 0 1-1-1.2L8.5 7.5Z"/></S>,
-  shield: (p) => <S {...p}><path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9.2 12 2 2 3.6-3.8"/></S>,
-  eye: (p) => <S {...p}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></S>,
-  star: (p) => <svg viewBox="0 0 24 24" fill="currentColor" {...p}><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8-4.3-4.1 5.9-.9L12 3Z"/></svg>,
-  globe: (p) => <S {...p}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></S>,
-  flame: (p) => <svg viewBox="0 0 24 24" fill="currentColor" {...p}><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c0-1-.4-1.8-.4-1.8C18 9 19 12 19 14a7 7 0 0 1-14 0c0-4 4-6 4-9 0-1.5 1-2.5 3-3Z"/></svg>,
-  user: (p) => <S {...p}><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5"/></S>,
-  menu: (p) => <S {...p}><path d="M4 7h16M4 12h16M4 17h16"/></S>,
-  lock: (p) => <S {...p}><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></S>,
-  pin: (p) => <S {...p}><path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></S>,
-  phone: (p) => <S {...p}><path d="M5 4h3.5l1.5 4-2 1.5a11 11 0 0 0 5 5L19 16l1.5 3.5V20a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></S>,
-  card: (p) => <S {...p}><rect x="3" y="6" width="18" height="12" rx="2.4"/><path d="M3 10h18"/></S>,
-  spark: (p) => <S {...p}><path d="M12 4v16M4 12h16M6.5 6.5l11 11M17.5 6.5l-11 11"/></S>,
-  home: (p) => <S {...p}><path d="M3 12L12 4l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z"/></S>,
-  grid: (p) => <S {...p}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></S>,
-  box: (p) => <S {...p}><path d="M12 3L3 8v8l9 5 9-5V8L12 3Z"/><path d="M3 8l9 5 9-5M12 13v8"/></S>,
-  help: (p) => <S {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/></S>,
+<div id="root"></div>
+<script>
+var SB = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+var KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
+var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
+var SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTQ0NjkzMCwiZXhwIjoyMDk3MDIyOTMwfQ.U8GjwhhY5_aiLxHtXBCF3l8_PfdUMTrQRPTRtiZtJL4";
+var CATS = [
+  {id:"tech",label:"Texnika"},{id:"shoes",label:"Oyoq kiyim"},
+  {id:"fashion",label:"Kiyim"},{id:"home",label:"Uy-ro'zg'or"}
+];
+var REGIONS = {
+  "tsh-c":"Toshkent shahri","tsh-v":"Toshkent viloyati","sam":"Samarqand",
+  "bux":"Buxoro","and":"Andijon","far":"Farg'ona","nam":"Namangan",
+  "qash":"Qashqadaryo","surx":"Surxondaryo","xor":"Xorazm",
+  "nav":"Navoiy","jiz":"Jizzax","sir":"Sirdaryo","qor":"Qoraqalpog'iston"
 };
+var STATUSES = [
+  {id:"yangi",label:"Yangi"},{id:"tasdiqlangan",label:"Tasdiqlangan"},
+  {id:"yetkazilmoqda",label:"Yetkazilmoqda"},{id:"yakunlangan",label:"Yakunlangan"},
+  {id:"bekor",label:"Bekor qilindi"}
+];
 
-window.Icons = Icons;
+var root = document.getElementById("root");
+var token = sessionStorage.getItem("savat_admin_token") || null;
+var currentTab = "orders";
 
-</script>
-  <script type="text/babel">
-/* ============ SAVAT.UZ — components ============ */
-const { useState, useEffect, useRef } = React;
-const I = window.Icons;
-const { breakdown, fmt } = window.SAVAT;
+function fmt(n) { return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g," "); }
+function h(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-/* ---- placeholder media tile ---- */
-function Media({ p, label }) {
-  if (p.image_url) {
-    return (
-      <div className="ph" style={{ background: p.tile, padding: 0, overflow: "hidden" }}>
-        <img src={p.image_url} alt={p.name.uz} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-      </div>
-    );
-  }
-  return (
-    <div className="ph" style={{ background: p.tile }}>
-      <span className="ph-label">{label || p.name.uz.toLowerCase()}</span>
-    </div>
-  );
+function renderLogin(errMsg) {
+  root.innerHTML =
+    '<div class="login-box">'+
+      '<h1>SAVAT.UZ — Admin</h1>'+
+      '<p>Buyurtmalar va mahsulotlarni boshqarish</p>'+
+      '<label>Email</label><input id="em" type="email" placeholder="email@misol.com" />'+
+      '<label>Parol</label><input id="pw" type="password" placeholder="••••••••" />'+
+      '<div class="err">'+(errMsg||"")+'</div>'+
+      '<button class="btn" id="loginBtn">Kirish</button>'+
+    '</div>';
+  document.getElementById("loginBtn").onclick = doLogin;
+  document.getElementById("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
 }
 
-/* ---- animated count-up ---- */
-function useCountUp(target, on) {
-  const [v, setV] = useState(target);
-  useEffect(() => {
-    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!on || document.hidden || reduce) { setV(target); return; }
-    let raf, start;
-    const dur = 700;
-    setV(0);
-    const step = (t) => {
-      if (!start) start = t;
-      const k = Math.min((t - start) / dur, 1);
-      const e = 1 - Math.pow(1 - k, 3);
-      setV(target * e);
-      if (k < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    const safety = setTimeout(() => setV(target), dur + 200);
-    return () => { cancelAnimationFrame(raf); clearTimeout(safety); };
-  }, [target, on]);
-  return v;
+function doLogin() {
+  var email = document.getElementById("em").value.trim();
+  var pw = document.getElementById("pw").value;
+  var btn = document.getElementById("loginBtn");
+  btn.disabled=true; btn.textContent="Kirilmoqda...";
+  fetch(SB+"/auth/v1/token?grant_type=password",{
+    method:"POST",
+    headers:{"apikey":KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({email:email,password:pw})
+  }).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};})})
+  .then(function(r){
+    if(!r.ok||!r.d.access_token){renderLogin("Email yoki parol noto'g'ri");return;}
+    token=r.d.access_token;
+    sessionStorage.setItem("savat_admin_token",token);
+    renderMain();
+  }).catch(function(){renderLogin("Xatolik yuz berdi");});
 }
 
-/* ---- Header ---- */
-function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, onMenu, onMyOrders, onHelp, onCatalog }) {
-  return (
-    <header className="hdr">
-      <div className="wrap hdr-row">
-        <button className="burger" onClick={onMenu} aria-label="menu"><I.menu /></button>
-        <div className="brand" onClick={onHome}>
-          <div className="brand-mark"><I.basket /></div>
-          <div>
-            <div className="brand-name">SAVAT<span className="uz">.UZ</span></div>
-            <div className="brand-tag">{t.tag}</div>
-          </div>
-        </div>
-        <nav className="nav">
-          <button onClick={onHome}>{t.nav_home}</button>
-          <button onClick={onCatalog}>{t.nav_catalog}</button>
-          {user && <button onClick={onMyOrders}>{t.nav_track}</button>}
-          <button onClick={onHelp}>{t.nav_help}</button>
-        </nav>
-        <div className="search">
-          <I.search />
-          <input placeholder={t.search} />
-        </div>
-        <div className="hdr-actions">
-          <div className="lang">
-            <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
-            <button className={lang === "ru" ? "on" : ""} onClick={() => setLang("ru")}>RU</button>
-          </div>
-          <button className="acct-btn" onClick={onAccount}>
-            <I.user style={{ width: 18, height: 18 }} />
-            <span className="acct-label">{user ? user.name.split(" ")[0] : t.login}</span>
-          </button>
-          <button className="cart-btn" onClick={onCart}>
-            <I.cart />
-            <span className="cart-word">{t.cart_title}</span>
-            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-          </button>
-        </div>
-      </div>
-    </header>
-  );
+function doLogout() {
+  sessionStorage.removeItem("savat_admin_token");
+  token=null; renderLogin();
 }
 
-/* ---- Hero ---- */
-function Hero({ t, lang, product, onView, onAdd }) {
-  const b = breakdown(product);
-  return (
-    <section className="hero">
-      <div className="wrap hero-grid">
-        <div className="hero-left up">
-          <span className="kicker"><span className="dot" />{t.hero_kicker}</span>
-          <h1 className="hero-h1">{t.hero_title}</h1>
-          <p className="hero-lead">{t.hero_lead}</p>
-          <div className="hero-cta-row">
-            <button className="btn-primary" onClick={() => onView(product)}>
-              {t.hero_cta} <I.arrow style={{ width: 18, height: 18 }} />
-            </button>
-            <button className="btn-ghost" onClick={() => onView(product)}>{t.hero_secondary}</button>
-          </div>
-        </div>
-
-        <div className="hero-card up">
-          <div className="hero-media" style={{ cursor: "pointer" }} onClick={() => onView(product)}>
-            <span className="badge-disc" style={{ position: "absolute", top: 14, left: 14, zIndex: 2 }}>−{b.pct}%</span>
-            <Media p={product} />
-          </div>
-          <div className="hero-card-body">
-            <h3 className="hero-card-title">{product.name[lang]}</h3>
-            <p className="hero-card-sub">{product.sub[lang]}</p>
-            <div className="hero-price-row">
-              <div>
-                <div className="hero-was">{fmt(b.market)} {t.unit}</div>
-                <div className="hero-now">{fmt(b.total)} <small>{t.unit}</small></div>
-              </div>
-              <span className="save-chip"><I.flame style={{ width: 14, height: 14 }} />{t.hero_save} {fmt(b.save)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+function renderMain() {
+  root.innerHTML =
+    '<div class="wrap">'+
+      '<div class="top">'+
+        '<p class="top-title">SAVAT.UZ Admin</p>'+
+        '<div class="nav-tabs">'+
+          '<button class="tab'+(currentTab==="orders"?" active":"")+'" id="tabOrders">Buyurtmalar</button>'+
+          '<button class="tab'+(currentTab==="products"?" active":"")+'" id="tabProducts">Mahsulotlar</button>'+
+          '<button class="tab'+(currentTab==="users"?" active":"")+'" id="tabUsers">Foydalanuvchilar</button>'+
+          '<button class="tab'+(currentTab==="messages"?" active":"")+'" id="tabMessages">Xabarlar</button>'+
+        '</div>'+
+        '<button class="logout" id="logoutBtn">Chiqish</button>'+
+      '</div>'+
+      '<div id="content">Yuklanmoqda...</div>'+
+    '</div>';
+  document.getElementById("logoutBtn").onclick = doLogout;
+  document.getElementById("tabOrders").onclick = function(){ currentTab="orders"; renderMain(); };
+  document.getElementById("tabProducts").onclick = function(){ currentTab="products"; renderMain(); };
+  document.getElementById("tabUsers").onclick = function(){ currentTab="users"; renderMain(); };
+  document.getElementById("tabMessages").onclick = function(){ currentTab="messages"; renderMain(); };
+  if(currentTab==="orders") loadOrders();
+  else if(currentTab==="products") loadProducts();
+  else if(currentTab==="users") loadUsers();
+  else loadMessages();
 }
 
-/* ---- Category strip ---- */
-function Cats({ cats, lang, active, onPick }) {
-  const emojis = { all: "🛍️", tech: "📱", shoes: "👟", fashion: "👗", home: "🏠" };
-  return (
-    <div className="wrap">
-      <div className="cats">
-        {cats.map((c) => (
-          <button key={c.id} className={"cat" + (active === c.id ? " on" : "")} onClick={() => onPick(c.id)}>
-            <span className="cat-emoji">{emojis[c.id] || "📦"}</span>
-            {c[lang]}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+function statusClass(s){
+  if(s==="yangi") return "status-yangi";
+  if(s==="tasdiqlangan") return "status-tasdiqlangan";
+  if(s==="yetkazilmoqda") return "status-yetkazilmoqda";
+  if(s==="yakunlangan") return "status-yakunlangan";
+  return "status-bekor";
 }
 
-/* ---- Product card ---- */
-function ProductCard({ p, t, lang, qty, onView, onAdd, onInc, onDec }) {
-  const b = breakdown(p);
-  const stop = (e) => e.stopPropagation();
-  return (
-    <div className="card" onClick={() => onView(p)}>
-      <div className="card-media">
-        <span className="badge-disc">−{b.pct}%</span>
-        {qty > 0 && <span className="badge-incart"><I.check style={{ width: 12, height: 12, strokeWidth: 2.6 }} />{qty} {t.qty}</span>}
-        {p.hit && qty === 0 && <span className="badge-hit"><I.flame style={{ width: 12, height: 12 }} />HIT</span>}
-        <Media p={p} />
-      </div>
-      <div className="card-body">
-        <h4 className="card-name">{p.name[lang]}</h4>
-        <p className="card-sub">{p.sub[lang]}</p>
-        <div className="card-rate">
-          <span className="stars">{"★".repeat(5)}</span>
-          <span>{p.rating}</span>
-          <span style={{ color: "var(--ink-3)" }}>· {fmt(p.sold)} {t.sold}</span>
-        </div>
-        <div className="card-foot">
-          <div>
-            <span className="card-was">{fmt(b.market)}</span>
-            <span className="card-price">{fmt(b.total)} <small>{t.unit}</small></span>
-          </div>
-          {qty > 0 ? (
-            <div className="stepper" onClick={stop}>
-              <button onClick={(e) => { stop(e); onDec(p.id); }} aria-label="-"><I.minus /></button>
-              <span>{qty}</span>
-              <button onClick={(e) => { stop(e); onInc(p); }} aria-label="+"><I.plus /></button>
-            </div>
-          ) : (
-            <button className="card-add" onClick={(e) => { stop(e); onAdd(p, e); }} aria-label={t.add}>
-              <I.plus />
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---- Grid section ---- */
-function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec }) {
-  return (
-    <section className="wrap">
-      <div className="sec-head">
-        <div>
-          <h2 className="sec-title"><span className="sec-flame">🔥</span> {t.best_title}</h2>
-          <p className="sec-sub">{t.best_sub}</p>
-        </div>
-      </div>
-      <div className="grid">
-        {products.map((p) => (
-          <ProductCard key={p.id} p={p} t={t} lang={lang} qty={qtyFor(p.id)}
-            onView={onView} onAdd={onAdd} onInc={onInc} onDec={onDec} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ---- Why strip ---- */
-function Why({ t }) {
-  const items = [
-    { ic: <I.factory />, tk: "why1_t", dk: "why1_d" },
-    { ic: <I.tag />, tk: "why2_t", dk: "why2_d" },
-    { ic: <I.truck />, tk: "why3_t", dk: "why3_d" },
-  ];
-  return (
-    <section className="wrap">
-      <div className="why">
-        {items.map((it, i) => (
-          <div className="why-card" key={i}>
-            <div className="why-ic">{it.ic}</div>
-            <h3 className="why-t">{t[it.tk]}</h3>
-            <p className="why-d">{t[it.dk]}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ---- Footer ---- */
-function Footer({ t }) {
-  return (
-    <footer className="ftr">
-      <div className="wrap ftr-row">
-        <div className="brand">
-          <div className="brand-mark" style={{ width: 34, height: 34, borderRadius: 10 }}><I.basket style={{ width: 20, height: 20 }} /></div>
-          <div className="brand-name" style={{ fontSize: 18 }}>SAVAT<span className="uz">.UZ</span></div>
-        </div>
-        <small>© 2026 SAVAT.UZ — {t.tag}</small>
-      </div>
-    </footer>
-  );
-}
-
-window.SC = { Media, useCountUp, Header, Hero, Cats, ProductCard, Bestsellers, Why, Footer };
-
-</script>
-  <script type="text/babel">
-/* ============ SAVAT.UZ — auth, checkout, mobile menu ============ */
-const AC_D = window.SAVAT;
-const AC_I = window.Icons;
-const ACMedia = () => window.SC.Media;
-
-/* phone mask: +998 90 123 45 67 */
-function maskPhone(raw) {
-  let d = raw.replace(/\D/g, "");
-  if (d.startsWith("998")) d = d.slice(3);
-  d = d.slice(0, 9);
-  let out = "+998";
-  if (d.length) out += " " + d.slice(0, 2);
-  if (d.length > 2) out += " " + d.slice(2, 5);
-  if (d.length > 5) out += " " + d.slice(5, 7);
-  if (d.length > 7) out += " " + d.slice(7, 9);
-  return out;
-}
-function phoneValid(p) { return p.replace(/\D/g, "").length === 12; }
-
-/* ---------- Auth modal ---------- */
-function AuthModal({ open, t, onClose, onAuth }) {
-  const [tab, setTab] = useState("login"); // login | register | verify | forgot | reset-sent
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [err, setErr] = useState("");
-  const [info, setInfo] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
-  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
-
-  useEffect(() => { if (open) { setErr(""); setInfo(""); setLoading(false); } }, [open, tab]);
-  if (!open) return null;
-
-  const sb = (path, body) => fetch(SB_URL + path, {
-    method: "POST",
-    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  }).then(r => r.json().then(d => ({ ok: r.ok, d })));
-
-  // Kirish
-  const doLogin = async () => {
-    if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
-    if (password.length < 6) { setErr("Parol kamida 6 ta belgi"); return; }
-    setLoading(true); setErr("");
-    const { ok, d } = await sb("/auth/v1/token?grant_type=password", { email, password });
-    setLoading(false);
-    if (!ok) {
-      if (d.error_description === "Invalid login credentials") setErr("Email yoki parol noto'g'ri");
-      else if (d.error_description?.includes("Email not confirmed")) setErr("Email tasdiqlanmagan — pochtangizni tekshiring");
-      else setErr(d.error_description || "Xatolik yuz berdi");
-      return;
-    }
-    const finalName = d.user?.user_metadata?.name || email.split("@")[0];
-    onAuth({ name: finalName, email, token: d.access_token });
-    setName(""); setEmail(""); setPassword("");
-  };
-
-  // Ro'yxatdan o'tish
-  const doRegister = async () => {
-    if (name.trim().length < 2) { setErr("Ismingizni kiriting"); return; }
-    if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
-    if (password.length < 6) { setErr("Parol kamida 6 ta belgi"); return; }
-    setLoading(true); setErr("");
-
-    // Email mavjudligini tekshirish
-    const check = await sb("/auth/v1/token?grant_type=password", { email, password: "___check___x9z" });
-    if (!check.ok) {
-      const desc = check.d.error_description || "";
-      if (desc === "Invalid login credentials") {
-        // Email bor, faqat parol noto'g'ri = allaqachon ro'yxatdan o'tgan
-        setErr("Bu email allaqachon ro'yxatdan o'tgan");
-        setLoading(false); return;
-      }
-      // "Email not confirmed" ham email borligini bildiradi
-      if (desc.includes("not confirmed") || desc.includes("Email")) {
-        setErr("Bu email allaqachon ro'yxatdan o'tgan");
-        setLoading(false); return;
-      }
-    }
-
-    const { ok, d } = await sb("/auth/v1/signup", { email, password, data: { name: name.trim() } });
-    setLoading(false);
-    if (!ok) {
-      setErr(d.error_description || d.msg || d.message || "Xatolik yuz berdi");
-      return;
-    }
-    setTab("verify");
-    setInfo(email + " manziliga tasdiqlash kodi yuborildi");
-  };
-
-  // OTP tasdiqlash
-  const doVerify = async () => {
-    if (otp.trim().length < 6) { setErr("Kodni to'liq kiriting"); return; }
-    setLoading(true); setErr("");
-    const { ok, d } = await sb("/auth/v1/verify", { type: "signup", email, token: otp.trim() });
-    setLoading(false);
-    if (!ok) { 
-      setErr("Kod noto'g'ri yoki muddati o'tgan. Agar avval ro'yxatdan o'tgan bo'lsangiz — 'Kirishga qaytish' tugmasini bosib, email va parolingiz bilan kiring."); 
-      return; 
-    }
-    const finalName = d.user?.user_metadata?.name || name || email.split("@")[0];
-    onAuth({ name: finalName, email, token: d.access_token });
-    setName(""); setEmail(""); setPassword(""); setOtp("");
-  };
-
-  // Parolni tiklash
-  const doForgot = async () => {
-    if (!email.includes("@")) { setErr("To'g'ri email kiriting"); return; }
-    setLoading(true); setErr("");
-    const res = await fetch(SB_URL + "/auth/v1/recover", {
-      method: "POST",
-      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
+function loadOrders() {
+  fetch(SB+"/rest/v1/orders?select=*&order=created_at.desc",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){
+    if(r.status===401){doLogout();return Promise.reject();}
+    return r.json();
+  }).then(function(orders){
+    var cont = document.getElementById("content");
+    if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
+    cont.innerHTML = orders.map(function(o){
+      var items = (o.items||[]).map(function(it){
+        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
+      }).join("");
+      var opts = STATUSES.map(function(s){
+        return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
+      }).join("");
+      return '<div class="order-card">'+
+        '<div class="order-head">'+
+          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
+          '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
+          '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
+        '</div>'+
+        '<div class="order-body">'+
+          '<div class="items-list">'+items+'</div>'+
+          '<div>'+
+            '<div class="info-row"><b>Tel:</b> '+h(o.phone||"—")+'</div>'+
+            '<div class="info-row"><b>Hudud:</b> '+(REGIONS[o.region]||h(o.region||"—"))+'</div>'+
+            '<div class="info-row"><b>Shahar:</b> '+h(o.city||"—")+'</div>'+
+            '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
+            (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
+            '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    document.querySelectorAll("select.status").forEach(function(sel){
+      sel.onchange = function(){
+        sel.className="status "+statusClass(sel.value);
+        fetch(SB+"/rest/v1/orders?id=eq."+sel.getAttribute("data-id"),{
+          method:"PATCH",
+          headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+          body:JSON.stringify({status:sel.value})
+        });
+      };
     });
-    setLoading(false);
-    if (res.status === 429) {
-      setErr("Urinishlar soni ko'payib ketdi. 5-10 daqiqadan keyin qayta urinib ko'ring.");
-      return;
-    }
-    setTab("reset-sent");
-  };
-
-  const Brand = () => (
-    <div className="modal-brand">
-      <div className="brand-mark" style={{ width: 44, height: 44 }}><AC_I.basket style={{ width: 25, height: 25 }} /></div>
-      <div className="brand-name" style={{ fontSize: 22 }}>SAVAT<span className="uz">.UZ</span></div>
-    </div>
-  );
-
-  // OTP ekrani
-  if (tab === "verify") return (
-    <div className="modal-scrim on" onClick={onClose}>
-      <div className="modal pop" onClick={e => e.stopPropagation()}>
-        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
-        <Brand />
-        <div style={{ textAlign: "center", marginBottom: 16 }}>
-          <div style={{ fontSize: 36, marginBottom: 8 }}>📧</div>
-          <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>Emailni tasdiqlang</div>
-          <div style={{ color: "#8a849c", fontSize: 13.5 }}>{info}</div>
-          <div style={{ color: "#8a849c", fontSize: 12.5, marginTop: 8 }}>Agar xat kelmasa — avval ro'yxatdan o'tgan bo'lishingiz mumkin. "Kirishga qaytish" tugmasini bosing.</div>
-        </div>
-        <div className="auth-fields">
-          <label className="field">
-            <span>Tasdiqlash kodi</span>
-            <div className="field-in">
-              <AC_I.lock style={{ width: 18, height: 18 }} />
-              <input value={otp} onChange={e => setOtp(e.target.value)} placeholder="123456"
-                inputMode="numeric" maxLength={6}
-                onKeyDown={e => { if (e.key === "Enter") doVerify(); }} />
-            </div>
-          </label>
-          {err && <p className="field-err">{err}</p>}
-        </div>
-        <button className="auth-submit" onClick={doVerify} disabled={loading}>
-          {loading ? "Tekshirilmoqda..." : "Tasdiqlash"} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
-        </button>
-        <p className="auth-note" style={{ textAlign: "center", cursor: "pointer", color: "#6c2bd9" }}
-          onClick={() => { setTab("login"); setErr(""); }}>← Kirishga qaytish</p>
-      </div>
-    </div>
-  );
-
-  // Parol tiklash yuborildi
-  if (tab === "reset-sent") return (
-    <div className="modal-scrim on" onClick={onClose}>
-      <div className="modal pop" onClick={e => e.stopPropagation()}>
-        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
-        <Brand />
-        <div style={{ textAlign: "center", padding: "16px 0" }}>
-          <div style={{ fontSize: 36, marginBottom: 8 }}>✉️</div>
-          <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>Xat yuborildi</div>
-          <div style={{ color: "#8a849c", fontSize: 13.5 }}><b>{email}</b> manziliga parolni tiklash havolasi yuborildi. Pochtangizni tekshiring.</div>
-        </div>
-        <button className="auth-submit" onClick={() => { setTab("login"); setErr(""); }}>
-          Kirishga qaytish
-        </button>
-      </div>
-    </div>
-  );
-
-  // Parolni unutdim
-  if (tab === "forgot") return (
-    <div className="modal-scrim on" onClick={onClose}>
-      <div className="modal pop" onClick={e => e.stopPropagation()}>
-        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
-        <Brand />
-        <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>Parolni tiklash</div>
-        <div style={{ color: "#8a849c", fontSize: 13.5, marginBottom: 16 }}>Emailingizga tiklash havolasi yuboramiz</div>
-        <div className="auth-fields">
-          <label className="field">
-            <span>Email</span>
-            <div className="field-in">
-              <AC_I.user style={{ width: 18, height: 18 }} />
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@misol.com"
-                onKeyDown={e => { if (e.key === "Enter") doForgot(); }} />
-            </div>
-          </label>
-          {err && <p className="field-err">{err}</p>}
-        </div>
-        <button className="auth-submit" onClick={doForgot} disabled={loading}>
-          {loading ? "Yuborilmoqda..." : "Havolani yuborish"} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
-        </button>
-        <p className="auth-note" style={{ textAlign: "center", cursor: "pointer", color: "#6c2bd9" }}
-          onClick={() => { setTab("login"); setErr(""); }}>← Kirishga qaytish</p>
-      </div>
-    </div>
-  );
-
-  // Asosiy kirish / ro'yxatdan o'tish
-  return (
-    <div className="modal-scrim on" onClick={onClose}>
-      <div className="modal pop" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-x" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
-        <Brand />
-        <div className="auth-tabs">
-          <button className={tab === "login" ? "on" : ""} onClick={() => { setTab("login"); setErr(""); }}>{t.auth_login_tab}</button>
-          <button className={tab === "register" ? "on" : ""} onClick={() => { setTab("register"); setErr(""); }}>{t.auth_reg_tab}</button>
-        </div>
-        <div className="auth-fields">
-          {tab === "register" && (
-            <label className="field">
-              <span>{t.auth_name}</span>
-              <div className="field-in">
-                <AC_I.user style={{ width: 18, height: 18 }} />
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.auth_name} />
-              </div>
-            </label>
-          )}
-          <label className="field">
-            <span>Email</span>
-            <div className="field-in">
-              <AC_I.user style={{ width: 18, height: 18 }} />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@misol.com" autoComplete="off" />
-            </div>
-          </label>
-          <label className="field">
-            <span>Parol</span>
-            <div className="field-in">
-              <AC_I.lock style={{ width: 18, height: 18 }} />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="new-password"
-                onKeyDown={(e) => { if (e.key === "Enter") tab === "login" ? doLogin() : doRegister(); }} />
-            </div>
-          </label>
-          {err && <p className="field-err">{err}</p>}
-          {tab === "login" && (
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6c2bd9", cursor: "pointer", textAlign: "right" }}
-              onClick={() => { setTab("forgot"); setErr(""); }}>Parolni unutdingizmi?</p>
-          )}
-        </div>
-        <button className="auth-submit" onClick={tab === "login" ? doLogin : doRegister} disabled={loading}>
-          {loading ? "Yuklanmoqda..." : t.auth_continue} {!loading && <AC_I.arrow style={{ width: 18, height: 18 }} />}
-        </button>
-        <p className="auth-note">{t.auth_note}</p>
-      </div>
-    </div>
-  );
+  }).catch(function(){});
 }
 
-/* ---------- Mobile menu ---------- */
-function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders }) {
-  return (
-    <>
-      <div className={"mm-scrim" + (open ? " on" : "")} onClick={onClose} />
-      <aside className={"mm" + (open ? " on" : "")}>
-        <div className="mm-head">
-          <div className="brand-name" style={{ fontSize: 20 }}>SAVAT<span className="uz">.UZ</span></div>
-          <button className="x-btn" onClick={onClose}><AC_I.x style={{ width: 20, height: 20 }} /></button>
-        </div>
-        <div className="mm-acct" onClick={() => { onClose(); onAccount(); }}>
-          <div className="mm-acct-ic"><AC_I.user style={{ width: 20, height: 20 }} /></div>
-          <div>
-            <div className="mm-acct-name">{user ? `${t.auth_hello}, ${user.name.split(" ")[0]}` : t.login}</div>
-            <div className="mm-acct-sub">{user ? user.email : t.auth_reg_tab}</div>
-          </div>
-        </div>
-        <nav className="mm-nav">
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_home}</button>
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_catalog}</button>
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_track}</button>
-          <button onClick={() => { onClose(); onHome(); }}>{t.nav_help}</button>
-        </nav>
-        <div className="mm-foot">
-          <div className="lang" style={{ width: "fit-content" }}>
-            <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
-            <button className={lang === "ru" ? "on" : ""} onClick={() => setLang("ru")}>RU</button>
-          </div>
-          {user && <button className="mm-logout" style={{ background: "#f0e8ff", color: "#6c2bd9", marginBottom: 8 }} onClick={() => { onClose(); onMyOrders(); }}>Mening buyurtmalarim</button>}
-          {user && <button className="mm-logout" onClick={() => { onClose(); onLogout(); }}>{t.auth_logout}</button>}
-        </div>
-      </aside>
-    </>
-  );
-}
-
-/* ---------- Checkout ---------- */
-function PaymentCard({ m, t, selected, onSelect }) {
-  const icon = m.id === "cash" ? <AC_I.truck style={{ width: 20, height: 20 }} />
-    : m.id === "payme" ? <AC_I.card style={{ width: 20, height: 20 }} />
-    : <AC_I.spark style={{ width: 20, height: 20 }} />;
-  return (
-    <button
-      className={"pay" + (m.soon ? " soon" : "") + (selected ? " on" : "")}
-      onClick={() => !m.soon && onSelect(m.id)}
-      disabled={m.soon}
-    >
-      <span className="pay-ic" style={{ background: m.tint, color: m.color }}>{icon}</span>
-      <span className="pay-text">
-        <span className="pay-name">{m.label}</span>
-        <span className="pay-sub">{m.sub}</span>
-      </span>
-      {m.soon
-        ? <span className="pay-soon"><AC_I.lock style={{ width: 12, height: 12 }} />{t.soon}</span>
-        : <span className={"pay-radio" + (selected ? " on" : "")} />}
-    </button>
-  );
-}
-
-function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
-  const Media = window.SC.Media;
-  const [region, setRegion] = useState("");
-  const [city, setCity] = useState("");
-  const [address, setAddress] = useState("");
-  const [comment, setComment] = useState("");
-  const [phone, setPhone] = useState("+998 ");
-  const [pay, setPay] = useState("payme");
-  const [err, setErr] = useState(false);
-
-  useEffect(() => {
-    if (user && user.phone && phone.replace(/\D/g, "").length <= 3) setPhone(user.phone);
-  }, [user]);
-
-  const total = items.reduce((s, it) => s + AC_D.breakdown(it.p).total * it.q, 0);
-  const count = items.reduce((s, it) => s + it.q, 0);
-
-  const methods = [
-    { id: "payme", label: "Payme", sub: t.pay_payme_d, tint: "#e6f6fb", color: "#00b8d4" },
-    { id: "click", label: "Click", sub: t.pay_click_d, tint: "#eef0ff", color: "#3461ff" },
-    { id: "cash", label: t.pay_cash, sub: t.pay_cash_d, tint: "#e7f7ee", color: "#12a150", soon: true },
-  ];
-
-  if (!user) {
-    return (
-      <div className="pd wrap up">
-        <button className="back-link" onClick={onBack}><AC_I.back style={{ width: 18, height: 18 }} />{t.back}</button>
-        <div className="login-req">
-          <div className="login-req-ic"><AC_I.lock style={{ width: 30, height: 30 }} /></div>
-          <h2>{t.co_login_req_t}</h2>
-          <p>{t.co_login_req_d}</p>
-          <button className="auth-submit" style={{ maxWidth: 320, margin: "8px auto 0" }} onClick={onRequireAuth}>
-            {t.login} / {t.auth_reg_tab}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const place = () => {
-    if (!region || !phoneValid(phone) || city.trim().length < 2 || address.trim().length < 3) { setErr(true); return; }
-    const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
-    const orderItems = items.map((it) => {
-      const b = AC_D.breakdown(it.p);
-      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total };
-    });
-    onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
-  };
-
-  return (
-    <div className="pd wrap up">
-      <button className="back-link" onClick={onBack}><AC_I.back style={{ width: 18, height: 18 }} />{t.back}</button>
-      <h1 className="pd-title" style={{ marginBottom: 22 }}>{t.checkout}</h1>
-      <div className="co-grid">
-        <div className="co-main">
-          {/* delivery */}
-          <section className="co-card">
-            <h3 className="co-h"><span className="co-num">1</span>{t.co_delivery}</h3>
-            <div className="co-form">
-              <label className="field">
-                <span>{t.co_region}</span>
-                <div className={"field-in" + (err && !region ? " bad" : "")}>
-                  <AC_I.pin style={{ width: 18, height: 18 }} />
-                  <select value={region} onChange={(e) => setRegion(e.target.value)}>
-                    <option value="">{t.co_region_ph}</option>
-                    {AC_D.REGIONS.map((r) => <option key={r.id} value={r.id}>{r[lang]}</option>)}
-                  </select>
-                </div>
-              </label>
-              <label className="field">
-                <span>{t.co_city}</span>
-                <div className={"field-in" + (err && city.trim().length < 2 ? " bad" : "")}>
-                  <input value={city} onChange={(e) => setCity(e.target.value)} placeholder={t.co_city} />
-                </div>
-              </label>
-              <label className="field span2">
-                <span>{t.auth_phone}</span>
-                <div className={"field-in" + (err && !phoneValid(phone) ? " bad" : "")}>
-                  <AC_I.phone style={{ width: 18, height: 18 }} />
-                  <input inputMode="tel" value={phone}
-                    onChange={(e) => setPhone(maskPhone(e.target.value))}
-                    onKeyDown={(e) => { if ((e.key === "Backspace" || e.key === "Delete") && phone.replace(/\D/g, "").length <= 3) e.preventDefault(); }}
-                    placeholder="+998 90 123 45 67" />
-                </div>
-              </label>
-              <label className="field span2">
-                <span>{t.co_address}</span>
-                <div className={"field-in" + (err && address.trim().length < 3 ? " bad" : "")}>
-                  <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={t.co_address} />
-                </div>
-              </label>
-              <label className="field span2">
-                <span>{t.co_comment}</span>
-                <div className="field-in">
-                  <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t.co_comment} />
-                </div>
-              </label>
-            </div>
-          </section>
-
-          {/* payment */}
-          <section className="co-card">
-            <h3 className="co-h"><span className="co-num">2</span>{t.co_payment}</h3>
-            <div className="pay-list">
-              {methods.map((m) => (
-                <PaymentCard key={m.id} m={m} t={t} selected={pay === m.id} onSelect={setPay} />
-              ))}
-            </div>
-          </section>
-        </div>
-
-        {/* summary */}
-        <aside className="co-side">
-          <div className="co-summary">
-            <h3 className="co-h" style={{ marginBottom: 14 }}>{t.co_summary}</h3>
-            <div className="co-items">
-              {items.map((it) => {
-                const b = AC_D.breakdown(it.p);
-                return (
-                  <div className="co-item" key={it.p.id}>
-                    <div className="co-item-media"><Media p={it.p} label="" /></div>
-                    <div className="co-item-info">
-                      <p className="co-item-name">{it.p.name[lang]}</p>
-                      <span className="co-item-qty">{it.q} × {AC_D.fmt(b.total)} {t.unit}</span>
-                    </div>
-                    <span className="co-item-sum">{AC_D.fmt(b.total * it.q)}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="co-line"><span>{t.co_items} ({count})</span><b>{AC_D.fmt(total)} {t.unit}</b></div>
-            <div className="co-line"><span>{t.co_delivery_fee}</span><b className="free">{t.co_free}</b></div>
-            <div className="co-total">
-              <span>{t.co_total}</span>
-              <span className="co-total-v">{AC_D.fmt(total)} <small>{t.unit}</small></span>
-            </div>
-            {err && <p className="field-err" style={{ textAlign: "center" }}>{t.co_err}</p>}
-            <button className="co-place" onClick={place}>{t.co_place} <AC_I.check style={{ width: 18, height: 18 }} /></button>
-          </div>
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Order success ---------- */
-function OrderSuccess({ order, t, onHome }) {
-  return (
-    <div className="wrap success up">
-      <div className="success-card pop">
-        <div className="success-ic"><AC_I.check style={{ width: 38, height: 38, strokeWidth: 2.6 }} /></div>
-        <h1>{t.ok_t}</h1>
-        <p>{t.ok_d}</p>
-        <div className="success-order">
-          <div>
-            <span className="lbl">{t.ok_num}</span>
-            <span className="num">{order.num}</span>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <span className="lbl">{t.co_total}</span>
-            <span className="num">{AC_D.fmt(order.total)} {t.unit}</span>
-          </div>
-        </div>
-        <button className="co-place" style={{ maxWidth: 340, margin: "0 auto" }} onClick={onHome}>{t.ok_home}</button>
-      </div>
-    </div>
-  );
-}
-
-function MyOrders({ user, t, onHome }) {
-  const [orders, setOrders] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
-  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
-
-  const STATUS_LABELS = { yangi: "🟡 Yangi", tasdiqlangan: "🔵 Tasdiqlangan", yetkazilmoqda: "🟣 Yetkazilmoqda", yakunlangan: "🟢 Yakunlangan", bekor: "🔴 Bekor" };
-
-  useEffect(() => {
-    if (!user || !user.email) { setLoading(false); return; }
-    fetch(SB_URL + "/rest/v1/orders?user_email=eq." + encodeURIComponent(user.email) + "&order=created_at.desc", {
-      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
-    }).then(r => r.json()).then(data => { setOrders(data || []); setLoading(false); })
-    .catch(() => setLoading(false));
-  }, [user]);
-
-  return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px" }}>
-      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 16, padding: 0 }}>← Bosh sahifa</button>
-      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 20px" }}>Mening buyurtmalarim</h2>
-      {loading && <p style={{ color: "#8a849c" }}>Yuklanmoqda...</p>}
-      {!loading && !orders.length && <p style={{ color: "#8a849c" }}>Hozircha buyurtmalar yo'q</p>}
-      {orders.map(o => (
-        <div key={o.id} style={{ background: "#fff", border: "1px solid #ece8f4", borderRadius: 14, padding: 18, marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 16 }}>{o.order_num}</span>
-            <span style={{ fontSize: 13, color: "#8a849c" }}>{new Date(o.created_at).toLocaleDateString("ru-RU")}</span>
-          </div>
-          <div style={{ fontSize: 14, color: "#4a4360", marginBottom: 8 }}>
-            {(o.items || []).map((it, i) => <div key={i}>{it.qty}× {it.name_uz} — {Math.round(it.price * it.qty).toLocaleString()} so'm</div>)}
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17 }}>{Math.round(o.total).toLocaleString()} so'm</span>
-            <span style={{ fontSize: 13, fontWeight: 700 }}>{STATUS_LABELS[o.status] || o.status}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function HelpPage({ t, onHome, user }) {
-  const [openFaq, setOpenFaq] = React.useState(null);
-  const [name, setName] = React.useState(user ? user.name || "" : "");
-  const [email, setEmail] = React.useState(user ? user.email || "" : "");
-  const [msg, setMsg] = React.useState("");
-  const [sent, setSent] = React.useState(false);
-  const [sending, setSending] = React.useState(false);
-  const [err, setErr] = React.useState("");
-
-  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
-  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
-
-  const faqs = [
-    { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
-    { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni. Mahsulot og'irligiga qarab farq qilishi mumkin." },
-    { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo xarajati + xizmat haqi. Hech qanday yashirin to'lov yo'q — barchasini oldidan ko'rsatamiz." },
-    { q: "Mahsulot kelmaganda yoki sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz. Muammo bo'lsa, to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
-    { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul — qaysi qulay bo'lsa. To'lov faqat mahsulot yetib kelganidan keyin ham qilsa bo'ladi." },
-    { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
-    { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." },
-  ];
-
-  const sendMsg = async () => {
-    if (msg.trim().length < 5) { setErr("Xabar juda qisqa"); return; }
-    setSending(true); setErr("");
-    const res = await fetch(SB_URL + "/rest/v1/messages", {
-      method: "POST",
-      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
-      body: JSON.stringify({ name: name.trim() || "Noma'lum", email: email.trim() || null, message: msg.trim() })
-    });
-    setSending(false);
-    if (res.ok) { setSent(true); setMsg(""); }
-    else setErr("Xabar yuborishda xatolik, qayta urinib ko'ring");
-  };
-
-  return (
-    <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 40px" }}>
-      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>← Bosh sahifa</button>
-
-      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>Yordam markazi</h2>
-      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 28px" }}>Savollaringizga javob toping yoki xabar yuboring</p>
-
-      {/* Xabar yuborish formasi */}
-      <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", marginBottom: 28 }}>
-        <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17, color: "#fff", marginBottom: 16 }}>💬 Biz bilan yozing</div>
-        {sent ? (
-          <div style={{ background: "rgba(255,255,255,.2)", borderRadius: 12, padding: "18px 20px", textAlign: "center", color: "#fff" }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
-            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Xabar yuborildi!</div>
-            <div style={{ fontSize: 13.5, opacity: .85 }}>Tez orada javob beramiz</div>
-            <button onClick={() => setSent(false)} style={{ marginTop: 14, background: "rgba(255,255,255,.25)", border: "none", borderRadius: 10, padding: "10px 20px", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Yana yozish</button>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {!user && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Ismingiz"
-                  style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14 }} />
-                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (ixtiyoriy)" type="email"
-                  style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14 }} />
-              </div>
-            )}
-            <textarea value={msg} onChange={e => setMsg(e.target.value)} placeholder="Savolingiz yoki muammoingizni yozing..."
-              style={{ background: "rgba(255,255,255,.18)", border: "1.5px solid rgba(255,255,255,.25)", borderRadius: 10, padding: "12px 14px", color: "#fff", fontFamily: "inherit", fontSize: 14, resize: "none", height: 100, outline: "none" }} />
-            {err && <div style={{ color: "#fca5a5", fontSize: 13 }}>{err}</div>}
-            <button onClick={sendMsg} disabled={sending}
-              style={{ background: "#fff", color: "#6c2bd9", border: "none", borderRadius: 10, padding: "13px 0", fontFamily: "inherit", fontWeight: 800, fontSize: 15, cursor: "pointer" }}>
-              {sending ? "Yuborilmoqda..." : "Xabar yuborish →"}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Tezkor aloqa */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
-        <a href="https://t.me/savatmarket" target="_blank"
-          style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#1b1430" }}>
-          <span style={{ fontSize: 22 }}>✈️</span>
-          <div><div style={{ fontSize: 11, color: "#8a849c" }}>Telegram</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>@savatmarket</div></div>
-        </a>
-        <a href="tel:+998900000000"
-          style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, padding: "14px 16px", textDecoration: "none", color: "#1b1430" }}>
-          <span style={{ fontSize: 22 }}>📞</span>
-          <div><div style={{ fontSize: 11, color: "#8a849c" }}>Telefon</div><div style={{ fontSize: 13.5, fontWeight: 700 }}>+998 90 000 00 00</div></div>
-        </a>
-      </div>
-
-      {/* FAQ */}
-      <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 18, marginBottom: 14 }}>Ko'p so'raladigan savollar</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {faqs.map((f, i) => (
-          <div key={i} style={{ background: "#fff", border: "1.5px solid #ece8f4", borderRadius: 14, overflow: "hidden" }}>
-            <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "16px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, textAlign: "left", fontFamily: "inherit", fontWeight: 700, fontSize: 14.5, color: "#1b1430" }}>
-              <span>{f.q}</span>
-              <span style={{ fontSize: 18, color: "#6c2bd9", transition: "transform .2s", display: "inline-block", transform: openFaq === i ? "rotate(45deg)" : "none", flexShrink: 0 }}>+</span>
-            </button>
-            {openFaq === i && (
-              <div style={{ padding: "0 18px 16px", fontSize: 14, color: "#4a4360", lineHeight: 1.6 }}>{f.a}</div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage };
-
-</script>
-  <script type="text/babel">
-/* ============ SAVAT.UZ — product detail, cart, app ============ */
-const { Media, useCountUp, Header, Hero, Cats, ProductCard, Bestsellers, Why, Footer } = window.SC;
-const { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage } = window.AC;
-const Ico = window.Icons;
-const D = window.SAVAT;
-
-/* ---------- Product Detail ---------- */
-function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }) {
-  const b = D.breakdown(p);
-  const [thumb, setThumb] = useState(0);
-  const [open, setOpen] = useState(false);
-  const total = useCountUp(b.total, true);
-  const under = p.weight < 1;
-
-  const wLabel = p.weight < 1 ? Math.round(p.weight * 1000) + " g" : p.weight + " kg";
-  const rows = [
-    { ic: <Ico.factory />, lbl: t.pc_china, val: b.china },
-    { ic: <Ico.plane />, lbl: t.pc_cargo, val: b.cargo },
-    { ic: <Ico.shield />, lbl: t.pc_service, val: b.service },
-  ];
-
-  return (
-    <div className="pd wrap up">
-      <button className="back-link" onClick={onBack}><Ico.back style={{ width: 18, height: 18 }} />{t.back}</button>
-      <div className="pd-grid">
-        {/* gallery */}
-        <div className="pd-gallery">
-          <div className="pd-main-media">
-            <span className="badge-disc" style={{ top: 16, left: 16, fontSize: 15, padding: "7px 14px" }}>−{b.pct}%</span>
-            <Media p={p} label={p.name[lang].toLowerCase()} />
-          </div>
-          <div className="pd-thumbs">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className={"pd-thumb" + (thumb === i ? " on" : "")} onClick={() => setThumb(i)}>
-                <Media p={p} label={"" + (i + 1)} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* info */}
-        <div>
-          <span className="pd-src"><Ico.globe style={{ width: 15, height: 15 }} /> Pinduoduo · 拼多多</span>
-          <h1 className="pd-title">{p.name[lang]}</h1>
-          <p className="pd-sub">{p.sub[lang]}</p>
-          <div className="pd-meta">
-            <span className="stars" style={{ fontSize: 15 }}>{"★".repeat(5)}</span>
-            <b>{p.rating}</b>
-            <span className="sep" />
-            <span>{D.fmt(p.sold)} {t.sold}</span>
-            <span className="sep" />
-            <span><b>{p.days}</b> {t.delivery_days}</span>
-            <span className="sep" />
-            <span>{t.weight}: <b>{wLabel}</b></span>
-          </div>
-
-          {/* price calculator */}
-          <div className="calc">
-            <div className="calc-h"><h3>{t.pc_title}</h3></div>
-            {rows.map((r, i) => (
-              <div className="calc-row" key={i}>
-                <span className="lbl"><span className="ic" style={{ color: p.accent }}>{r.ic}</span>{r.lbl}</span>
-                <span className="val">{D.fmt(r.val)} {t.unit}</span>
-              </div>
-            ))}
-            <div className="calc-total">
-              <div className="was">{t.pc_market}: <s>{D.fmt(b.market)} {t.unit}</s></div>
-              <div className="now-row">
-                <span className="now-lbl">{t.pc_total}</span>
-                <span className="now">{D.fmt(total)} <small>{t.unit}</small></span>
-              </div>
-              <div className="calc-save"><Ico.flame style={{ width: 15, height: 15 }} />{t.pc_save} {D.fmt(b.save)} {t.unit}</div>
-            </div>
-
-            {/* service explainer */}
-            <div className="svc">
-              <button className={"svc-q" + (open ? " open" : "")} onClick={() => setOpen(!open)}>
-                <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Ico.shield style={{ width: 18, height: 18, color: "var(--brand)" }} />{t.service_q}
-                </span>
-                <Ico.chevron className="chev" style={{ width: 18, height: 18 }} />
-              </button>
-              {open && (
-                <div className="svc-body pop">
-                  <div className={"svc-rule" + (under ? " svc-active" : "")}>
-                    <span className="k"><span className="badge">≤1</span>{t.service_r1}</span>
-                    <span className="v">{t.service_r1v}</span>
-                  </div>
-                  <div className={"svc-rule" + (!under ? " svc-active" : "")}>
-                    <span className="k"><span className="badge">1+</span>{t.service_r2}</span>
-                    <span className="v">{t.service_r2v}</span>
-                  </div>
-                  <p className="svc-note">
-                    {t.service_note} <b style={{ color: "var(--ink)" }}>{wLabel} → {D.fmt(b.service)} {t.unit}</b>
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="pd-cta">
-            <button className="order" onClick={() => onOrder(p)}>{t.detail_order} <Ico.arrow style={{ width: 18, height: 18 }} /></button>
-            {qty > 0 ? (
-              <div className="stepper stepper-lg">
-                <button onClick={() => onDec(p.id)} aria-label="-"><Ico.minus /></button>
-                <span>{qty}</span>
-                <button onClick={() => onInc(p)} aria-label="+"><Ico.plus /></button>
-              </div>
-            ) : (
-              <button className="addc" onClick={(e) => onAdd(p, e)} aria-label={t.detail_add}><Ico.cart style={{ width: 22, height: 22 }} /></button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Cart Drawer ---------- */
-function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout }) {
-  const total = items.reduce((s, it) => s + D.breakdown(it.p).total * it.q, 0);
-  const count = items.reduce((s, it) => s + it.q, 0);
-  return (
-    <>
-      <div className={"scrim" + (open ? " on" : "")} onClick={onClose} />
-      <aside className={"drawer" + (open ? " on" : "")}>
-        <div className="drawer-h">
-          <h3>{t.cart_title}{count > 0 ? ` · ${count}` : ""}</h3>
-          <button className="x-btn" onClick={onClose}><Ico.x style={{ width: 20, height: 20 }} /></button>
-        </div>
-        <div className="drawer-body">
-          {items.length === 0 ? (
-            <div className="cart-empty">
-              <div className="big"><Ico.cart style={{ width: 30, height: 30 }} /></div>
-              <p>{t.cart_empty}</p>
-            </div>
-          ) : items.map((it) => {
-            const b = D.breakdown(it.p);
-            return (
-              <div className="ci" key={it.p.id}>
-                <div className="ci-media"><Media p={it.p} label="" /></div>
-                <div className="ci-info">
-                  <p className="ci-name">{it.p.name[lang]}</p>
-                  <span className="ci-price">{D.fmt(b.total * it.q)} <small style={{ fontSize: 12, color: "var(--ink-3)" }}>{t.unit}</small></span>
-                  <div>
-                    <div className="ci-qty">
-                      <button onClick={() => onQty(it.p.id, -1)}><Ico.minus style={{ width: 14, height: 14 }} /></button>
-                      <span>{it.q}</span>
-                      <button onClick={() => onQty(it.p.id, 1)}><Ico.plus style={{ width: 14, height: 14 }} /></button>
-                    </div>
-                  </div>
-                </div>
-                <button className="ci-rm" onClick={() => onRemove(it.p.id)}><Ico.x style={{ width: 16, height: 16 }} /></button>
-              </div>
-            );
-          })}
-        </div>
-        {items.length > 0 && (
-          <div className="drawer-foot">
-            <div className="drawer-total">
-              <span className="t-l">{t.cart_total}</span>
-              <span className="t-v">{D.fmt(total)} <small style={{ fontSize: 16 }}>{t.unit}</small></span>
-            </div>
-            <button className="checkout" onClick={onCheckout}>{t.cart_checkout} →</button>
-          </div>
-        )}
-      </aside>
-    </>
-  );
-}
-
-/* ---------- App ---------- */
-function App() {
-  const [lang, setLang] = useState(() => localStorage.getItem("savat_lang") || "uz");
-  const [view, setView] = useState("home"); // home | product | checkout | success
-  const [current, setCurrent] = useState(null);
-  const [cat, setCat] = useState("all");
-  const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [products, setProducts] = useState(D.PRODUCTS);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("savat_user") || "null"); } catch (e) { return null; }
+function loadProducts() {
+  fetch(SB+"/rest/v1/products?select=*&order=id",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(products){
+    var cont = document.getElementById("content");
+    cont.innerHTML =
+      '<div class="add-btn-row">'+
+        '<span>Jami: <b>'+products.length+'</b> ta mahsulot</span>'+
+        '<button class="btn btn-sm" id="addBtn">+ Yangi mahsulot</button>'+
+      '</div>'+
+      '<div class="prod-grid">'+
+        products.map(function(p){
+          var imgHtml = p.image_url
+            ? '<img class="prod-img" src="'+h(p.image_url)+'" alt="'+h(p.name_uz)+'" />'
+            : '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>';
+          return '<div class="prod-card">'+
+            imgHtml+
+            '<div class="prod-name">'+h(p.name_uz)+(p.sku?' <span style="font-size:11px;font-weight:700;background:#f0e8ff;color:#6c2bd9;padding:2px 8px;border-radius:999px;vertical-align:middle">'+h(p.sku)+'</span>':'')+'</div>'+
+            '<div class="prod-sub">'+h(p.sub_uz||"")+'</div>'+
+            '<div class="prod-prices">Xitoy: <b>'+fmt(p.china)+'</b> | Biz: <b>'+fmt(p.market)+'</b> so\'m | '+p.weight+' kg</div>'+
+            '<div class="prod-actions">'+
+              '<button class="btn btn-sm btn-ghost" onclick="editProduct(\''+encodeURIComponent(JSON.stringify(p))+'\')">Tahrirlash</button>'+
+              '<button class="btn btn-sm btn-danger" onclick="deleteProduct('+p.id+',\''+h(p.name_uz)+'\')">O\'chirish</button>'+
+            '</div>'+
+          '</div>';
+        }).join("")+
+      '</div>';
+    document.getElementById("addBtn").onclick = function(){ openProductModal(null); };
   });
-  const [authOpen, setAuthOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [order, setOrder] = useState(null);
-  const toastTimer = useRef(null);
-
-  const t = D.I18N[lang];
-  useEffect(() => { localStorage.setItem("savat_lang", lang); }, [lang]);
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
-  useEffect(() => {
-    if (user) localStorage.setItem("savat_user", JSON.stringify(user));
-    else localStorage.removeItem("savat_user");
-  }, [user]);
-  useEffect(() => {
-    D.fetchProducts()
-      .then((rows) => { if (rows && rows.length) setProducts(rows); })
-      .catch((err) => { console.error("Mahsulotlarni yuklashda xato:", err); })
-      .finally(() => setProductsLoading(false));
-  }, []);
-
-  const featured = products.find((p) => p.id === 1) || products[0];
-  const list = cat === "all" ? products : products.filter((p) => p.cat === cat);
-
-  const showToast = (msg) => {
-    setToast(msg);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2000);
-  };
-  const addToCart = (p) => {
-    setCart((c) => {
-      const f = c.find((it) => it.p.id === p.id);
-      if (f) return c.map((it) => it.p.id === p.id ? { ...it, q: it.q + 1 } : it);
-      return [...c, { p, q: 1 }];
-    });
-    showToast(t.added);
-  };
-  const changeQty = (id, d) => setCart((c) => c.map((it) => it.p.id === id ? { ...it, q: Math.max(1, it.q + d) } : it));
-  const removeItem = (id) => setCart((c) => c.filter((it) => it.p.id !== id));
-  const decItem = (id) => setCart((c) => c.flatMap((it) => it.p.id === id ? (it.q > 1 ? [{ ...it, q: it.q - 1 }] : []) : [it]));
-  const cartQty = (id) => { const it = cart.find((i) => i.p.id === id); return it ? it.q : 0; };
-  const openProduct = (p) => { setCurrent(p); setView("product"); window.scrollTo({ top: 0 }); };
-  const goHome = () => { setView("home"); window.scrollTo({ top: 0 }); };
-  const goCheckout = () => {
-    if (cart.length === 0) return;
-    setCartOpen(false);
-    setView("checkout");
-    window.scrollTo({ top: 0 });
-  };
-  const onAccount = () => { if (user) setMenuOpen(true); else setAuthOpen(true); };
-  const onAuth = (u) => { setUser(u); setAuthOpen(false); };
-  const onLogout = () => { setUser(null); };
-  const placeOrder = (o) => {
-    D.saveOrder({ ...o, user_email: user ? user.email : null }).catch((err) => console.error("Buyurtmani saqlashda xato:", err));
-    setOrder(o);
-    setCart([]);
-    setView("success");
-    window.scrollTo({ top: 0 });
-  };
-
-  const cartCount = cart.reduce((s, it) => s + it.q, 0);
-
-  return (
-    <>
-      <Header t={t} lang={lang} setLang={setLang} cartCount={cartCount}
-        onCart={() => setCartOpen(true)} onHome={goHome}
-        user={user} onAccount={onAccount} onMenu={() => setMenuOpen(true)}
-        onMyOrders={() => setView("myorders")} onHelp={() => setView("help")} onCatalog={() => { goHome(); document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}); }} />
-
-      {view === "home" && (
-        <main>
-          <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
-          <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
-          <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty}
-            onView={openProduct} onAdd={(p) => addToCart(p)} onInc={(p) => addToCart(p)} onDec={decItem} />
-          <Why t={t} />
-          <Footer t={t} />
-        </main>
-      )}
-      {view === "product" && (
-        <main>
-          <ProductDetail p={current} t={t} lang={lang} qty={cartQty(current.id)} onBack={goHome}
-            onAdd={(p) => addToCart(p)} onOrder={(p) => { addToCart(p); goCheckout(); }}
-            onInc={(p) => addToCart(p)} onDec={decItem} />
-          <Footer t={t} />
-        </main>
-      )}
-      {view === "checkout" && (
-        <main>
-          <Checkout items={cart} t={t} lang={lang} user={user}
-            onBack={() => (current ? openProduct(current) : goHome())}
-            onPlace={placeOrder} onRequireAuth={() => setAuthOpen(true)} />
-          <Footer t={t} />
-        </main>
-      )}
-      {view === "success" && order && (
-        <main>
-          <OrderSuccess order={order} t={t} onHome={goHome} />
-          <Footer t={t} />
-        </main>
-      )}
-      {view === "myorders" && (
-        <main>
-          <MyOrders user={user} t={t} onHome={goHome} />
-          <Footer t={t} />
-        </main>
-      )}
-      {view === "help" && (
-        <main>
-          <HelpPage t={t} onHome={goHome} user={user} />
-          <Footer t={t} />
-        </main>
-      )}
-
-      <CartDrawer open={cartOpen} items={cart} t={t} lang={lang}
-        onClose={() => setCartOpen(false)} onQty={changeQty} onRemove={removeItem}
-        onCheckout={goCheckout} />
-
-      <AuthModal open={authOpen} t={t} onClose={() => setAuthOpen(false)} onAuth={onAuth} />
-      <MobileMenu open={menuOpen} t={t} lang={lang} setLang={setLang}
-        onClose={() => setMenuOpen(false)} onHome={goHome}
-        user={user} onAccount={() => setAuthOpen(true)} onLogout={onLogout}
-        onMyOrders={() => setView("myorders")} />
-
-      {/* Bottom Navigation — faqat mobile */}
-      <nav className="bottom-nav">
-        <button className={view === "home" ? "active" : ""} onClick={goHome}>
-          <Ico.home style={{ width: 22, height: 22 }} />
-          <span>Bosh</span>
-        </button>
-        <button onClick={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 100); }}>
-          <Ico.grid style={{ width: 22, height: 22 }} />
-          <span>Katalog</span>
-        </button>
-        {user ? (
-          <button className={view === "myorders" ? "active" : ""} onClick={() => setView("myorders")}>
-            <Ico.box style={{ width: 22, height: 22 }} />
-            <span>Buyurtmalar</span>
-          </button>
-        ) : (
-          <button className={view === "help" ? "active" : ""} onClick={() => setView("help")}>
-            <Ico.help style={{ width: 22, height: 22 }} />
-            <span>Yordam</span>
-          </button>
-        )}
-        <button className="bn-cart" onClick={() => setCartOpen(true)}>
-          <Ico.cart style={{ width: 22, height: 22 }} />
-          {cartCount > 0 && <span className="bn-badge">{cartCount}</span>}
-          <span>Savat</span>
-        </button>
-      </nav>
-
-      <div className={"toast" + (toast ? " on" : "")}>
-        <span className="ok"><Ico.check style={{ width: 13, height: 13, color: "#fff" }} /></span>
-        {toast}
-      </div>
-    </>
-  );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+function editProduct(pEnc) {
+  openProductModal(JSON.parse(decodeURIComponent(pEnc)));
+}
 
+function deleteProduct(id, name) {
+  if(!confirm(name+" ni o'chirishni tasdiqlaysizmi?")) return;
+  fetch(SB+"/rest/v1/products?id=eq."+id,{
+    method:"DELETE",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+  }).then(function(){ loadProducts(); });
+}
+
+function openProductModal(p) {
+  var isEdit = !!p;
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="modal-bg" id="modalBg">'+
+      '<div class="modal">'+
+        '<h2>'+(isEdit?"Tahrirlash":"Yangi mahsulot")+'</h2>'+
+        '<label>Nomi (uz)</label><input id="f_name_uz" value="'+h(p?p.name_uz:"")+'" placeholder="Sport krossovka" />'+
+        '<label>Nomi (ru)</label><input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" />'+
+        '<label>Tavsif (uz)</label><input id="f_sub_uz" value="'+h(p?p.sub_uz:"")+'" placeholder="Erkaklar uchun..." />'+
+        '<label>Tavsif (ru)</label><input id="f_sub_ru" value="'+h(p?p.sub_ru:"")+'" placeholder="Мужские..." />'+
+        '<label>SKU (mahsulot kodi)</label><input id="f_sku" value="'+h(p?p.sku||"":"")+'" placeholder="SHOES-001, TECH-042..." />'+
+        '<div class="form-row">'+
+          '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" /></div>'+
+          '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" /></div>'+
+        '</div>'+
+        '<div class="form-row">'+
+          '<div><label>Vazni (kg)</label><input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" /></div>'+
+          '<div><label>Kategoriya</label>'+
+            '<select id="f_cat">'+CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+'</select>'+
+          '</div>'+
+        '</div>'+
+        '<label>Mahsulot rasmi</label>'+
+        (p&&p.image_url?'<img class="img-preview" id="imgPreview" src="'+h(p.image_url)+'" style="display:block" />':'<img class="img-preview" id="imgPreview" />')+
+        '<input type="file" id="f_image" accept="image/*" />'+
+        '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
+        '<div class="err" id="modalErr"></div>'+
+        '<div style="display:flex;gap:10px;">'+
+          '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
+          '<button class="btn" style="flex:2" id="saveBtn">'+(isEdit?"Saqlash":"Qo\'shish")+'</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  );
+
+  var fileInput = document.getElementById("f_image");
+  var preview = document.getElementById("imgPreview");
+  window._uploadBlob = null;
+  fileInput.onchange = function() {
+    if(!fileInput.files[0]) return;
+    window._uploadBlob = null;
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement("canvas");
+        var MAX = 800;
+        var w = img.width, h = img.height;
+        if(w > h) { if(w > MAX){ h = Math.round(h*MAX/w); w = MAX; } }
+        else { if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        preview.src = canvas.toDataURL("image/jpeg", 0.85);
+        preview.style.display = "block";
+        canvas.toBlob(function(blob){ window._uploadBlob = blob; }, "image/jpeg", 0.85);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  document.getElementById("cancelBtn").onclick = closeModal;
+  document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
+  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null, p?p.image_url:null); };
+}
+
+function closeModal() {
+  var bg = document.getElementById("modalBg");
+  if(bg) bg.remove();
+}
+
+function saveProduct(id, existingImageUrl) {
+  var name_uz = document.getElementById("f_name_uz").value.trim();
+  var name_ru = document.getElementById("f_name_ru").value.trim();
+  var china = parseInt(document.getElementById("f_china").value);
+  var market = parseInt(document.getElementById("f_market").value);
+  var weight = parseFloat(document.getElementById("f_weight").value);
+  var fileInput2 = document.getElementById("f_image");
+  var file = fileInput2.files[0];
+
+  if(!name_uz||!name_ru||!china||!market||!weight){
+    document.getElementById("modalErr").textContent="Barcha majburiy maydonlarni to'ldiring";
+    return;
+  }
+
+  var btn = document.getElementById("saveBtn");
+  btn.disabled=true; btn.textContent="Saqlanmoqda...";
+
+  var doSave = function(imageUrl) {
+    var body = {
+      name_uz:name_uz, name_ru:name_ru,
+      sub_uz:document.getElementById("f_sub_uz").value.trim(),
+      sub_ru:document.getElementById("f_sub_ru").value.trim(),
+      china:china, market:market, weight:weight,
+      cat:document.getElementById("f_cat").value,
+      sku:document.getElementById("f_sku").value.trim()||null,
+      image_url: imageUrl || null
+    };
+    var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
+    fetch(url,{
+      method: id?"PATCH":"POST",
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+      body:JSON.stringify(body)
+    }).then(function(r){
+      if(!r.ok){ btn.disabled=false; btn.textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
+      closeModal(); loadProducts();
+    });
+  };
+
+  if(file) {
+    document.getElementById("uploadProgress").style.display="block";
+    var ext = "jpg";
+    var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"."+ext;
+    var uploadBlob = window._uploadBlob || file;
+    var contentType = uploadBlob.type || "image/jpeg";
+    fetch(SB+"/storage/v1/object/products/"+fileName,{
+      method:"POST",
+      headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":contentType,"x-upsert":"true"},
+      body:uploadBlob
+    }).then(function(r){ return r.json(); })
+    .then(function(){
+      var publicUrl = SB+"/storage/v1/object/public/products/"+fileName;
+      doSave(publicUrl);
+    }).catch(function(){
+      document.getElementById("modalErr").textContent="Rasm yuklanmadi, qayta urinib ko'ring";
+      btn.disabled=false; btn.textContent="Saqlash";
+    });
+  } else {
+    doSave(existingImageUrl);
+  }
+}
+
+function loadUsers() {
+  fetch(SB+"/auth/v1/admin/users?per_page=100", {
+    headers: {"apikey": SERVICE_KEY, "Authorization": "Bearer "+SERVICE_KEY}
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    var users = data.users || [];
+    var cont = document.getElementById("content");
+    if(!users.length){ cont.innerHTML='<div class="empty">Hozircha foydalanuvchilar yo\'q</div>'; return; }
+    cont.innerHTML =
+      '<div class="add-btn-row"><span>Jami: <b>'+users.length+'</b> ta foydalanuvchi</span></div>'+
+      '<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);">'+
+        '<thead><tr style="background:var(--bg);">'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Email</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Ism</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Ro\'yxat sanasi</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Holat</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Amal</th>'+
+        '</tr></thead>'+
+        '<tbody>'+
+          users.map(function(u){
+            var name = (u.user_metadata && u.user_metadata.name) ? h(u.user_metadata.name) : "—";
+            var date = new Date(u.created_at).toLocaleDateString("ru-RU");
+            var confirmed = u.email_confirmed_at
+              ? '<span style="color:#12a150;font-weight:600">✓ Tasdiqlangan</span>'
+              : '<span style="color:#f59e0b;font-weight:600">⏳ Tasdiqlanmagan</span>';
+            return '<tr style="border-top:1px solid var(--line);">'+
+              '<td style="padding:12px 16px;font-size:14px;">'+h(u.email)+'</td>'+
+              '<td style="padding:12px 16px;font-size:14px;">'+name+'</td>'+
+              '<td style="padding:12px 16px;font-size:14px;color:var(--ink-3);">'+date+'</td>'+
+              '<td style="padding:12px 16px;font-size:14px;">'+confirmed+'</td>'+
+              '<td style="padding:12px 16px;">'+
+                '<button class="btn btn-sm btn-ghost" onclick="resetPassword(\''+h(u.email)+'\')">Parol reset</button>'+
+              '</td>'+
+            '</tr>';
+          }).join("")+
+        '</tbody>'+
+      '</table>';
+  }).catch(function(){
+    document.getElementById("content").innerHTML = '<div class="empty">Xatolik yuz berdi</div>';
+  });
+}
+
+function resetPassword(email) {
+  if(!confirm(email+" ga parol tiklash xati yuborilsinmi?")) return;
+  fetch(SB+"/auth/v1/recover", {
+    method:"POST",
+    headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({email:email})
+  }).then(function(r){
+    alert(r.status===429 ? "Juda ko'p urinish, 5-10 daqiqadan keyin qayta urinib ko'ring" : email+" ga parol tiklash xati yuborildi!");
+  });
+}
+
+function loadMessages() {
+  fetch(SB+"/rest/v1/messages?select=*&order=created_at.desc", {
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(msgs){
+    var cont = document.getElementById("content");
+    if(!msgs.length){ cont.innerHTML='<div class="empty">Hozircha xabarlar yo\'q</div>'; return; }
+    cont.innerHTML =
+      '<div class="add-btn-row"><span>Jami: <b>'+msgs.length+'</b> ta xabar</span></div>'+
+      msgs.map(function(m){
+        var date = new Date(m.created_at).toLocaleString("ru-RU");
+        return '<div class="order-card" style="'+(m.read?'':'border-left:3px solid #6c2bd9')+'">'+
+          '<div class="order-head">'+
+            '<div>'+
+              '<div class="order-num" style="font-size:15px">'+(m.name||'Noma\'lum')+'</div>'+
+              '<div class="order-date">'+(m.email||'Email yo\'q')+' · '+date+'</div>'+
+            '</div>'+
+            '<button class="btn btn-sm btn-ghost" onclick="markRead('+m.id+',this)">'+(m.read?'✓ O\'qilgan':'O\'qildi deb belgilash')+'</button>'+
+          '</div>'+
+          '<div style="font-size:14px;color:#4a4360;line-height:1.6">'+h(m.message)+'</div>'+
+        '</div>';
+      }).join("");
+  });
+}
+
+function markRead(id, btn) {
+  fetch(SB+"/rest/v1/messages?id=eq."+id,{
+    method:"PATCH",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+    body:JSON.stringify({read:true})
+  }).then(function(){ btn.textContent="✓ O'qilgan"; btn.closest(".order-card").style.borderLeft="none"; });
+}
+
+if(token) renderMain(); else renderLogin();
 </script>
 </body>
 </html>
