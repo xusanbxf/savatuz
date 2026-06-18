@@ -3,7 +3,49 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SAVAT.UZ — Xitoydan to'g'ridan-to'g'ri</title>
+<title>SAVAT.UZ — Xitoydan to'g'ridan-to'g'ri | Arzon narxlar</title>
+
+<!-- SEO Meta -->
+<meta name="description" content="SAVAT.UZ — Xitoy zavodlaridan to'g'ridan-to'g'ri buyurtma qiling. Krossovka, kiyim, texnika, uy jihozlari — bozor narxidan 3-5 marta arzon. Kargo va xizmat haqi ochiq." />
+<meta name="keywords" content="xitoydan buyurtma, arzon krossovka, arzon kiyim, taobao uzbekistan, pinduoduo uzbekistan, xitoy tovar, savat uz, arzon narx, kargo uzbekistan" />
+<meta name="author" content="SAVAT.UZ" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://savatuz.vercel.app/" />
+
+<!-- Open Graph (Facebook, Telegram preview) -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://savatuz.vercel.app/" />
+<meta property="og:title" content="SAVAT.UZ — Xitoydan to'g'ridan-to'g'ri" />
+<meta property="og:description" content="Xitoy zavodlaridan to'g'ridan-to'g'ri buyurtma. Bozordan 3-5 marta arzon. Kargo va xizmat haqi ochiq narxda." />
+<meta property="og:image" content="https://savatuz.vercel.app/og-image.png" />
+<meta property="og:locale" content="uz_UZ" />
+<meta property="og:site_name" content="SAVAT.UZ" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="SAVAT.UZ — Xitoydan to'g'ridan-to'g'ri" />
+<meta name="twitter:description" content="Xitoy zavodlaridan to'g'ridan-to'g'ri buyurtma. Bozordan 3-5 marta arzon." />
+<meta name="twitter:image" content="https://savatuz.vercel.app/og-image.png" />
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "SAVAT.UZ",
+  "url": "https://savatuz.vercel.app",
+  "description": "Xitoy zavodlaridan to'g'ridan-to'g'ri buyurtma qilish platformasi",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "UZ",
+    "addressLocality": "Toshkent"
+  },
+  "priceRange": "$$",
+  "openingHours": "Mo-Su 09:00-21:00"
+}
+</script>
+<link rel="preload" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" as="script" crossorigin />
+<link rel="preload" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" as="script" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -219,6 +261,17 @@
     .mobile-search .search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--ink-3); pointer-events: none; }
     .mobile-search .search .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; background: var(--ink-3); color: #fff; border: none; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; padding: 0; }
   }
+
+  /* Variants */
+  .var-section { margin: 16px 0; }
+  .var-label { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+  .var-label span { font-weight: 800; color: var(--ink); text-transform: none; letter-spacing: 0; }
+  .var-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .var-chip { padding: 7px 16px; border-radius: 999px; border: 1.5px solid var(--line-2); background: var(--surface); font-size: 13px; font-weight: 600; cursor: pointer; transition: .15s; color: var(--ink); }
+  .var-chip:hover { border-color: var(--brand); }
+  .var-chip.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+  .var-chip.color-chip { width: 36px; height: 36px; padding: 0; border-radius: 50%; position: relative; }
+  .var-chip.color-chip.on::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
   /* ---------- Category strip ---------- */
   .cats { display: flex; gap: 10px; padding: 26px 0 6px; flex-wrap: wrap; }
   .cat {
@@ -638,8 +691,8 @@
 <body>
   <div id="root"></div>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
   <script>
@@ -2132,6 +2185,61 @@ function ImageSwiper({ p, lang }) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/* ---- Variant Picker ---- */
+function VariantPicker({ variants, selected, onSelect }) {
+  if (!variants || variants.length === 0) return null;
+
+  // Group by type
+  const groups = {};
+  variants.forEach(v => {
+    if (!groups[v.type]) groups[v.type] = [];
+    groups[v.type].push(v);
+  });
+
+  const typeLabels = { color: "Rang", size: "Razmer", model: "Model" };
+
+  return (
+    <div>
+      {Object.entries(groups).map(([type, items]) => {
+        const sel = selected[type];
+        return (
+          <div key={type} className="var-section">
+            <div className="var-label">
+              {typeLabels[type] || type}
+              {sel && <span> — {sel.value}</span>}
+            </div>
+            <div className="var-chips">
+              {items.map(v => {
+                const isOn = sel && sel.id === v.id;
+                if (type === "color" && v.color_hex) {
+                  return (
+                    <button
+                      key={v.id}
+                      className={"var-chip color-chip" + (isOn ? " on" : "")}
+                      style={{ background: v.color_hex, borderColor: isOn ? v.color_hex : undefined }}
+                      title={v.value}
+                      onClick={() => onSelect(type, v)}
+                    />
+                  );
+                }
+                return (
+                  <button
+                    key={v.id}
+                    className={"var-chip" + (isOn ? " on" : "")}
+                    onClick={() => onSelect(type, v)}
+                  >
+                    {v.value}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
