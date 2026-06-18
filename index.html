@@ -2563,12 +2563,11 @@ function App() {
           <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query}
             onView={openProduct}
             onAdd={(p) => {
-              fetch(SB_URL + "/rest/v1/product_variants?product_id=eq." + p.id + "&select=id&limit=1", {
-                headers: { apikey: SB_KEY }
-              }).then(r => r.json()).then(rows => {
-                if (rows && rows.length > 0) { openProduct(p); }
-                else { addToCart(p); }
-              }).catch(() => addToCart(p));
+              const hasVar = window._varProductIds
+                ? window._varProductIds.has(p.id)
+                : false;
+              if (hasVar) { openProduct(p); }
+              else { addToCart(p); }
             }}
             onInc={(p) => addToCart(p)} onDec={decItem} />
           <Why t={t} />
