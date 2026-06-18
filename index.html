@@ -2190,10 +2190,9 @@ function ImageSwiper({ p, lang }) {
 }
 
 /* ---- Variant Picker ---- */
-function VariantPicker({ variants, selected, onSelect }) {
+function VariantPicker({ variants, selected, onSelect, productImages }) {
   if (!variants || variants.length === 0) return null;
 
-  // Group by type
   const groups = {};
   variants.forEach(v => {
     if (!groups[v.type]) groups[v.type] = [];
@@ -2203,40 +2202,71 @@ function VariantPicker({ variants, selected, onSelect }) {
   const typeLabels = { color: "Rang", size: "Razmer", model: "Model" };
 
   return (
-    <div>
+    <div style={{ margin: "16px 0" }}>
       {Object.entries(groups).map(([type, items]) => {
         const sel = selected[type];
         return (
-          <div key={type} className="var-section">
+          <div key={type} style={{ marginBottom: 16 }}>
             <div className="var-label">
               {typeLabels[type] || type}
-              {sel && <span> — {sel.value}</span>}
+              {sel && <span style={{ fontWeight: 800, color: "var(--ink)", textTransform: "none", letterSpacing: 0 }}> — {sel.value}</span>}
             </div>
-            <div className="var-chips">
-              {items.map(v => {
-                const isOn = sel && sel.id === v.id;
-                if (type === "color" && v.color_hex) {
+
+            {type === "color" ? (
+              /* Rang: kichik rasm kartochkalar (Taobao uslubi) */
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {items.map((v, i) => {
+                  const isOn = sel && sel.id === v.id;
+                  /* Rang uchun: agar image_url bo'lsa — rasm, bo'lmasa color_hex doira */
+                  const imgSrc = v.image_url || (productImages && productImages[i]) || null;
                   return (
                     <button
                       key={v.id}
-                      className={"var-chip color-chip" + (isOn ? " on" : "")}
-                      style={{ background: v.color_hex, borderColor: isOn ? v.color_hex : undefined }}
-                      title={v.value}
                       onClick={() => onSelect(type, v)}
-                    />
+                      style={{
+                        position: "relative", padding: 0, border: "2px solid " + (isOn ? "var(--brand)" : "var(--line-2)"),
+                        borderRadius: 10, overflow: "hidden", cursor: "pointer", background: "var(--surface-2)",
+                        boxShadow: isOn ? "0 0 0 3px var(--brand-soft)" : "none",
+                        transition: ".15s", flexShrink: 0,
+                        width: imgSrc ? 56 : 40, height: imgSrc ? 56 : 40,
+                      }}
+                      title={v.value}
+                    >
+                      {imgSrc ? (
+                        <img src={imgSrc} alt={v.value} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", background: v.color_hex || "#ccc",
+                          display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {isOn && <span style={{ color: "#fff", fontSize: 16, fontWeight: 800, textShadow: "0 1px 3px rgba(0,0,0,.4)" }}>✓</span>}
+                        </div>
+                      )}
+                      {isOn && imgSrc && (
+                        <div style={{ position: "absolute", inset: 0, background: "rgba(108,43,217,.15)",
+                          display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ color: "var(--brand)", fontSize: 16, fontWeight: 800 }}>✓</span>
+                        </div>
+                      )}
+                    </button>
                   );
-                }
-                return (
-                  <button
-                    key={v.id}
-                    className={"var-chip" + (isOn ? " on" : "")}
-                    onClick={() => onSelect(type, v)}
-                  >
-                    {v.value}
-                  </button>
-                );
-              })}
-            </div>
+                })}
+              </div>
+            ) : (
+              /* Razmer / Model: chip tugmalar */
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {items.map(v => {
+                  const isOn = sel && sel.id === v.id;
+                  return (
+                    <button
+                      key={v.id}
+                      className={"var-chip" + (isOn ? " on" : "")}
+                      onClick={() => onSelect(type, v)}
+                    >
+                      {v.value}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}
