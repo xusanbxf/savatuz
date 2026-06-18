@@ -144,6 +144,14 @@ var CATS = [
   {id:"tech",label:"Texnika"},{id:"shoes",label:"Oyoq kiyim"},
   {id:"fashion",label:"Kiyim"},{id:"home",label:"Uy-ro'zg'or"}
 ];
+// Har kategoriya uchun qaysi variantlar ko'rinsin
+var CAT_VARIANTS = {
+  "tech":    ["color", "model"],   // Texnika: rang + model (xotira, versiya)
+  "shoes":   ["color", "size"],    // Oyoq kiyim: rang + razmer (40,41,42...)
+  "fashion": ["color", "size"],    // Kiyim: rang + razmer (S,M,L,XL)
+  "home":    ["color"],            // Uy-rozgor: faqat rang
+};
+
 var REGIONS = {
   "tsh-c":"Toshkent shahri","tsh-v":"Toshkent viloyati","sam":"Samarqand",
   "bux":"Buxoro","and":"Andijon","far":"Farg'ona","nam":"Namangan",
