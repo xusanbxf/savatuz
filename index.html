@@ -740,7 +740,8 @@
             days: r.days,
             hit: r.hit,
             image_url: r.image_url || null,
-            image_urls: r.image_urls || (r.image_url ? [r.image_url] : [])
+            image_urls: r.image_urls || (r.image_url ? [r.image_url] : []),
+            _hasVariants: varIds.has(r.id)
           };
         });
         // Har sahifa ochilganda random tartib
@@ -2561,7 +2562,13 @@ function App() {
           <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
           <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query}
-            onView={openProduct} onAdd={(p) => addToCart(p)} onInc={(p) => addToCart(p)} onDec={decItem} />
+            onView={openProduct}
+            onAdd={(p) => {
+              // variant bo'lsa mahsulot sahifasiga o't
+              if (p._hasVariants) { openProduct(p); return; }
+              addToCart(p);
+            }}
+            onInc={(p) => addToCart(p)} onDec={decItem} />
           <Why t={t} />
           <Footer t={t} />
         </main>
@@ -3375,7 +3382,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
             days: r.days,
             hit: r.hit,
             image_url: r.image_url || null,
-            image_urls: r.image_urls || (r.image_url ? [r.image_url] : [])
+            image_urls: r.image_urls || (r.image_url ? [r.image_url] : []),
+            _hasVariants: varIds.has(r.id)
           };
         });
         // Har sahifa ochilganda random tartib
