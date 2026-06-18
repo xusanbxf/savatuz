@@ -713,43 +713,44 @@
 
   // Supabase'dan mahsulotlarni olib, sahifa kutgan formatga o'tkazadi
   function fetchProducts() {
-    return fetch(SUPABASE_URL + "/rest/v1/products?select=*&order=id", {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY
-      }
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Supabase so'rovida xato: " + res.status);
-        return res.json();
-      })
-      .then(function (rows) {
-        var mapped = rows.map(function (r) {
-          return {
-            id: r.id,
-            cat: r.cat,
-            tile: r.tile,
-            accent: r.accent,
-            name: { uz: r.name_uz, ru: r.name_ru },
-            sub: { uz: r.sub_uz, ru: r.sub_ru },
-            china: r.china,
-            market: r.market,
-            weight: r.weight,
-            rating: r.rating,
-            sold: r.sold,
-            days: r.days,
-            hit: r.hit,
-            image_url: r.image_url || null,
-            image_urls: r.image_urls || (r.image_url ? [r.image_url] : [])
-          };
-        });
-        // Har sahifa ochilganda random tartib
-        for (var i = mapped.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = mapped[i]; mapped[i] = mapped[j]; mapped[j] = tmp;
-        }
-        return mapped;
+    // Products va variantlarni parallel yuklaymiz
+    return Promise.all([
+      fetch(SUPABASE_URL + "/rest/v1/products?select=*&order=id", {
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+      }).then(function(res){ return res.json(); }),
+      fetch(SUPABASE_URL + "/rest/v1/product_variants?select=product_id", {
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+      }).then(function(res){ return res.json(); }).catch(function(){ return []; })
+    ]).then(function(results) {
+      var rows = results[0];
+      var varRows = results[1] || [];
+      var varIds = new Set(varRows.map(function(v){ return Number(v.product_id); }));
+      var mapped = rows.map(function (r) {
+        return {
+          id: r.id,
+          cat: r.cat,
+          tile: r.tile,
+          accent: r.accent,
+          name: { uz: r.name_uz, ru: r.name_ru },
+          sub: { uz: r.sub_uz, ru: r.sub_ru },
+          china: r.china,
+          market: r.market,
+          weight: r.weight,
+          rating: r.rating,
+          sold: r.sold,
+          days: r.days,
+          hit: r.hit,
+          image_url: r.image_url || null,
+          image_urls: r.image_urls || (r.image_url ? [r.image_url] : []),
+          _hasVariants: varIds.has(r.id)
+        };
       });
+      for (var i = mapped.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = mapped[i]; mapped[i] = mapped[j]; mapped[j] = tmp;
+      }
+      return mapped;
+    });
   }
 
   // Yangi buyurtmani Supabase'ning "orders" jadvaliga yozadi
@@ -2563,10 +2564,7 @@ function App() {
           <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query}
             onView={openProduct}
             onAdd={(p) => {
-              const hasVar = window._varProductIds
-                ? window._varProductIds.has(p.id)
-                : false;
-              if (hasVar) { openProduct(p); }
+              if (p._hasVariants) { openProduct(p); }
               else { addToCart(p); }
             }}
             onInc={(p) => addToCart(p)} onDec={decItem} />
@@ -3356,43 +3354,44 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
   // Supabase'dan mahsulotlarni olib, sahifa kutgan formatga o'tkazadi
   function fetchProducts() {
-    return fetch(SUPABASE_URL + "/rest/v1/products?select=*&order=id", {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY
-      }
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error("Supabase so'rovida xato: " + res.status);
-        return res.json();
-      })
-      .then(function (rows) {
-        var mapped = rows.map(function (r) {
-          return {
-            id: r.id,
-            cat: r.cat,
-            tile: r.tile,
-            accent: r.accent,
-            name: { uz: r.name_uz, ru: r.name_ru },
-            sub: { uz: r.sub_uz, ru: r.sub_ru },
-            china: r.china,
-            market: r.market,
-            weight: r.weight,
-            rating: r.rating,
-            sold: r.sold,
-            days: r.days,
-            hit: r.hit,
-            image_url: r.image_url || null,
-            image_urls: r.image_urls || (r.image_url ? [r.image_url] : [])
-          };
-        });
-        // Har sahifa ochilganda random tartib
-        for (var i = mapped.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = mapped[i]; mapped[i] = mapped[j]; mapped[j] = tmp;
-        }
-        return mapped;
+    // Products va variantlarni parallel yuklaymiz
+    return Promise.all([
+      fetch(SUPABASE_URL + "/rest/v1/products?select=*&order=id", {
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+      }).then(function(res){ return res.json(); }),
+      fetch(SUPABASE_URL + "/rest/v1/product_variants?select=product_id", {
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+      }).then(function(res){ return res.json(); }).catch(function(){ return []; })
+    ]).then(function(results) {
+      var rows = results[0];
+      var varRows = results[1] || [];
+      var varIds = new Set(varRows.map(function(v){ return Number(v.product_id); }));
+      var mapped = rows.map(function (r) {
+        return {
+          id: r.id,
+          cat: r.cat,
+          tile: r.tile,
+          accent: r.accent,
+          name: { uz: r.name_uz, ru: r.name_ru },
+          sub: { uz: r.sub_uz, ru: r.sub_ru },
+          china: r.china,
+          market: r.market,
+          weight: r.weight,
+          rating: r.rating,
+          sold: r.sold,
+          days: r.days,
+          hit: r.hit,
+          image_url: r.image_url || null,
+          image_urls: r.image_urls || (r.image_url ? [r.image_url] : []),
+          _hasVariants: varIds.has(r.id)
+        };
       });
+      for (var i = mapped.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = mapped[i]; mapped[i] = mapped[j]; mapped[j] = tmp;
+      }
+      return mapped;
+    });
   }
 
   // Yangi buyurtmani Supabase'ning "orders" jadvaliga yozadi
