@@ -637,13 +637,32 @@ function saveProduct(id) {
       image_urls: finalUrls.length > 0 ? finalUrls : null
     };
     var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
+    var prefer = id ? "return=minimal" : "return=representation";
     fetch(url,{
       method: id?"PATCH":"POST",
-      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":prefer},
       body:JSON.stringify(body)
     }).then(function(r){
       if(!r.ok){ btn.disabled=false; btn.textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
-      closeModal(); loadProducts();
+      return r.json().catch(function(){ return [{id:id}]; });
+    }).then(function(rows){
+      var productId = id || (rows && rows[0] ? rows[0].id : null);
+      var variants = window._variants || [];
+      if(!productId || variants.length === 0){ closeModal(); loadProducts(); return; }
+      // Delete old variants then insert new
+      fetch(SB+"/rest/v1/product_variants?product_id=eq."+productId,{
+        method:"DELETE",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+      }).then(function(){
+        var vRows = variants.map(function(v){
+          return {product_id:productId, type:v.type, value:v.value, color_hex:v.color_hex||null};
+        });
+        fetch(SB+"/rest/v1/product_variants",{
+          method:"POST",
+          headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+          body:JSON.stringify(vRows)
+        }).then(function(){ closeModal(); loadProducts(); });
+      });
     });
   }
 
