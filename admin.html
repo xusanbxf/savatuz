@@ -398,38 +398,8 @@ function openProductModal(p) {
         '<div class="imgs-grid" id="imgsGrid"></div>'+
         '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
         '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
-        '<div class="variants-section">'+
-          '<h4>Variantlar</h4>'+
-
-          '<div style="margin-bottom:14px">'+
-            '<div class="var-section-label">🎨 Ranglar</div>'+
-            '<div class="variant-list" id="varListColor"></div>'+
-            '<div class="variant-add-row">'+
-              '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:36px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none" />'+
-              '<input id="varInputColor" placeholder="Rang nomi (masalan: Qizil, Zangori...)" />'+
-              '<button class="btn btn-sm" id="varAddColor">+ Qo&#39;sh</button>'+
-            '</div>'+
-          '</div>'+
-
-          '<div style="margin-bottom:14px">'+
-            '<div class="var-section-label">📐 Razmerlar</div>'+
-            '<div class="variant-list" id="varListSize"></div>'+
-            '<div class="variant-add-row">'+
-              '<input id="varInputSize" placeholder="Razmer (masalan: S, M, L, XL, 40, 41...)" />'+
-              '<button class="btn btn-sm" id="varAddSize">+ Qo&#39;sh</button>'+
-            '</div>'+
-          '</div>'+
-
-          '<div>'+
-            '<div class="var-section-label">📦 Modellar</div>'+
-            '<div class="variant-list" id="varListModel"></div>'+
-            '<div class="variant-add-row">'+
-              '<input id="varInputModel" placeholder="Model (masalan: 128GB, Pro Max...)" />'+
-              '<button class="btn btn-sm" id="varAddModel">+ Qo&#39;sh</button>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="err" id="modalErr"></div>'+
+        '<div class="variants-section"><h4>Variantlar</h4><div id="varSectionsWrap"></div></div>'+
+                '<div class="err" id="modalErr"></div>'+
         '<div style="display:flex;gap:10px;">'+
           '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
           '<button class="btn" style="flex:2" id="saveBtn">'+(isEdit?"Saqlash":"Qo\'shish")+'</button>'+
@@ -503,6 +473,127 @@ function openProductModal(p) {
   }
 
   renderImgsGrid();
+
+
+  // ===== VARIANTS =====
+  window._variants = [];
+  var currentCat = p ? (p.cat || "fashion") : "fashion";
+
+  var VAR_ICONS = { color: "Ranglar", size: "Razmerlar", model: "Modellar" };
+  var VAR_PLACEHOLDERS = {
+    color: "Rang nomi (Qizil, Zangori...)",
+    size: "Razmer (S, M, L, XL, 40, 41...)",
+    model: "Model (128GB, Pro Max...)"
+  };
+
+  function getAllowedTypes(cat) {
+    if(cat === "tech") return ["color", "model"];
+    if(cat === "home") return ["color"];
+    return ["color", "size"]; // shoes, fashion, default
+  }
+
+  function renderVarList(type) {
+    var key = type.charAt(0).toUpperCase() + type.slice(1);
+    var listEl = document.getElementById("varList" + key);
+    if(!listEl) return;
+    var items = window._variants.filter(function(v){ return v.type === type; });
+    if(type === "color") {
+      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;min-height:8px";
+      listEl.innerHTML = items.map(function(v, i){
+        var idx = window._variants.indexOf(v);
+        return "<div style='position:relative;width:52px;text-align:center'>"+
+          "<div style='width:52px;height:52px;border-radius:10px;background:"+(v.color_hex||"#ccc")+";border:1.5px solid var(--line);overflow:hidden'>"+
+          "</div>"+
+          "<div style='font-size:10px;font-weight:700;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+v.value+"</div>"+
+          "<button data-ridx='"+idx+"' data-rtype='color' class='var-remove-btn' style='position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#e11d48;color:#fff;border:none;cursor:pointer;font-size:10px;font-weight:800;padding:0'>x</button>"+
+        "</div>";
+      }).join("") || "<span style='color:var(--ink-3);font-size:12px'>Hali qo'shilmagan</span>";
+    } else {
+      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:8px";
+      listEl.innerHTML = items.map(function(v){
+        var idx = window._variants.indexOf(v);
+        return "<div style='display:flex;align-items:center;gap:4px;background:var(--brand-soft);color:var(--brand);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700'>"+
+          v.value+
+          "<button data-ridx='"+idx+"' data-rtype='"+type+"' class='var-remove-btn' style='background:none;border:none;cursor:pointer;color:var(--brand);font-size:14px;font-weight:800;padding:0;line-height:1;margin-left:2px'>x</button>"+
+        "</div>";
+      }).join("") || "<span style='color:var(--ink-3);font-size:12px'>Hali qo'shilmagan</span>";
+    }
+  }
+
+  window._removeVariant = function(idx, type) {
+    window._variants.splice(idx, 1);
+    renderVarList(type);
+  };
+
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest ? e.target.closest(".var-remove-btn") : null;
+    if(!btn) return;
+    var idx = parseInt(btn.getAttribute("data-ridx"));
+    var type = btn.getAttribute("data-rtype");
+    if(!isNaN(idx) && type) window._removeVariant(idx, type);
+  });
+
+  function setupVarAdd(type) {
+    var key = type.charAt(0).toUpperCase() + type.slice(1);
+    var addBtn = document.getElementById("varAdd" + key);
+    var inp = document.getElementById("varInput" + key);
+    if(!addBtn || !inp) return;
+    var doAdd = function() {
+      var val = inp.value.trim();
+      if(!val) return;
+      var colorHex = type === "color" ? (document.getElementById("varColorPicker") || {value:"#cccccc"}).value : "";
+      window._variants.push({ type: type, value: val, color_hex: colorHex });
+      inp.value = "";
+      renderVarList(type);
+    };
+    addBtn.onclick = doAdd;
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); doAdd(); } });
+  }
+
+  function rebuildVariantSections(cat) {
+    var allowed = getAllowedTypes(cat);
+    var wrap = document.getElementById("varSectionsWrap");
+    if(!wrap) return;
+    wrap.innerHTML = allowed.map(function(type){
+      var key = type.charAt(0).toUpperCase() + type.slice(1);
+      var colorRow = '<div class="variant-add-row" style="flex-wrap:wrap;gap:6px">'+
+        '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:36px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none"/>'+
+        '<input id="varInputColor" placeholder="'+VAR_PLACEHOLDERS.color+'" style="flex:1;min-width:100px"/>'+
+        '<button class="btn btn-sm" id="varAddColor">+ Qo&#39;sh</button>'+
+      '</div>';
+      var otherRow = '<div class="variant-add-row">'+
+        '<input id="varInput'+key+'" placeholder="'+VAR_PLACEHOLDERS[type]+'"/>'+
+        '<button class="btn btn-sm" id="varAdd'+key+'">+ Qo&#39;sh</button>'+
+      '</div>';
+      return '<div style="margin-bottom:14px">'+
+        '<div class="var-section-label">'+(type==="color"?"🎨":type==="size"?"📐":"📦")+' '+VAR_ICONS[type]+'</div>'+
+        '<div id="varList'+key+'"></div>'+
+        (type==="color" ? colorRow : otherRow)+
+      '</div>';
+    }).join("");
+    allowed.forEach(function(t){ setupVarAdd(t); });
+    allowed.forEach(function(t){ renderVarList(t); });
+  }
+
+  var catSel = document.getElementById("f_cat");
+  if(catSel) {
+    catSel.addEventListener("change", function(){
+      currentCat = this.value;
+      rebuildVariantSections(currentCat);
+    });
+  }
+
+  if(p && p.id) {
+    fetch(SB+"/rest/v1/product_variants?product_id=eq."+p.id+"&order=id",{
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+    }).then(function(r){ return r.json(); })
+    .then(function(rows){
+      window._variants = rows.map(function(r){ return {id:r.id,type:r.type,value:r.value,color_hex:r.color_hex||""}; });
+      rebuildVariantSections(currentCat);
+    }).catch(function(){ rebuildVariantSections(currentCat); });
+  } else {
+    rebuildVariantSections(currentCat);
+  }
 
   document.getElementById("cancelBtn").onclick = closeModal;
   document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
