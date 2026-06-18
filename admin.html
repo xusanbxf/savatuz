@@ -83,6 +83,20 @@
   .img-add-box { aspect-ratio: 1/1; border: 2px dashed var(--line); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; background: var(--bg); color: var(--ink-3); font-size: 12px; gap: 4px; transition: .15s; }
   .img-add-box:hover { border-color: var(--brand); color: var(--brand); }
   .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
+
+  /* Variants */
+  .variants-section { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .variants-section h4 { font-family: var(--display); font-weight: 800; font-size: 14px; margin: 0 0 12px; }
+  .variant-type-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .vtype-btn { padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--bg); font-size: 13px; font-weight: 600; cursor: pointer; transition: .15s; }
+  .vtype-btn.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+  .variant-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .variant-row { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+  .variant-row input { flex: 1; min-width: 0; height: 34px; font-size: 13px; }
+  .variant-color-input { width: 36px !important; height: 34px !important; padding: 2px 4px !important; flex: none !important; cursor: pointer; border-radius: 6px; }
+  .variant-del { width: 28px; height: 28px; border-radius: 50%; background: #fee2e2; color: #e11d48; border: none; cursor: pointer; font-size: 16px; font-weight: 700; flex: none; display: flex; align-items: center; justify-content: center; }
+  .variant-add-row { display: flex; gap: 8px; }
+  .variant-add-row input { flex: 1; height: 36px; font-size: 13px; }
   .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
   .tab-import { background: linear-gradient(135deg,#7c3aed,#a855f7) !important; color: #fff !important; border-color: transparent !important; }
   .import-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; max-width: 640px; margin: 0 auto; }
@@ -376,6 +390,20 @@ function openProductModal(p) {
         '<div class="imgs-grid" id="imgsGrid"></div>'+
         '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
         '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
+        '<div class="variants-section">'+
+          '<h4>Variantlar (rang, razmer, model)</h4>'+
+          '<div class="variant-type-tabs">'+
+            '<button class="vtype-btn" id="vtColor">Rang</button>'+
+            '<button class="vtype-btn" id="vtSize">Razmer</button>'+
+            '<button class="vtype-btn" id="vtModel">Model</button>'+
+          '</div>'+
+          '<div class="variant-list" id="variantList"></div>'+
+          '<div class="variant-add-row">'+
+            '<input id="variantInput" placeholder="Qiymat kiriting (masalan: XL, Qizil, 256GB...)" />'+
+            '<input type="color" class="variant-color-input" id="variantColor" value="#6c2bd9" style="display:none" />'+
+            '<button class="btn btn-sm" id="variantAddBtn">+ Qo&#39;shish</button>'+
+          '</div>'+
+        '</div>'+
         '<div class="err" id="modalErr"></div>'+
         '<div style="display:flex;gap:10px;">'+
           '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
