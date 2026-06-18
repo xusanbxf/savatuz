@@ -3,9 +3,7 @@ import { SB_URL, SB_KEY, ANON_KEY, I18N, CATS, REGIONS, breakdown, fmt, saveOrde
 
 
 /* ============ SAVAT.UZ — auth, checkout, mobile menu ============ */
-const AC_D = window.SAVAT;      // ← eski CDN uslub
-const AC_I = window.Icons;      // ← eski CDN uslub  
-const ACMedia = () => window.SC.Media;  // ← eski CDN uslub
+import Icons from './Icons.jsx';
 
 /* phone mask: +998 90 123 45 67 */
 function maskPhone(raw) {
