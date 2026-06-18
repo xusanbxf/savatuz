@@ -391,17 +391,34 @@ function openProductModal(p) {
         '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
         '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
         '<div class="variants-section">'+
-          '<h4>Variantlar (rang, razmer, model)</h4>'+
-          '<div class="variant-type-tabs">'+
-            '<button class="vtype-btn" id="vtColor">Rang</button>'+
-            '<button class="vtype-btn" id="vtSize">Razmer</button>'+
-            '<button class="vtype-btn" id="vtModel">Model</button>'+
+          '<h4>Variantlar</h4>'+
+
+          '<div style="margin-bottom:14px">'+
+            '<div class="var-section-label">🎨 Ranglar</div>'+
+            '<div class="variant-list" id="varListColor"></div>'+
+            '<div class="variant-add-row">'+
+              '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:36px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none" />'+
+              '<input id="varInputColor" placeholder="Rang nomi (masalan: Qizil, Zangori...)" />'+
+              '<button class="btn btn-sm" id="varAddColor">+ Qo&#39;sh</button>'+
+            '</div>'+
           '</div>'+
-          '<div class="variant-list" id="variantList"></div>'+
-          '<div class="variant-add-row">'+
-            '<input id="variantInput" placeholder="Qiymat kiriting (masalan: XL, Qizil, 256GB...)" />'+
-            '<input type="color" class="variant-color-input" id="variantColor" value="#6c2bd9" style="display:none" />'+
-            '<button class="btn btn-sm" id="variantAddBtn">+ Qo&#39;shish</button>'+
+
+          '<div style="margin-bottom:14px">'+
+            '<div class="var-section-label">📐 Razmerlar</div>'+
+            '<div class="variant-list" id="varListSize"></div>'+
+            '<div class="variant-add-row">'+
+              '<input id="varInputSize" placeholder="Razmer (masalan: S, M, L, XL, 40, 41...)" />'+
+              '<button class="btn btn-sm" id="varAddSize">+ Qo&#39;sh</button>'+
+            '</div>'+
+          '</div>'+
+
+          '<div>'+
+            '<div class="var-section-label">📦 Modellar</div>'+
+            '<div class="variant-list" id="varListModel"></div>'+
+            '<div class="variant-add-row">'+
+              '<input id="varInputModel" placeholder="Model (masalan: 128GB, Pro Max...)" />'+
+              '<button class="btn btn-sm" id="varAddModel">+ Qo&#39;sh</button>'+
+            '</div>'+
           '</div>'+
         '</div>'+
         '<div class="err" id="modalErr"></div>'+
