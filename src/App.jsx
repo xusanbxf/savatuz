@@ -92,7 +92,7 @@ function SearchBox({ t, query, onSearch, products, onSelect, lang, mobile }) {
   const bd = breakdown;
 
   const suggestions = query.trim().length > 0
-    ? products.filter(p => {
+    ? (products || []).filter(p => {
         const q = query.trim().toLowerCase();
         return p.name.uz.toLowerCase().includes(q) || p.name.ru.toLowerCase().includes(q);
       }).slice(0, 6)
@@ -741,8 +741,8 @@ export default function App() {
       .finally(() => setProductsLoading(false));
   }, []);
 
-  const featured = products.find((p) => p.id === 1) || products[0];
-  const list = products.filter((p) => {
+  const featured = (products || []).find((p) => p.id === 1) || (products || [])[0];
+  const list = (products || []).filter((p) => {
     const matchCat = cat === "all" || p.cat === cat;
     const q = query.trim().toLowerCase();
     const matchQ = !q || p.name.uz.toLowerCase().includes(q) || p.name.ru.toLowerCase().includes(q) || (p.sub && (p.sub.uz.toLowerCase().includes(q) || p.sub.ru.toLowerCase().includes(q)));
