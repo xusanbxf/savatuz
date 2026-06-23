@@ -15,8 +15,8 @@ export async function fetchProducts() {
         headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY }
       }).then(function(res){ return res.json(); }).catch(function(){ return []; })
     ]).then(function(results) {
-      var rows = results[0];
-      var varRows = results[1] || [];
+      var rows = Array.isArray(results[0]) ? results[0] : [];
+      var varRows = Array.isArray(results[1]) ? results[1] : [];
       var varIds = new Set(varRows.map(function(v){ return Number(v.product_id); }));
       var mapped = rows.map(function (r) {
         return {
