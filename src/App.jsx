@@ -321,7 +321,7 @@ function Footer({ t }) {
 /* ============ SAVAT.UZ — product detail, cart, app ============ */
 import { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage } from './components/Modals.jsx';
 const Ico = Icons;
-const D = { breakdown, fmt, CATS, REGIONS, I18N, fetchProducts, PRODUCTS: [] };
+const D = { breakdown, fmt, CATS, REGIONS, I18N, fetchProducts };
 
 /* ---- Image Swiper ---- */
 function ImageSwiper({ p, lang }) {
