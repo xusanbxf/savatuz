@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SAVAT.UZ — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f7f5fb; --surface: #ffffff; --ink: #1b1430; --ink-2: #4a4360;
+    --ink-3: #8a849c; --line: #ece8f4; --brand: #6c2bd9; --r: 14px; --r-sm: 10px;
+    --font: "Plus Jakarta Sans", system-ui, sans-serif;
+    --display: "Sora", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
+  .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
+  .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+  input, textarea, select {
+    width: 100%; border-radius: var(--r-sm); border: 1.5px solid var(--line);
+    padding: 10px 14px; font-size: 15px; font-family: inherit; margin-bottom: 14px;
+    background: var(--bg); color: var(--ink);
+  }
+  input[type=file] { padding: 8px 14px; height: auto; cursor: pointer; }
+  input { height: 46px; }
+  textarea { height: 80px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); }
+  .btn { height: 46px; border-radius: var(--r-sm); border: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 15px; color: #fff; background: linear-gradient(140deg, #7c3aed 0%, #c026d3 100%); width: 100%; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn-sm { width: auto; padding: 0 16px; height: 36px; font-size: 13px; }
+  .btn-danger { background: #e11d48; }
+  .btn-ghost { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+  .err { color: #e11d48; font-size: 13.5px; margin: -6px 0 12px; min-height: 1em; }
+
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .top-title { font-family: var(--display); font-weight: 800; font-size: 22px; margin: 0; flex: 1; }
+  .nav-tabs { display: flex; gap: 6px; }
+  .tab { height: 38px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--line); font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer; background: var(--surface); color: var(--ink-2); }
+  .tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-weight: 700; }
+
+  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
+  .order-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
+  .order-num { font-family: var(--display); font-weight: 800; font-size: 17px; }
+  .order-date { color: var(--ink-3); font-size: 13px; }
+  .order-total { font-family: var(--display); font-weight: 800; font-size: 18px; }
+  .order-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } }
+  .items-list { font-size: 14px; line-height: 1.8; color: var(--ink-2); }
+  .items-list b { color: var(--ink); }
+  .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
+  .info-row b { color: var(--ink); font-weight: 600; }
+  select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; width: auto; margin-bottom: 0; }
+  .status-yangi { background-color: #f59e0b; }
+  .status-tasdiqlangan { background-color: #2563eb; }
+  .status-yetkazilmoqda { background-color: #7c3aed; }
+  .status-yakunlangan { background-color: #12a150; }
+  .status-bekor { background-color: #e11d48; }
+
+  .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 4px; }
+  .prod-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+  .prod-img { width: 100%; height: 140px; border-radius: var(--r-sm); margin-bottom: 12px; object-fit: cover; }
+  .prod-tile { width: 100%; height: 140px; border-radius: var(--r-sm); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .prod-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .prod-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 10px; }
+  .prod-prices { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; }
+  .prod-actions { display: flex; gap: 8px; }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: var(--surface); border-radius: var(--r); padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-family: var(--display); font-weight: 800; font-size: 20px; margin: 0 0 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .add-btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: var(--r-sm); margin-bottom: 10px; display: none; }
+  .imgs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-bottom: 10px; }
+  .img-thumb-wrap { position: relative; aspect-ratio: 1/1; border-radius: var(--r-sm); overflow: hidden; border: 1.5px solid var(--line); background: var(--bg); }
+  .img-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-thumb-del { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: #e11d48; color: #fff; border: none; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; line-height: 1; padding: 0; }
+  .img-add-box { aspect-ratio: 1/1; border: 2px dashed var(--line); border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; background: var(--bg); color: var(--ink-3); font-size: 12px; gap: 4px; transition: .15s; }
+  .img-add-box:hover { border-color: var(--brand); color: var(--brand); }
+  .upload-progress { font-size: 13px; color: var(--brand); margin-bottom: 10px; display: none; }
+
+  /* Variants */
+  .variants-section { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .variants-section h4 { font-family: var(--display); font-weight: 800; font-size: 14px; margin: 0 0 12px; }
+  .variant-type-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .vtype-btn { padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--bg); font-size: 13px; font-weight: 600; cursor: pointer; transition: .15s; }
+  .vtype-btn.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+  .variant-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .variant-row { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+  .variant-row input { flex: 1; min-width: 0; height: 34px; font-size: 13px; }
+  .variant-color-input { width: 36px !important; height: 34px !important; padding: 2px 4px !important; flex: none !important; cursor: pointer; border-radius: 6px; }
+  .variant-del { width: 28px; height: 28px; border-radius: 50%; background: #fee2e2; color: #e11d48; border: none; cursor: pointer; font-size: 16px; font-weight: 700; flex: none; display: flex; align-items: center; justify-content: center; }
+  .variant-add-row { display: flex; gap: 8px; }
+  .variant-add-row input { flex: 1; height: 36px; font-size: 13px; }
+  .empty { text-align: center; color: var(--ink-3); padding: 60px 0; }
+  .tab-import { background: linear-gradient(135deg,#7c3aed,#a855f7) !important; color: #fff !important; border-color: transparent !important; }
+  .import-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; max-width: 640px; margin: 0 auto; }
+  .import-box h3 { font-family: var(--display); font-weight: 800; font-size: 18px; margin: 0 0 6px; }
+  .import-box p { color: var(--ink-3); font-size: 13.5px; margin: 0 0 20px; }
+  .import-result { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: none; }
+  .import-result.show { display: block; }
+  .import-preview { display: grid; grid-template-columns: 180px 1fr; gap: 20px; padding: 20px; }
+  .import-img { width: 180px; height: 180px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); }
+  .import-img-ph { width: 180px; height: 180px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .import-field { margin-bottom: 12px; }
+  .import-field label { font-size: 12px; font-weight: 700; color: var(--ink-3); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .import-field .val { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .platform-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+  .badge-taobao { background: #fff0e6; color: #e05c00; }
+  .badge-pdd { background: #ffe8f0; color: #c0184e; }
+  .import-actions { padding: 16px 20px; border-top: 1px solid var(--line); background: var(--bg); display: flex; gap: 10px; align-items: center; }
+  .import-status { font-size: 13px; padding: 10px 16px; border-radius: var(--r-sm); margin-top: 12px; display: none; }
+  .import-status.ok { background: #e7f7ee; color: #12a150; display: block; font-weight: 700; }
+  .import-status.err { background: #fff0f0; color: #e11d48; display: block; font-weight: 700; }
+
+  .confirm-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn .15s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .confirm-box { background: #fff; border-radius: 16px; padding: 28px 24px 20px; max-width: 340px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.2); text-align: center; }
+  .confirm-box .ic { font-size: 36px; margin-bottom: 12px; }
+  .confirm-box h3 { font-family: var(--display); font-weight: 800; font-size: 17px; margin: 0 0 8px; color: var(--ink); }
+  .confirm-box p { color: var(--ink-3); font-size: 14px; margin: 0 0 22px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-btns button { flex: 1; height: 44px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .confirm-cancel { background: var(--bg); color: var(--ink); border: 1.5px solid var(--line) !important; }
+  .confirm-ok { background: #e11d48; color: #fff; }
+  .confirm-ok.purple { background: linear-gradient(135deg,#7c3aed,#a855f7); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+var SB = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+var KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
+var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
+var SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTQ0NjkzMCwiZXhwIjoyMDk3MDIyOTMwfQ.U8GjwhhY5_aiLxHtXBCF3l8_PfdUMTrQRPTRtiZtJL4";
+var SCRAPER_API_KEY = "49ca405dd29931f0e1faa9763c90363b";
+
+var CATS = [
+  {id:"tech",label:"Texnika"},{id:"shoes",label:"Oyoq kiyim"},
+  {id:"fashion",label:"Kiyim"},{id:"home",label:"Uy-ro'zg'or"}
+];
+// Har kategoriya uchun qaysi variantlar ko'rinsin
+var CAT_VARIANTS = {
+  "tech":    ["color", "model"],   // Texnika: rang + model (xotira, versiya)
+  "shoes":   ["color", "size"],    // Oyoq kiyim: rang + razmer (40,41,42...)
+  "fashion": ["color", "size"],    // Kiyim: rang + razmer (S,M,L,XL)
+  "home":    ["color"],            // Uy-rozgor: faqat rang
+};
+
+var REGIONS = {
+  "tsh-c":"Toshkent shahri","tsh-v":"Toshkent viloyati","sam":"Samarqand",
+  "bux":"Buxoro","and":"Andijon","far":"Farg'ona","nam":"Namangan",
+  "qash":"Qashqadaryo","surx":"Surxondaryo","xor":"Xorazm",
+  "nav":"Navoiy","jiz":"Jizzax","sir":"Sirdaryo","qor":"Qoraqalpog'iston"
+};
+var STATUSES = [
+  {id:"yangi",label:"Yangi"},{id:"tasdiqlangan",label:"Tasdiqlangan"},
+  {id:"yetkazilmoqda",label:"Yetkazilmoqda"},{id:"yakunlangan",label:"Yakunlangan"},
+  {id:"bekor",label:"Bekor qilindi"}
+];
+
+var root = document.getElementById("root");
+var token = sessionStorage.getItem("savat_admin_token") || null;
+var currentTab = "orders";
+
+
+function showConfirm(opts) {
+  // opts: { icon, title, text, okText, okClass, onOk }
+  var bg = document.createElement("div");
+  bg.className = "confirm-bg";
+  bg.id = "confirmBg";
+  bg.innerHTML =
+    '<div class="confirm-box">'+
+      '<div class="ic">'+(opts.icon||"🗑️")+'</div>'+
+      '<h3>'+opts.title+'</h3>'+
+      '<p>'+opts.text+'</p>'+
+      '<div class="confirm-btns">'+
+        '<button class="confirm-cancel" id="confirmCancel">Bekor qilish</button>'+
+        '<button class="confirm-ok '+(opts.okClass||"")+'" id="confirmOk">'+(opts.okText||"O&#39;chirish")+'</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(bg);
+  bg.onclick = function(e){ if(e.target===bg) closeConfirm(); };
+  document.getElementById("confirmCancel").onclick = closeConfirm;
+  document.getElementById("confirmOk").onclick = function(){ closeConfirm(); opts.onOk(); };
+}
+function closeConfirm() {
+  var el = document.getElementById("confirmBg");
+  if(el) el.remove();
+}
+function fmt(n) { return Math.round(n).toLocaleString("ru-RU").replace(/\u00A0/g," "); }
+function h(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function renderLogin(errMsg) {
+  root.innerHTML =
+    '<div class="login-box">'+
+      '<h1>SAVAT.UZ — Admin</h1>'+
+      '<p>Buyurtmalar va mahsulotlarni boshqarish</p>'+
+      '<label>Email</label><input id="em" type="email" placeholder="email@misol.com" />'+
+      '<label>Parol</label><input id="pw" type="password" placeholder="••••••••" />'+
+      '<div class="err">'+(errMsg||"")+'</div>'+
+      '<button class="btn" id="loginBtn">Kirish</button>'+
+    '</div>';
+  document.getElementById("loginBtn").onclick = doLogin;
+  document.getElementById("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
+}
+
+function doLogin() {
+  var email = document.getElementById("em").value.trim();
+  var pw = document.getElementById("pw").value;
+  var btn = document.getElementById("loginBtn");
+  btn.disabled=true; btn.textContent="Kirilmoqda...";
+  fetch(SB+"/auth/v1/token?grant_type=password",{
+    method:"POST",
+    headers:{"apikey":KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({email:email,password:pw})
+  }).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};})})
+  .then(function(r){
+    if(!r.ok||!r.d.access_token){renderLogin("Email yoki parol noto'g'ri");return;}
+    token=r.d.access_token;
+    sessionStorage.setItem("savat_admin_token",token);
+    renderMain();
+  }).catch(function(){renderLogin("Xatolik yuz berdi");});
+}
+
+function doLogout() {
+  sessionStorage.removeItem("savat_admin_token");
+  token=null; renderLogin();
+}
+
+function renderMain() {
+  root.innerHTML =
+    '<div class="wrap">'+
+      '<div class="top">'+
+        '<p class="top-title">SAVAT.UZ Admin</p>'+
+        '<div class="nav-tabs">'+
+          '<button class="tab'+(currentTab==="orders"?" active":"")+'" id="tabOrders">Buyurtmalar</button>'+
+          '<button class="tab'+(currentTab==="products"?" active":"")+'" id="tabProducts">Mahsulotlar</button>'+
+          '<button class="tab'+(currentTab==="users"?" active":"")+'" id="tabUsers">Foydalanuvchilar</button>'+
+          '<button class="tab'+(currentTab==="messages"?" active":"")+'" id="tabMessages">Xabarlar</button>'+
+          '<button class="tab'+(currentTab==="import"?" active":"")+' tab-import" id="tabImport">📥 Import</button>'+
+        '</div>'+
+        '<button class="logout" id="logoutBtn">Chiqish</button>'+
+      '</div>'+
+      '<div id="content">Yuklanmoqda...</div>'+
+    '</div>';
+  document.getElementById("logoutBtn").onclick = doLogout;
+  document.getElementById("tabOrders").onclick = function(){ currentTab="orders"; renderMain(); };
+  document.getElementById("tabProducts").onclick = function(){ currentTab="products"; renderMain(); };
+  document.getElementById("tabUsers").onclick = function(){ currentTab="users"; renderMain(); };
+  document.getElementById("tabMessages").onclick = function(){ currentTab="messages"; renderMain(); };
+  document.getElementById("tabImport").onclick = function(){ currentTab="import"; renderMain(); };
+  if(currentTab==="orders") loadOrders();
+  else if(currentTab==="products") loadProducts();
+  else if(currentTab==="users") loadUsers();
+  else if(currentTab==="import") loadImport();
+  else loadMessages();
+}
+
+function statusClass(s){
+  if(s==="yangi") return "status-yangi";
+  if(s==="tasdiqlangan") return "status-tasdiqlangan";
+  if(s==="yetkazilmoqda") return "status-yetkazilmoqda";
+  if(s==="yakunlangan") return "status-yakunlangan";
+  return "status-bekor";
+}
+
+function loadOrders() {
+  fetch(SB+"/rest/v1/orders?select=*&order=created_at.desc",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){
+    if(r.status===401){doLogout();return Promise.reject();}
+    return r.json();
+  }).then(function(orders){
+    var cont = document.getElementById("content");
+    if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
+    cont.innerHTML = orders.map(function(o){
+      var items = (o.items||[]).map(function(it){
+        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
+      }).join("");
+      var opts = STATUSES.map(function(s){
+        return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
+      }).join("");
+      return '<div class="order-card">'+
+        '<div class="order-head">'+
+          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
+          '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
+          '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
+          '<button class="btn btn-sm btn-danger" onclick="deleteOrder('+o.id+',\''+h(o.order_num)+'\')" style="flex:none">O\'chirish</button>'+
+        '</div>'+
+        '<div class="order-body">'+
+          '<div class="items-list">'+items+'</div>'+
+          '<div>'+
+            '<div class="info-row"><b>Tel:</b> '+h(o.phone||"—")+'</div>'+
+            '<div class="info-row"><b>Hudud:</b> '+(REGIONS[o.region]||h(o.region||"—"))+'</div>'+
+            '<div class="info-row"><b>Shahar:</b> '+h(o.city||"—")+'</div>'+
+            '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
+            (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
+            '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    document.querySelectorAll("select.status").forEach(function(sel){
+      sel.onchange = function(){
+        sel.className="status "+statusClass(sel.value);
+        fetch(SB+"/rest/v1/orders?id=eq."+sel.getAttribute("data-id"),{
+          method:"PATCH",
+          headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+          body:JSON.stringify({status:sel.value})
+        });
+      };
+    });
+  }).catch(function(){});
+}
+
+function loadProducts() {
+  fetch(SB+"/rest/v1/products?select=*&order=id",{
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(products){
+    var cont = document.getElementById("content");
+    cont.innerHTML =
+      '<div class="add-btn-row">'+
+        '<span>Jami: <b>'+products.length+'</b> ta mahsulot</span>'+
+        '<button class="btn btn-sm" id="addBtn">+ Yangi mahsulot</button>'+
+      '</div>'+
+      '<div class="prod-grid">'+
+        products.map(function(p){
+          var imgs = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
+          var imgHtml = imgs.length > 0
+            ? '<div style="position:relative"><img class="prod-img" src="'+h(imgs[0])+'" alt="'+h(p.name_uz)+'" />'+
+              (imgs.length>1?'<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px">'+imgs.length+' ta</span>':'')+
+              '</div>'
+            : '<div class="prod-tile" style="background:'+h(p.tile||"#f0e8ff")+';color:'+h(p.accent||"#6c2bd9")+'">📦</div>';
+          return '<div class="prod-card">'+
+            imgHtml+
+            '<div class="prod-name">'+h(p.name_uz)+(p.sku?' <span style="font-size:11px;font-weight:700;background:#f0e8ff;color:#6c2bd9;padding:2px 8px;border-radius:999px;vertical-align:middle">'+h(p.sku)+'</span>':'')+'</div>'+
+            '<div class="prod-sub">'+h(p.sub_uz||"")+'</div>'+
+            '<div class="prod-prices">Xitoy: <b>'+fmt(p.china)+'</b> | Biz: <b>'+fmt(p.market)+'</b> so\'m | '+p.weight+' kg</div>'+
+            '<div class="prod-actions">'+
+              '<button class="btn btn-sm btn-ghost" onclick="editProduct(\''+encodeURIComponent(JSON.stringify(p))+'\')">Tahrirlash</button>'+
+              '<button class="btn btn-sm btn-danger" onclick="deleteProduct('+p.id+',\''+h(p.name_uz)+'\')">O\'chirish</button>'+
+            '</div>'+
+          '</div>';
+        }).join("")+
+      '</div>';
+    document.getElementById("addBtn").onclick = function(){ openProductModal(null); };
+  });
+}
+
+function editProduct(pEnc) {
+  openProductModal(JSON.parse(decodeURIComponent(pEnc)));
+}
+
+function deleteProduct(id, name) {
+  showConfirm({
+    icon: "🗑️",
+    title: "Mahsulotni o'chirish",
+    text: "<b>"+name+"</b> ni o'chirishni tasdiqlaysizmi?",
+    okText: "O'chirish",
+    onOk: function(){
+      fetch(SB+"/rest/v1/products?id=eq."+id,{
+        method:"DELETE",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+      }).then(function(){ loadProducts(); });
+    }
+  });
+}
+
+function openProductModal(p) {
+  var isEdit = !!p;
+  document.body.insertAdjacentHTML("beforeend",
+    '<div class="modal-bg" id="modalBg">'+
+      '<div class="modal">'+
+        '<h2>'+(isEdit?"Tahrirlash":"Yangi mahsulot")+'</h2>'+
+        '<label>Nomi (uz)</label><input id="f_name_uz" value="'+h(p?p.name_uz:"")+'" placeholder="Sport krossovka" />'+
+        '<label>Nomi (ru)</label><input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" />'+
+        '<label>Tavsif (uz)</label><input id="f_sub_uz" value="'+h(p?p.sub_uz:"")+'" placeholder="Erkaklar uchun..." />'+
+        '<label>Tavsif (ru)</label><input id="f_sub_ru" value="'+h(p?p.sub_ru:"")+'" placeholder="Мужские..." />'+
+        '<label>SKU (mahsulot kodi)</label><input id="f_sku" value="'+h(p?p.sku||"":"")+'" placeholder="SHOES-001, TECH-042..." />'+
+        '<div class="form-row">'+
+          '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" /></div>'+
+          '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" /></div>'+
+        '</div>'+
+        '<div class="form-row">'+
+          '<div><label>Vazni (kg)</label><input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" /></div>'+
+          '<div><label>Kategoriya</label>'+
+            '<select id="f_cat">'+CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+'</select>'+
+          '</div>'+
+        '</div>'+
+        '<label>Mahsulot rasmlari <span style="color:var(--ink-3);font-weight:500;font-size:12px">(8 tagacha, istalgan tartibda)</span></label>'+
+        '<div class="imgs-grid" id="imgsGrid"></div>'+
+        '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
+        '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
+        '<div class="variants-section"><h4>Variantlar</h4><div id="varSectionsWrap"></div></div>'+
+                '<div class="err" id="modalErr"></div>'+
+        '<div style="display:flex;gap:10px;">'+
+          '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
+          '<button class="btn" style="flex:2" id="saveBtn">'+(isEdit?"Saqlash":"Qo\'shish")+'</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  );
+
+  // Ko'p rasm — state: [{url, blob, isNew}]
+  window._imgList = [];
+  var existingUrls = [];
+  if(p && p.image_urls && p.image_urls.length) existingUrls = p.image_urls;
+  else if(p && p.image_url) existingUrls = [p.image_url];
+  window._imgList = existingUrls.map(function(u){ return {url:u, blob:null, isNew:false}; });
+
+  function renderImgsGrid() {
+    var grid = document.getElementById("imgsGrid");
+    if(!grid) return;
+    grid.innerHTML = window._imgList.map(function(item, idx){
+      return '<div class="img-thumb-wrap">'+
+        '<img src="'+h(item.url)+'" />'+
+        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="Ochirish">\u00d7</button>'+
+      '</div>';
+    }).join("") +
+    (window._imgList.length < 8 ?
+      '<div class="img-add-box" id="imgAddBox">'+
+        '<span style="font-size:22px">+</span><span>Rasm qushish</span>'+
+      '</div>' : "");
+    var addBox = document.getElementById("imgAddBox");
+    if(addBox) addBox.onclick = function(){ var inp = document.getElementById("f_img_add"); if(inp) inp.click(); };
+    var inp = document.getElementById("f_img_add");
+    if(inp) inp.onchange = function(){ addImages(this.files); this.value=""; };
+  }
+
+  window._removeImg = function(idx) {
+    window._imgList.splice(idx, 1);
+    renderImgsGrid();
+  };
+
+  function compressFile(file, cb) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement("canvas");
+        var MAX = 900; var w = img.width, hh = img.height;
+        if(w > hh) { if(w > MAX){ hh = Math.round(hh*MAX/w); w = MAX; } }
+        else { if(hh > MAX){ w = Math.round(w*MAX/hh); hh = MAX; } }
+        canvas.width = w; canvas.height = hh;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, hh);
+        var previewUrl = canvas.toDataURL("image/jpeg", 0.88);
+        canvas.toBlob(function(blob){ cb(blob, previewUrl); }, "image/jpeg", 0.88);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function addImages(files) {
+    var arr = Array.from(files);
+    var remaining = 8 - window._imgList.length;
+    arr = arr.slice(0, remaining);
+    var done = 0;
+    arr.forEach(function(file){
+      compressFile(file, function(blob, previewUrl){
+        window._imgList.push({url: previewUrl, blob: blob, isNew: true});
+        done++;
+        if(done === arr.length) renderImgsGrid();
+      });
+    });
+  }
+
+  renderImgsGrid();
+
+
+  // ===== VARIANTS =====
+  window._variants = [];
+  var currentCat = p ? (p.cat || "fashion") : "fashion";
+
+  var VAR_ICONS = { color: "Ranglar", size: "Razmerlar", model: "Modellar" };
+  var VAR_PLACEHOLDERS = {
+    color: "Rang nomi (Qizil, Zangori...)",
+    size: "Razmer (S, M, L, XL, 40, 41...)",
+    model: "Model (128GB, Pro Max...)"
+  };
+
+  function getAllowedTypes(cat) {
+    if(cat === "tech") return ["color", "model"];
+    if(cat === "home") return ["color"];
+    return ["color", "size"]; // shoes, fashion, default
+  }
+
+  function renderVarList(type) {
+    var key = type.charAt(0).toUpperCase() + type.slice(1);
+    var listEl = document.getElementById("varList" + key);
+    if(!listEl) return;
+    var items = window._variants.filter(function(v){ return v.type === type; });
+    if(type === "color") {
+      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;min-height:8px";
+      listEl.innerHTML = items.map(function(v, i){
+        var idx = window._variants.indexOf(v);
+        return "<div style='position:relative;width:52px;text-align:center'>"+
+          "<div style='width:52px;height:52px;border-radius:10px;background:"+(v.color_hex||"#ccc")+";border:1.5px solid var(--line);overflow:hidden'>"+
+          "</div>"+
+          "<div style='font-size:10px;font-weight:700;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+v.value+"</div>"+
+          "<button data-ridx='"+idx+"' data-rtype='color' class='var-remove-btn' style='position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#e11d48;color:#fff;border:none;cursor:pointer;font-size:10px;font-weight:800;padding:0'>x</button>"+
+        "</div>";
+      }).join("") || "<span style='color:var(--ink-3);font-size:12px'>Hali qo'shilmagan</span>";
+    } else {
+      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:8px";
+      listEl.innerHTML = items.map(function(v){
+        var idx = window._variants.indexOf(v);
+        return "<div style='display:flex;align-items:center;gap:4px;background:var(--brand-soft);color:var(--brand);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700'>"+
+          v.value+
+          "<button data-ridx='"+idx+"' data-rtype='"+type+"' class='var-remove-btn' style='background:none;border:none;cursor:pointer;color:var(--brand);font-size:14px;font-weight:800;padding:0;line-height:1;margin-left:2px'>x</button>"+
+        "</div>";
+      }).join("") || "<span style='color:var(--ink-3);font-size:12px'>Hali qo'shilmagan</span>";
+    }
+  }
+
+  window._removeVariant = function(idx, type) {
+    window._variants.splice(idx, 1);
+    renderVarList(type);
+  };
+
+  document.addEventListener("click", function(e) {
+    var btn = e.target.closest ? e.target.closest(".var-remove-btn") : null;
+    if(!btn) return;
+    var idx = parseInt(btn.getAttribute("data-ridx"));
+    var type = btn.getAttribute("data-rtype");
+    if(!isNaN(idx) && type) window._removeVariant(idx, type);
+  });
+
+  function setupVarAdd(type) {
+    var key = type.charAt(0).toUpperCase() + type.slice(1);
+    var addBtn = document.getElementById("varAdd" + key);
+    var inp = document.getElementById("varInput" + key);
+    if(!addBtn || !inp) return;
+    var doAdd = function() {
+      var val = inp.value.trim();
+      if(!val) return;
+      var colorHex = type === "color" ? (document.getElementById("varColorPicker") || {value:"#cccccc"}).value : "";
+      window._variants.push({ type: type, value: val, color_hex: colorHex });
+      inp.value = "";
+      renderVarList(type);
+    };
+    addBtn.onclick = doAdd;
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); doAdd(); } });
+  }
+
+  function rebuildVariantSections(cat) {
+    var allowed = getAllowedTypes(cat);
+    var wrap = document.getElementById("varSectionsWrap");
+    if(!wrap) return;
+    wrap.innerHTML = allowed.map(function(type){
+      var key = type.charAt(0).toUpperCase() + type.slice(1);
+      var colorRow = '<div class="variant-add-row" style="flex-wrap:wrap;gap:6px">'+
+        '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:36px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none"/>'+
+        '<input id="varInputColor" placeholder="'+VAR_PLACEHOLDERS.color+'" style="flex:1;min-width:100px"/>'+
+        '<button class="btn btn-sm" id="varAddColor">+ Qo&#39;sh</button>'+
+      '</div>';
+      var otherRow = '<div class="variant-add-row">'+
+        '<input id="varInput'+key+'" placeholder="'+VAR_PLACEHOLDERS[type]+'"/>'+
+        '<button class="btn btn-sm" id="varAdd'+key+'">+ Qo&#39;sh</button>'+
+      '</div>';
+      return '<div style="margin-bottom:14px">'+
+        '<div class="var-section-label">'+(type==="color"?"🎨":type==="size"?"📐":"📦")+' '+VAR_ICONS[type]+'</div>'+
+        '<div id="varList'+key+'"></div>'+
+        (type==="color" ? colorRow : otherRow)+
+      '</div>';
+    }).join("");
+    allowed.forEach(function(t){ setupVarAdd(t); });
+    allowed.forEach(function(t){ renderVarList(t); });
+  }
+
+  var catSel = document.getElementById("f_cat");
+  if(catSel) {
+    catSel.addEventListener("change", function(){
+      currentCat = this.value;
+      rebuildVariantSections(currentCat);
+    });
+  }
+
+  if(p && p.id) {
+    fetch(SB+"/rest/v1/product_variants?product_id=eq."+p.id+"&order=id",{
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+    }).then(function(r){ return r.json(); })
+    .then(function(rows){
+      window._variants = rows.map(function(r){ return {id:r.id,type:r.type,value:r.value,color_hex:r.color_hex||""}; });
+      rebuildVariantSections(currentCat);
+    }).catch(function(){ rebuildVariantSections(currentCat); });
+  } else {
+    rebuildVariantSections(currentCat);
+  }
+
+  document.getElementById("cancelBtn").onclick = closeModal;
+  document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
+  document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null); };
+}
+
+function closeModal() {
+  var bg = document.getElementById("modalBg");
+  if(bg) bg.remove();
+}
+
+function saveProduct(id) {
+  var name_uz = document.getElementById("f_name_uz").value.trim();
+  var name_ru = document.getElementById("f_name_ru").value.trim();
+  var china = parseInt(document.getElementById("f_china").value);
+  var market = parseInt(document.getElementById("f_market").value);
+  var weight = parseFloat(document.getElementById("f_weight").value);
+
+  if(!name_uz||!name_ru||!china||!market||!weight){
+    document.getElementById("modalErr").textContent="Barcha majburiy maydonlarni to'ldiring";
+    return;
+  }
+
+  var btn = document.getElementById("saveBtn");
+  btn.disabled=true; btn.textContent="Saqlanmoqda...";
+
+  var imgList = window._imgList || [];
+  var newImgs = imgList.filter(function(i){ return i.isNew && i.blob; });
+  var prog = document.getElementById("uploadProgress");
+
+  function doFinalSave(finalUrls) {
+    var firstUrl = finalUrls.length > 0 ? finalUrls[0] : null;
+    var body = {
+      name_uz:name_uz, name_ru:name_ru,
+      sub_uz:document.getElementById("f_sub_uz").value.trim(),
+      sub_ru:document.getElementById("f_sub_ru").value.trim(),
+      china:china, market:market, weight:weight,
+      cat:document.getElementById("f_cat").value,
+      sku:document.getElementById("f_sku").value.trim()||null,
+      image_url: firstUrl,
+      image_urls: finalUrls.length > 0 ? finalUrls : null
+    };
+    var url = id ? SB+"/rest/v1/products?id=eq."+id : SB+"/rest/v1/products";
+    var prefer = id ? "return=minimal" : "return=representation";
+    fetch(url,{
+      method: id?"PATCH":"POST",
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":prefer},
+      body:JSON.stringify(body)
+    }).then(function(r){
+      if(!r.ok){ btn.disabled=false; btn.textContent="Saqlash"; document.getElementById("modalErr").textContent="Xatolik yuz berdi"; return; }
+      return r.json().catch(function(){ return [{id:id}]; });
+    }).then(function(rows){
+      var productId = id || (rows && rows[0] ? rows[0].id : null);
+      var variants = window._variants || [];
+      if(!productId || variants.length === 0){ closeModal(); loadProducts(); return; }
+      // Delete old variants then insert new
+      fetch(SB+"/rest/v1/product_variants?product_id=eq."+productId,{
+        method:"DELETE",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+      }).then(function(){
+        var vRows = variants.map(function(v){
+          return {product_id:productId, type:v.type, value:v.value, color_hex:v.color_hex||null};
+        });
+        fetch(SB+"/rest/v1/product_variants",{
+          method:"POST",
+          headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+          body:JSON.stringify(vRows)
+        }).then(function(){ closeModal(); loadProducts(); });
+      });
+    });
+  }
+
+  // Existing (not new) URLs
+  var existingUrls = imgList.filter(function(i){ return !i.isNew; }).map(function(i){ return i.url; });
+
+  if(newImgs.length === 0) {
+    doFinalSave(existingUrls);
+    return;
+  }
+
+  prog.style.display="block";
+  prog.textContent = "0 / "+newImgs.length+" rasm yuklanmoqda...";
+
+  var uploadedUrls = [];
+  var done = 0;
+
+  newImgs.forEach(function(item, i){
+    var fileName = "product_"+(id||Date.now())+"_"+Date.now()+"_"+i+".jpg";
+    fetch(SB+"/storage/v1/object/products/"+fileName,{
+      method:"POST",
+      headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":"image/jpeg","x-upsert":"true"},
+      body:item.blob
+    }).then(function(r){ return r.json(); })
+    .then(function(){
+      uploadedUrls[i] = SB+"/storage/v1/object/public/products/"+fileName;
+      done++;
+      prog.textContent = done+" / "+newImgs.length+" rasm yuklandi";
+      if(done === newImgs.length) {
+        var allUrls = existingUrls.concat(uploadedUrls.filter(Boolean));
+        doFinalSave(allUrls);
+      }
+    }).catch(function(){
+      document.getElementById("modalErr").textContent="Rasm "+(i+1)+" yuklanmadi";
+      btn.disabled=false; btn.textContent="Saqlash";
+    });
+  });
+}
+
+
+function deleteOrder(id, num) {
+  showConfirm({
+    icon: "📦",
+    title: "Buyurtmani o'chirish",
+    text: "<b>"+num+"</b> buyurtmani o'chirishni tasdiqlaysizmi?",
+    okText: "O'chirish",
+    onOk: function(){
+      fetch(SB+"/rest/v1/orders?id=eq."+id,{
+        method:"DELETE",
+        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
+      }).then(function(){ loadOrders(); });
+    }
+  });
+}
+
+function loadImport() {
+  var cont = document.getElementById("content");
+  cont.innerHTML = "";
+
+  var box = document.createElement("div");
+  box.className = "import-box";
+
+  box.innerHTML = [
+    "<h3>Import qilish</h3>",
+    "<p>Taobao yoki Pinduoduo mahsulot linkini kiriting</p>",
+    "<label>Mahsulot linki</label>"
+  ].join("");
+
+  var urlInput = document.createElement("input");
+  urlInput.id = "importUrl";
+  urlInput.placeholder = "https://item.taobao.com/item.htm?id=...";
+  urlInput.style.marginBottom = "8px";
+  box.appendChild(urlInput);
+
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText = "display:flex;gap:10px;margin-bottom:4px";
+
+  var fetchBtn = document.createElement("button");
+  fetchBtn.id = "importBtn";
+  fetchBtn.className = "btn";
+  fetchBtn.style.flex = "1";
+  fetchBtn.textContent = "Ma'lumot olish";
+  btnRow.appendChild(fetchBtn);
+
+  var clearBtn = document.createElement("button");
+  clearBtn.className = "btn btn-ghost";
+  clearBtn.style.cssText = "width:auto;padding:0 16px";
+  clearBtn.textContent = "X";
+  clearBtn.onclick = function() {
+    urlInput.value = "";
+    statusDiv.className = "import-status";
+    resultDiv.className = "import-result";
+  };
+  btnRow.appendChild(clearBtn);
+  box.appendChild(btnRow);
+
+  var statusDiv = document.createElement("div");
+  statusDiv.id = "importStatus";
+  statusDiv.className = "import-status";
+  box.appendChild(statusDiv);
+
+  var resultDiv = document.createElement("div");
+  resultDiv.id = "importResult";
+  resultDiv.className = "import-result";
+
+  // Preview grid
+  var preview = document.createElement("div");
+  preview.className = "import-preview";
+
+  var imgWrap = document.createElement("div");
+  imgWrap.id = "importImgWrap";
+  imgWrap.innerHTML = "<div class=\"import-img-ph\">📦</div>";
+  preview.appendChild(imgWrap);
+
+  var infoDiv = document.createElement("div");
+
+  var badge = document.createElement("div");
+  badge.id = "importBadge";
+  badge.className = "platform-badge badge-taobao";
+  badge.textContent = "Taobao";
+  infoDiv.appendChild(badge);
+
+  var nameField = document.createElement("div");
+  nameField.className = "import-field";
+  nameField.innerHTML = "<label>Nomi</label><div class=\"val\" id=\"importName\">—</div>";
+  infoDiv.appendChild(nameField);
+
+  var priceRow = document.createElement("div");
+  priceRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:12px";
+  priceRow.innerHTML = [
+    "<div class=\"import-field\"><label>Xitoy narxi (som)</label><input id=\"importChina\" type=\"number\" placeholder=\"95000\" /></div>",
+    "<div class=\"import-field\"><label>Bozor narxi (som)</label><input id=\"importMarket\" type=\"number\" placeholder=\"650000\" /></div>"
+  ].join("");
+  infoDiv.appendChild(priceRow);
+
+  var weightRow = document.createElement("div");
+  weightRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:12px";
+  var catOptions = CATS.map(function(c){ return "<option value=\""+c.id+"\">"+c.label+"</option>"; }).join("");
+  weightRow.innerHTML = [
+    "<div class=\"import-field\"><label>Vazni (kg)</label><input id=\"importWeight\" type=\"number\" step=\"0.01\" placeholder=\"0.5\" /></div>",
+    "<div class=\"import-field\"><label>Kategoriya</label><select id=\"importCat\">"+catOptions+"</select></div>"
+  ].join("");
+  infoDiv.appendChild(weightRow);
+
+  preview.appendChild(infoDiv);
+  resultDiv.appendChild(preview);
+
+  var actions = document.createElement("div");
+  actions.className = "import-actions";
+
+  var saveBtn = document.createElement("button");
+  saveBtn.id = "importSaveBtn";
+  saveBtn.className = "btn";
+  saveBtn.style.flex = "1";
+  saveBtn.textContent = "Saqlash";
+  saveBtn.onclick = doImportSave;
+  actions.appendChild(saveBtn);
+
+  var saveStatus = document.createElement("span");
+  saveStatus.id = "importSaveStatus";
+  saveStatus.style.cssText = "font-size:13px;color:var(--ink-3)";
+  actions.appendChild(saveStatus);
+
+  resultDiv.appendChild(actions);
+  box.appendChild(resultDiv);
+  cont.appendChild(box);
+
+  fetchBtn.onclick = doImport;
+  urlInput.addEventListener("keydown", function(e){ if(e.key === "Enter") doImport(); });
+}
+
+
+
+function detectPlatform(url) {
+  if(url.includes("taobao.com") || url.includes("tmall.com")) return "taobao";
+  if(url.includes("pinduoduo.com") || url.includes("pdd") || url.includes("yangkeduo.com") || url.includes("kwcdn.com")) return "pdd";
+  if(url.includes("1688.com")) return "1688";
+  return null;
+}
+
+function doImport() {
+  var url = document.getElementById("importUrl").value.trim();
+  var status = document.getElementById("importStatus");
+  var result = document.getElementById("importResult");
+
+  if(!url) { status.className="import-status err"; status.textContent="Link kiriting!"; return; }
+  // Normalize URL - convert mobile to desktop
+  url = url
+    .replace("mobile.yangkeduo.com", "mobile.pinduoduo.com")
+    .replace("//m.taobao.com", "//item.taobao.com")
+    .replace("//a.m.taobao.com/i", "//item.taobao.com/item.htm?id=");
+
+  var platform = detectPlatform(url);
+  if(!platform) { status.className="import-status err"; status.textContent="Faqat Taobao, PDD yoki 1688 linki"; return; }
+
+  // For PDD, use API endpoint directly
+  if(platform === "pdd") {
+    var goodsId = url.match(/goods_id=(\d+)/)?.[1] || url.match(/ps=([^&]+)/)?.[1] || "";
+    if(goodsId && !goodsId.match(/^\d+$/)) goodsId = ""; // ps= is not goods_id
+  }
+
+  var btn = document.getElementById("importBtn");
+  btn.disabled = true; btn.textContent = "Yuklanmoqda...";
+  status.className="import-status"; result.className="import-result";
+
+  function showResult(info) {
+    btn.disabled=false; btn.textContent="Ma'lumot olish";
+    result.className="import-result show";
+
+    var nameEl = document.getElementById("importName");
+    nameEl.textContent = info.name_uz || info.name || "";
+    nameEl.contentEditable = "true";
+    nameEl.style.cssText = "border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;min-height:28px;outline:none;cursor:text;";
+
+    // Also fill name_ru field if exists
+    var nameRuEl = document.getElementById("importNameRu");
+    if(nameRuEl) nameRuEl.value = info.name_ru || info.name || "";
+
+    // Show original chinese name hint
+    if(info.name && (info.name_uz || info.name_ru)) {
+      var hint = document.getElementById("importNameHint");
+      if(hint) hint.textContent = "Xitoycha: " + info.name;
+    }
+
+    var badge = document.getElementById("importBadge");
+    if(platform==="pdd"){ badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
+    else if(platform==="1688"){ badge.className="platform-badge badge-taobao"; badge.textContent="1688.com"; }
+    else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao"; }
+
+    var imgWrap = document.getElementById("importImgWrap");
+    window._importImages = info.images || [];
+    if(info.images && info.images.length > 0) {
+      var mainImg = document.createElement("img");
+      mainImg.className = "import-img";
+      mainImg.src = info.images[0];
+      mainImg.onerror = function(){ this.parentNode.innerHTML="<div class=\"import-img-ph\">📦</div>"; };
+      imgWrap.innerHTML = "";
+      imgWrap.appendChild(mainImg);
+
+      if(info.images.length > 1) {
+        var thumbRow = document.createElement("div");
+        thumbRow.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;";
+        info.images.slice(0,8).forEach(function(src, i) {
+          var t = document.createElement("img");
+          t.src = src;
+          t.style.cssText = "width:40px;height:40px;object-fit:cover;border-radius:5px;border:2px solid "+(i===0?"var(--brand)":"var(--line)")+";cursor:pointer;";
+          t.onclick = function() {
+            thumbRow.querySelectorAll("img").forEach(function(x){ x.style.borderColor="var(--line)"; });
+            t.style.borderColor = "var(--brand)";
+            mainImg.src = src;
+            window._importImages = [src].concat(info.images.filter(function(u){ return u!==src; }));
+          };
+          thumbRow.appendChild(t);
+        });
+        imgWrap.appendChild(thumbRow);
+      }
+    } else {
+      imgWrap.innerHTML = "<div class=\"import-img-ph\">📦</div>";
+    }
+
+    if(info.price) {
+      var yuan = parseFloat(info.price);
+      if(yuan > 0) {
+        document.getElementById("importChina").value = Math.round(yuan * 1300);
+        document.getElementById("importMarket").value = Math.round(yuan * 1300 * 4.5);
+      }
+    }
+
+    if(info.name) {
+      status.className="import-status ok";
+      status.textContent = "✅ Ma'lumot olindi! Narx va vaznni to'ldiring.";
+    } else {
+      status.className="import-status err";
+      status.textContent = "⚠️ Nom topilmadi — yuqoridagi maydonga kiriting.";
+    }
+  }
+
+  // Use our Vercel serverless function (avoids CORS)
+  fetch("/api/scrape?url=" + encodeURIComponent(url))
+    .then(function(r) {
+      if(!r.ok) throw new Error("Server xato: " + r.status);
+      return r.json();
+    })
+    .then(function(info) {
+      if(info.error) throw new Error(info.error);
+      showResult(info);
+    })
+    .catch(function(e) {
+      btn.disabled=false; btn.textContent="Ma'lumot olish";
+      status.className="import-status err";
+      status.textContent = "Xato: " + (e.message||"Ishlamadi") + " — qo'lda to'ldiring.";
+      showResult({ name:"", images:[], price:"" });
+    });
+}
+
+
+function showManualForm(platform) {
+  var result = document.getElementById("importResult");
+  var badge = document.getElementById("importBadge");
+  if(platform === "pdd") { badge.className="platform-badge badge-pdd"; badge.textContent="Pinduoduo"; }
+  else { badge.className="platform-badge badge-taobao"; badge.textContent="Taobao"; }
+  document.getElementById("importName").textContent = "Nomni qo'lda kiriting";
+  result.className = "import-result show";
+}
+
+function parseProductPage(html, platform) {
+  var info = { name:"", price:"", images:[] };
+
+  // ---- NAME ----
+  var namePatterns = [
+    // PDD specific
+    /"goodsName"\s*:\s*"([^"]{5,}?)"/,
+    /"goods_name"\s*:\s*"([^"]{5,}?)"/,
+    /"name"\s*:\s*"([^"]{5,}?)"/,
+    // Taobao specific
+    /"title"\s*:\s*"([^"]{5,}?)"/,
+    /"subject"\s*:\s*"([^"]{5,}?)"/,
+    // Meta tags
+    /property="og:title"[^>]*content="([^"]{5,}?)"/i,
+    /name="title"[^>]*content="([^"]{5,}?)"/i,
+    /<title[^>]*>([^<]{5,}?)<\/title>/i,
+    /<h1[^>]*>([^<]{5,}?)<\/h1>/i
+  ];
+  for(var i=0;i<namePatterns.length;i++){
+    var m = html.match(namePatterns[i]);
+    if(m&&m[1]){
+      var t = m[1]
+        .replace(/\\u([0-9a-fA-F]{4})/g,function(_,c){return String.fromCharCode(parseInt(c,16));})
+        .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"')
+        .replace(/[-–|]\s*(淘宝|天猫|拼多多|Taobao|Tmall|1688|pinduoduo)[^]*/i,"")
+        .trim();
+      if(t.length>4&&!t.includes("404")&&!t.includes("error")){info.name=t;break;}
+    }
+  }
+
+  // ---- PRICE ----
+  var pricePatterns = [
+    /"minGroupPrice"\s*:\s*"?([\d.]+)"?/,
+    /"minNormalPrice"\s*:\s*"?([\d.]+)"?/,
+    /"defaultPrice"\s*:\s*"?([\d.]+)"?/,
+    /"price"\s*:\s*"([\d.]+)"/,
+    /"min_price"\s*:\s*"?([\d.]+)"?/,
+    /"originalPrice"\s*:\s*"?([\d.]+)"?/,
+    /[¥￥]\s*([\d]+(?:\.[\d]{1,2})?)/
+  ];
+  for(var j=0;j<pricePatterns.length;j++){
+    var pm=html.match(pricePatterns[j]);
+    if(pm&&pm[1]&&parseFloat(pm[1])>0.1&&parseFloat(pm[1])<99999){info.price=pm[1];break;}
+  }
+
+  // ---- IMAGES ----
+  var seen={};
+  var imgPatterns = [
+    // PDD
+    /https?:\/\/img\.kwcdn\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/img\.pddpic\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/yangkeduo\.com\/[^"'\s,}{>]{20,}/g,
+    // Taobao/Alibaba
+    /https?:\/\/img\.alicdn\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/gw\.alicdn\.com\/[^"'\s,}{>]{20,}/g,
+    /https?:\/\/g\.alicdn\.com\/[^"'\s,}{>]{20,}/g,
+    // Generic
+    /https?:\/\/[^"'\s,}{>]*\.(?:jpg|jpeg|png|webp)(?:\?[^"'\s,}{>]*)?/gi
+  ];
+  for(var k=0;k<imgPatterns.length&&info.images.length<8;k++){
+    var matches=html.match(imgPatterns[k])||[];
+    for(var l=0;l<matches.length&&info.images.length<8;l++){
+      var u=matches[l].replace(/\\/g,"").replace(/['"\s>]+.*$/,"");
+      // Filter: must be image, not icon/logo/tiny
+      if(!seen[u]&&u.length>30&&!u.match(/icon|logo|avatar|badge|star|rating|favicon/i)){
+        seen[u]=true;
+        info.images.push(u);
+      }
+    }
+  }
+
+  return info;
+}
+
+
+function doImportSave() {
+  var name = document.getElementById("importName").textContent.trim();
+  var nameRu = (document.getElementById("importNameRu") || {}).value || name;
+  var china = parseInt(document.getElementById("importChina").value);
+  var market = parseInt(document.getElementById("importMarket").value);
+  var weight = parseFloat(document.getElementById("importWeight").value);
+  var cat = document.getElementById("importCat").value;
+  var saveStatus = document.getElementById("importSaveStatus");
+
+  if(!name||!china||!market||!weight) {
+    saveStatus.textContent="❌ Barcha maydonlarni to'ldiring"; saveStatus.style.color="#e11d48"; return;
+  }
+
+  var saveBtn = document.getElementById("importSaveBtn");
+  saveBtn.disabled=true; saveBtn.textContent="⏳ Saqlanmoqda...";
+
+  var images = window._importImages || [];
+  var firstImg = images[0] || null;
+
+  var body = {
+    name_uz: name, name_ru: nameRu || name,
+    sub_uz: "", sub_ru: "",
+    china: china, market: market, weight: weight, cat: cat,
+    image_url: firstImg,
+    image_urls: images.length > 0 ? images : null,
+    tile: "#ede4ff", accent: "#6c2bd9",
+    rating: 4.5, sold: 0, days: 12, hit: false
+  };
+
+  fetch(SB+"/rest/v1/products", {
+    method:"POST",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+    body:JSON.stringify(body)
+  }).then(function(r){
+    if(r.ok) {
+      saveBtn.textContent="✅ Saqlandi!";
+      saveStatus.textContent="Mahsulot qo'shildi! Mahsulotlar bo'limida tahrirlashingiz mumkin.";
+      saveStatus.style.color="#12a150";
+      setTimeout(function(){ currentTab="products"; renderMain(); }, 1800);
+    } else {
+      saveBtn.disabled=false; saveBtn.textContent="✅ Saqlash";
+      saveStatus.textContent="❌ Xatolik yuz berdi"; saveStatus.style.color="#e11d48";
+    }
+  });
+}
+
+function loadUsers() {
+  fetch(SB+"/auth/v1/admin/users?per_page=100", {
+    headers: {"apikey": SERVICE_KEY, "Authorization": "Bearer "+SERVICE_KEY}
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    var users = data.users || [];
+    var cont = document.getElementById("content");
+    if(!users.length){ cont.innerHTML='<div class="empty">Hozircha foydalanuvchilar yo\'q</div>'; return; }
+    cont.innerHTML =
+      '<div class="add-btn-row"><span>Jami: <b>'+users.length+'</b> ta foydalanuvchi</span></div>'+
+      '<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);">'+
+        '<thead><tr style="background:var(--bg);">'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Email</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Ism</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Ro\'yxat sanasi</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Holat</th>'+
+          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Amal</th>'+
+        '</tr></thead>'+
+        '<tbody>'+
+          users.map(function(u){
+            var name = (u.user_metadata && u.user_metadata.name) ? h(u.user_metadata.name) : "—";
+            var date = new Date(u.created_at).toLocaleDateString("ru-RU");
+            var confirmed = u.email_confirmed_at
+              ? '<span style="color:#12a150;font-weight:600">✓ Tasdiqlangan</span>'
+              : '<span style="color:#f59e0b;font-weight:600">⏳ Tasdiqlanmagan</span>';
+            return '<tr style="border-top:1px solid var(--line);">'+
+              '<td style="padding:12px 16px;font-size:14px;">'+h(u.email)+'</td>'+
+              '<td style="padding:12px 16px;font-size:14px;">'+name+'</td>'+
+              '<td style="padding:12px 16px;font-size:14px;color:var(--ink-3);">'+date+'</td>'+
+              '<td style="padding:12px 16px;font-size:14px;">'+confirmed+'</td>'+
+              '<td style="padding:12px 16px;">'+
+                '<button class="btn btn-sm btn-ghost" onclick="resetPassword(\''+h(u.email)+'\')">Parol reset</button>'+
+              '</td>'+
+            '</tr>';
+          }).join("")+
+        '</tbody>'+
+      '</table>';
+  }).catch(function(){
+    document.getElementById("content").innerHTML = '<div class="empty">Xatolik yuz berdi</div>';
+  });
+}
+
+function resetPassword(email) {
+  showConfirm({
+    icon: "🔑",
+    title: "Parolni tiklash",
+    text: "<b>"+email+"</b> ga parol tiklash xati yuborilsinmi?",
+    okText: "Yuborish",
+    okClass: "purple",
+    onOk: function(){
+      fetch(SB+"/auth/v1/recover", {
+        method:"POST",
+        headers:{"apikey":ANON_KEY,"Authorization":"Bearer "+ANON_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({email:email})
+      }).then(function(r){
+        showConfirm({icon:"✅",title:"Yuborildi",text:r.status===429?"Juda ko'p urinish, keyinroq urinib ko'ring":email+" ga xat yuborildi!",okText:"OK",onOk:function(){}});
+      });
+    }
+  });
+}
+
+var currentChatEmail = null;
+var chatInterval = null;
+
+function fmtT(iso) {
+  return new Date(iso).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tashkent", hour12: false });
+}
+
+function renderMsg(m) {
+  var isAdmin = m.sender === "admin";
+  return '<div style="display:flex;justify-content:'+(isAdmin?'flex-end':'flex-start')+';margin-bottom:10px;">'+
+    '<div style="max-width:70%;padding:10px 14px;border-radius:'+(isAdmin?'16px 16px 4px 16px':'16px 16px 16px 4px')+';'+
+      'background:'+(isAdmin?'linear-gradient(135deg,#7c3aed,#a855f7)':'#f3f0fa')+';color:'+(isAdmin?'#fff':'#1b1430')+';font-size:14px;line-height:1.5;">'+
+      (isAdmin?'':'<div style="font-size:11px;font-weight:700;color:#6c2bd9;margin-bottom:3px">Foydalanuvchi</div>')+
+      h(m.message)+
+      '<div style="font-size:10px;opacity:.6;margin-top:3px;text-align:right">'+fmtT(m.created_at)+'</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function loadMessages() {
+  fetch(SB+"/rest/v1/chats?select=user_email&order=created_at.desc", {
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+  }).then(function(r){ return r.json(); })
+  .then(function(msgs){
+    var seen = {}; var users = [];
+    (msgs||[]).forEach(function(m){ if(!seen[m.user_email]){ seen[m.user_email]=true; users.push(m.user_email); } });
+    var cont = document.getElementById("content");
+    if(!users.length){ cont.innerHTML='<div class="empty">Hozircha xabarlar yo\'q</div>'; return; }
+
+    var listHtml = users.map(function(email){
+      var active = currentChatEmail===email;
+      return '<div onclick="openChat(\''+h(email)+'\')" '+
+        'style="padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);background:'+(active?'#f0e8ff':'')+';transition:.15s;">'+
+        '<div style="font-weight:'+(active?'800':'600')+';font-size:13.5px;color:'+(active?'#6c2bd9':'var(--ink)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+h(email)+'</div>'+
+      '</div>';
+    }).join("");
+
+    var existingList = document.getElementById("chatList");
+    if(existingList) {
+      existingList.innerHTML = listHtml;
+    } else {
+      cont.innerHTML =
+        '<div style="display:grid;grid-template-columns:240px 1fr;height:620px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;">'+
+          '<div id="chatList" style="border-right:1px solid var(--line);overflow-y:auto;">'+listHtml+'</div>'+
+          '<div id="chatBox" style="display:flex;flex-direction:column;min-height:0;background:#faf8fe;">'+
+            '<div style="padding:40px;color:var(--ink-3);text-align:center;margin:auto;font-size:14px;">👈 Foydalanuvchini tanlang</div>'+
+          '</div>'+
+        '</div>';
+      if(currentChatEmail) openChat(currentChatEmail);
+    }
+  });
+}
+
+function openChat(email) {
+  currentChatEmail = email;
+  if(chatInterval) clearInterval(chatInterval);
+
+  var chatBox = document.getElementById("chatBox");
+  if(!chatBox) return;
+
+  chatBox.innerHTML =
+    '<div style="padding:14px 18px;border-bottom:1px solid var(--line);background:#fff;font-weight:700;font-size:14px;flex-shrink:0;">💬 '+h(email)+'</div>'+
+    '<div id="msgList" style="flex:1;overflow-y:auto;padding:14px 16px;min-height:0;"></div>'+
+    '<div style="padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;background:#fff;flex-shrink:0;">'+
+      '<input id="adminInput" placeholder="Javob yozing..." '+
+        'style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--bg);outline:none;color:var(--ink);" />'+
+      '<button id="adminSendBtn" '+
+        'style="height:42px;padding:0 20px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;">'+
+        'Yuborish'+
+      '</button>'+
+    '</div>';
+
+  document.getElementById("adminSendBtn").onclick = function(){ sendAdminMsg(email); };
+  document.getElementById("adminInput").onkeydown = function(e){ if(e.key==="Enter") sendAdminMsg(email); };
+
+  var lastId = 0;
+  var firstLoad = true;
+
+  function fetchMsgs() {
+    fetch(SB+"/rest/v1/chats?user_email=eq."+encodeURIComponent(email)+"&order=created_at.asc", {
+      headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+    }).then(function(r){ return r.json(); })
+    .then(function(msgs){
+      var list = document.getElementById("msgList");
+      if(!list){ clearInterval(chatInterval); return; }
+
+      if(firstLoad) {
+        firstLoad = false;
+        list.innerHTML = "";
+        (msgs||[]).forEach(function(m){
+          list.insertAdjacentHTML("beforeend", renderMsg(m));
+          if(m.id > lastId) lastId = m.id;
+        });
+        list.scrollTop = list.scrollHeight;
+      } else {
+        var added = false;
+        (msgs||[]).forEach(function(m){
+          if(m.id > lastId) {
+            list.insertAdjacentHTML("beforeend", renderMsg(m));
+            lastId = m.id;
+            added = true;
+          }
+        });
+        if(added) list.scrollTop = list.scrollHeight;
+      }
+    });
+  }
+
+  fetchMsgs();
+  chatInterval = setInterval(fetchMsgs, 1500);
+  loadMessages();
+}
+
+function sendAdminMsg(email) {
+  var input = document.getElementById("adminInput");
+  if(!input || !input.value.trim()) return;
+  var text = input.value.trim();
+  input.value = "";
+  input.focus();
+  fetch(SB+"/rest/v1/chats",{
+    method:"POST",
+    headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+    body:JSON.stringify({user_email:email, sender:"admin", message:text})
+  });
+}
+
+if(token) renderMain(); else renderLogin();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import React from 'react';
 
-// Icons component
-const S = (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p} />;
+/* ============ SAVAT.UZ — icons (stroke, currentColor) ============ */
+const S = (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" {...p} />;
 
 const Icons = {
   basket: (p) => <svg viewBox="0 0 24 24" fill="none" {...p}>
@@ -21,7 +21,7 @@ const Icons = {
   check: (p) => <S strokeWidth="2.4" {...p}><path d="M4 12.5 9 17.5 20 6.5"/></S>,
   factory: (p) => <S {...p}><path d="M3 21h18M4 21V10l5 3V10l5 3V6l5 2.5V21"/><path d="M8 21v-3M13 21v-3"/></S>,
   plane: (p) => <S {...p}><path d="M21 5.5 3 12l6 2 2 6 3-5 5 4 2-13.5Z"/></S>,
-  tag: (p) => <S {...p}><path d="M12 3H5a2 2 0 0 0-2 2v7l9 9 9-9-9-9Z" transform="rotate(0)"/><circle cx="8" cy="8" r="1.4"/></S>,
+  tag: (p) => <S {...p}><path d="M12 3H5a2 2 0 0 0-2 2v7l9 9 9-9-9-9Z"/><circle cx="8" cy="8" r="1.4"/></S>,
   truck: (p) => <S {...p}><path d="M2 7h11v9H2zM13 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></S>,
   weight: (p) => <S {...p}><path d="M12 3a2.2 2.2 0 1 1-2.2 2.2A2.2 2.2 0 0 1 12 3Z"/><path d="M8.5 7.5h7l2.5 11.5a1 1 0 0 1-1 1.2H7a1 1 0 0 1-1-1.2L8.5 7.5Z"/></S>,
   shield: (p) => <S {...p}><path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9.2 12 2 2 3.6-3.8"/></S>,
@@ -41,6 +41,5 @@ const Icons = {
   box: (p) => <S {...p}><path d="M12 3L3 8v8l9 5 9-5V8L12 3Z"/><path d="M3 8l9 5 9-5M12 13v8"/></S>,
   help: (p) => <S {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/></S>,
 };
-
 
 export default Icons;

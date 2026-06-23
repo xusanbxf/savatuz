@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SB_URL, SB_KEY, ANON_KEY, I18N, CATS, REGIONS, breakdown, fmt, saveOrder } from '../lib/supabase.js';
-
-
 /* ============ SAVAT.UZ — auth, checkout, mobile menu ============ */
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Icons from './Icons.jsx';
+import { SB_URL, SB_KEY, ANON_KEY, I18N, CATS, REGIONS, breakdown, fmt, saveOrder } from '../lib/supabase.js';
+const AC_I = Icons;
 
 /* phone mask: +998 90 123 45 67 */
 function maskPhone(raw) {
@@ -20,7 +19,7 @@ function maskPhone(raw) {
 function phoneValid(p) { return p.replace(/\D/g, "").length === 12; }
 
 /* ---------- Auth modal ---------- */
-export function AuthModal({ open, t, onClose, onAuth }) {
+function AuthModal({ open, t, onClose, onAuth }) {
   const [tab, setTab] = useState("login"); // login | register | verify | forgot | reset-sent
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -262,7 +261,7 @@ export function AuthModal({ open, t, onClose, onAuth }) {
 }
 
 /* ---------- Mobile menu ---------- */
-export function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders, onHelp, onCatalog }) {
+function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders, onHelp, onCatalog }) {
   return (
     <>
       <div className={"mm-scrim" + (open ? " on" : "")} onClick={onClose} />
@@ -320,8 +319,8 @@ function PaymentCard({ m, t, selected, onSelect }) {
   );
 }
 
-export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
-  const Media = window.SC.Media;
+function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
+  
   const [region, setRegion] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
@@ -334,7 +333,7 @@ export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth 
     if (user && user.phone && phone.replace(/\D/g, "").length <= 3) setPhone(user.phone);
   }, [user]);
 
-  const total = items.reduce((s, it) => s + AC_breakdown(it.p).total * it.q, 0);
+  const total = items.reduce((s, it) => s + breakdown(it.p).total * it.q, 0);
   const count = items.reduce((s, it) => s + it.q, 0);
 
   const methods = [
@@ -363,7 +362,7 @@ export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth 
     if (!region || !phoneValid(phone) || city.trim().length < 2 || address.trim().length < 3) { setErr(true); return; }
     const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
     const orderItems = items.map((it) => {
-      const b = AC_breakdown(it.p);
+      const b = breakdown(it.p);
       return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total };
     });
     onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
@@ -385,7 +384,7 @@ export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth 
                   <AC_I.pin style={{ width: 18, height: 18 }} />
                   <select value={region} onChange={(e) => setRegion(e.target.value)}>
                     <option value="">{t.co_region_ph}</option>
-                    {AC_REGIONS.map((r) => <option key={r.id} value={r.id}>{r[lang]}</option>)}
+                    {REGIONS.map((r) => <option key={r.id} value={r.id}>{r[lang]}</option>)}
                   </select>
                 </div>
               </label>
@@ -437,24 +436,24 @@ export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth 
             <h3 className="co-h" style={{ marginBottom: 14 }}>{t.co_summary}</h3>
             <div className="co-items">
               {items.map((it) => {
-                const b = AC_breakdown(it.p);
+                const b = breakdown(it.p);
                 return (
                   <div className="co-item" key={it.p.id}>
                     <div className="co-item-media"><Media p={it.p} label="" /></div>
                     <div className="co-item-info">
                       <p className="co-item-name">{it.p.name[lang]}</p>
-                      <span className="co-item-qty">{it.q} × {AC_fmt(b.total)} {t.unit}</span>
+                      <span className="co-item-qty">{it.q} × {fmt(b.total)} {t.unit}</span>
                     </div>
-                    <span className="co-item-sum">{AC_fmt(b.total * it.q)}</span>
+                    <span className="co-item-sum">{fmt(b.total * it.q)}</span>
                   </div>
                 );
               })}
             </div>
-            <div className="co-line"><span>{t.co_items} ({count})</span><b>{AC_fmt(total)} {t.unit}</b></div>
+            <div className="co-line"><span>{t.co_items} ({count})</span><b>{fmt(total)} {t.unit}</b></div>
             <div className="co-line"><span>{t.co_delivery_fee}</span><b className="free">{t.co_free}</b></div>
             <div className="co-total">
               <span>{t.co_total}</span>
-              <span className="co-total-v">{AC_fmt(total)} <small>{t.unit}</small></span>
+              <span className="co-total-v">{fmt(total)} <small>{t.unit}</small></span>
             </div>
             {err && <p className="field-err" style={{ textAlign: "center" }}>{t.co_err}</p>}
             <button className="co-place" onClick={place}>{t.co_place} <AC_I.check style={{ width: 18, height: 18 }} /></button>
@@ -466,7 +465,7 @@ export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth 
 }
 
 /* ---------- Order success ---------- */
-export function OrderSuccess({ order, t, onHome }) {
+function OrderSuccess({ order, t, onHome }) {
   return (
     <div className="wrap success up">
       <div className="success-card pop">
@@ -480,7 +479,7 @@ export function OrderSuccess({ order, t, onHome }) {
           </div>
           <div style={{ textAlign: "right" }}>
             <span className="lbl">{t.co_total}</span>
-            <span className="num">{AC_fmt(order.total)} {t.unit}</span>
+            <span className="num">{fmt(order.total)} {t.unit}</span>
           </div>
         </div>
         <button className="co-place" style={{ maxWidth: 340, margin: "0 auto" }} onClick={onHome}>{t.ok_home}</button>
@@ -489,7 +488,7 @@ export function OrderSuccess({ order, t, onHome }) {
   );
 }
 
-export function MyOrders({ user, t, onHome }) {
+function MyOrders({ user, t, onHome }) {
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
@@ -530,7 +529,7 @@ export function MyOrders({ user, t, onHome }) {
   );
 }
 
-export function HelpPage({ t, onHome, user, onLogin }) {
+function HelpPage({ t, onHome, user, onLogin }) {
   const [chatOpen, setChatOpen] = React.useState(false);
   const [messages, setMessages] = React.useState([]);
   const [msg, setMsg] = React.useState("");
@@ -682,4 +681,3 @@ export function HelpPage({ t, onHome, user, onLogin }) {
     </div>
   );
 }
-// window.AC = { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage };
