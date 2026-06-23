@@ -321,7 +321,7 @@ function Footer({ t }) {
 /* ============ SAVAT.UZ — product detail, cart, app ============ */
 import { AuthModal, MobileMenu, Checkout, OrderSuccess, MyOrders, HelpPage } from './components/Modals.jsx';
 const Ico = Icons;
-const D = { breakdown, fmt, CATS, REGIONS, I18N };
+const D = { breakdown, fmt, CATS, REGIONS, I18N, fetchProducts, PRODUCTS: [] };
 
 /* ---- Image Swiper ---- */
 function ImageSwiper({ p, lang }) {
@@ -716,7 +716,7 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState(null);
-  const [products, setProducts] = useState(D.PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem("savat_user") || "null"); } catch (e) { return null; }
@@ -894,5 +894,3 @@ export default function App() {
     </>
   );
 }
-
-
