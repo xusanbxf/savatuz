@@ -19,7 +19,7 @@ function maskPhone(raw) {
 function phoneValid(p) { return p.replace(/\D/g, "").length === 12; }
 
 /* ---------- Auth modal ---------- */
-function AuthModal({ open, t, onClose, onAuth }) {
+export function AuthModal({ open, t, onClose, onAuth }) {
   const [tab, setTab] = useState("login"); // login | register | verify | forgot | reset-sent
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -261,7 +261,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
 }
 
 /* ---------- Mobile menu ---------- */
-function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders, onHelp, onCatalog }) {
+export function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, onLogout, onMyOrders, onHelp, onCatalog }) {
   return (
     <>
       <div className={"mm-scrim" + (open ? " on" : "")} onClick={onClose} />
@@ -319,7 +319,7 @@ function PaymentCard({ m, t, selected, onSelect }) {
   );
 }
 
-function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
+export function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
   
   const [region, setRegion] = useState("");
   const [city, setCity] = useState("");
@@ -465,7 +465,7 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
 }
 
 /* ---------- Order success ---------- */
-function OrderSuccess({ order, t, onHome }) {
+export function OrderSuccess({ order, t, onHome }) {
   return (
     <div className="wrap success up">
       <div className="success-card pop">
@@ -488,7 +488,7 @@ function OrderSuccess({ order, t, onHome }) {
   );
 }
 
-function MyOrders({ user, t, onHome }) {
+export function MyOrders({ user, t, onHome }) {
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
@@ -529,7 +529,7 @@ function MyOrders({ user, t, onHome }) {
   );
 }
 
-function HelpPage({ t, onHome, user, onLogin }) {
+export function HelpPage({ t, onHome, user, onLogin }) {
   const [chatOpen, setChatOpen] = React.useState(false);
   const [messages, setMessages] = React.useState([]);
   const [msg, setMsg] = React.useState("");
