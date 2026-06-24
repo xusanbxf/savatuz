@@ -2580,6 +2580,19 @@ function App() {
   }, [productsLoading]);
 
   const goHome = () => { setView("home"); window.scrollTo({ top: 0 }); window.history.pushState({}, "", window.location.pathname); };
+
+  // Browser back tugmasi bosilganda
+  useEffect(() => {
+    var handler = function() {
+      var params = new URLSearchParams(window.location.search);
+      if (!params.get("p")) {
+        setView("home");
+        window.scrollTo({ top: 0 });
+      }
+    };
+    window.addEventListener("popstate", handler);
+    return function() { window.removeEventListener("popstate", handler); };
+  }, []);
   const goCheckout = () => {
     if (cart.length === 0) return;
     setCartOpen(false);
