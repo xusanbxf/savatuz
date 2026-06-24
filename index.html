@@ -203,9 +203,26 @@
 
 
 
-  .hero-search-wrap { margin-top: 20px; max-width: 480px; }
+  .hero-search-wrap { margin-top: 24px; max-width: 500px; }
   .hero-search-wrap .search-wrap { max-width: 100%; }
-  .hero-search-wrap input { font-size: 15px; padding: 14px 20px 14px 44px; border-radius: 14px; box-shadow: 0 4px 20px rgba(100,60,200,.15); }
+  .hero-search-wrap .search { max-width: 100% !important; }
+  .hero-search-wrap .search input { 
+    font-size: 15px; 
+    height: 52px;
+    padding: 0 20px 0 50px; 
+    border-radius: 16px; 
+    border: none !important;
+    background: rgba(255,255,255,0.95) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    color: #1b1430;
+  }
+  .hero-search-wrap .search input:focus { 
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.25) !important;
+    background: #fff !important;
+  }
+  .hero-search-wrap .search svg { color: #7c3aed; }
+  .hero-search-wrap .search-dropdown { border-radius: 16px; margin-top: 8px; }
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
   .search-dropdown {
@@ -2850,9 +2867,26 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 
 
-  .hero-search-wrap { margin-top: 20px; max-width: 480px; }
+  .hero-search-wrap { margin-top: 24px; max-width: 500px; }
   .hero-search-wrap .search-wrap { max-width: 100%; }
-  .hero-search-wrap input { font-size: 15px; padding: 14px 20px 14px 44px; border-radius: 14px; box-shadow: 0 4px 20px rgba(100,60,200,.15); }
+  .hero-search-wrap .search { max-width: 100% !important; }
+  .hero-search-wrap .search input { 
+    font-size: 15px; 
+    height: 52px;
+    padding: 0 20px 0 50px; 
+    border-radius: 16px; 
+    border: none !important;
+    background: rgba(255,255,255,0.95) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    color: #1b1430;
+  }
+  .hero-search-wrap .search input:focus { 
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.25) !important;
+    background: #fff !important;
+  }
+  .hero-search-wrap .search svg { color: #7c3aed; }
+  .hero-search-wrap .search-dropdown { border-radius: 16px; margin-top: 8px; }
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
   .search-dropdown {
