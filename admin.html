@@ -289,7 +289,7 @@ function loadOrders() {
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
       }).join("");
-      return '<div class="order-card">'+
+      return '<div class="order-card" data-order-id="'+o.id+'">'+
         '<div class="order-head">'+
           '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
           '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
@@ -720,6 +720,9 @@ function deleteOrder(id, num) {
         method:"DELETE",
         headers:{"apikey":KEY,"Authorization":"Bearer "+authToken,"Prefer":"return=minimal"}
       }).then(function(r){
+        // DOM dan o'chirish - sahifa yangilanishini kutmasdan
+        var card = document.querySelector('.order-card[data-order-id="'+id+'"]');
+        if(card) card.remove();
         loadOrders();
       }).catch(function(e){ console.error("Delete xato:", e); });
     }
