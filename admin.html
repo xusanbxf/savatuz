@@ -294,7 +294,7 @@ function loadOrders() {
       var items = (o.items||[]).map(function(it){
         var varStr = it.variant ? '<span style="color:var(--brand);font-size:12px;font-weight:600;margin-left:6px;">['+h(it.variant)+']</span>' : '';
         var nameHtml = it.id
-          ? '<a href="https://www.savatmarket.uz" target="_blank" style="color:var(--ink);text-decoration:none;font-weight:600;border-bottom:1px dashed var(--brand);cursor:pointer;" title="Mahsulotni ko\'rish">'+h(it.name_uz||'Mahsulot')+'</a>'
+          ? '<a href="https://www.savatmarket.uz?p='+it.id+'" target="_blank" style="color:var(--ink);text-decoration:none;font-weight:600;border-bottom:1px dashed var(--brand);cursor:pointer;" title="Mahsulotni ko\'rish">'+h(it.name_uz||'Mahsulot')+'</a>'
           : '<span style="font-weight:600;">'+h(it.name_uz||'Mahsulot')+'</span>';
         return '<div style="padding:6px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
           '<span><b style="color:var(--brand)">'+it.qty+'×</b> '+nameHtml+varStr+'</span>'+
