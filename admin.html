@@ -598,6 +598,32 @@ function openProductModal(p) {
     size: "Razmer (S, M, L, XL, 40, 41, 42...)",
     model: "Model (128GB, Pro, Standart...)"
   };
+  var QUICK_COLORS = [
+    {name:"Qizil",hex:"#e11d48"},{name:"Ko'k",hex:"#2563eb"},{name:"Yashil",hex:"#16a34a"},
+    {name:"Sariq",hex:"#f59e0b"},{name:"Oq",hex:"#f8fafc"},{name:"Qora",hex:"#0f172a"},
+    {name:"Kulrang",hex:"#64748b"},{name:"Pushti",hex:"#ec4899"},{name:"Jigarrang",hex:"#92400e"},
+    {name:"Binafsha",hex:"#7c3aed"}
+  ];
+  var QUICK_SIZES_FASHION = ["XS","S","M","L","XL","XXL","3XL"];
+  var QUICK_SIZES_SHOES = ["36","37","38","39","40","41","42","43","44","45"];
+  var QUICK_MODELS = ["Standart","Pro","Pro Max","Lite","128GB","256GB","512GB","1TB"];
+  var QUICK_COLORS = [
+    {name:"Qizil", hex:"#e11d48"},{name:"Ko\'k", hex:"#2563eb"},{name:"Yashil", hex:"#16a34a"},
+    {name:"Sariq", hex:"#f59e0b"},{name:"Oq", hex:"#f8fafc"},{name:"Qora", hex:"#0f172a"},
+    {name:"Kulrang", hex:"#64748b"},{name:"Pushti", hex:"#ec4899"},{name:"To\'q sariq", hex:"#d97706"},
+    {name:"Binafsha", hex:"#7c3aed"}
+  ];
+  var QUICK_SIZES_FASHION = ["XS","S","M","L","XL","XXL","3XL"];
+  var QUICK_SIZES_SHOES = ["36","37","38","39","40","41","42","43","44","45"];
+  var QUICK_MODELS = ["Standart","Pro","Pro Max","Lite","128GB","256GB","512GB","1TB"];
+  var QUICK_SIZES = ["XS","S","M","L","XL","XXL","3XL","36","37","38","39","40","41","42","43","44","45","46"];
+  var QUICK_COLORS = [
+    {name:"Qizil",hex:"#e11d48"},{name:"Ko'k",hex:"#2563eb"},{name:"Yashil",hex:"#16a34a"},
+    {name:"Sariq",hex:"#f59e0b"},{name:"Oq",hex:"#ffffff"},{name:"Qora",hex:"#1b1430"},
+    {name:"Kulrang",hex:"#9ca3af"},{name:"Jigarrang",hex:"#92400e"},{name:"Binafsha",hex:"#7c3aed"},
+    {name:"Pushti",hex:"#ec4899"},{name:"To'q ko'k",hex:"#1e3a8a"},{name:"Zangori",hex:"#0ea5e9"}
+  ];
+  var QUICK_MODELS = ["64GB","128GB","256GB","512GB","Pro","Pro Max","Lite","Standard","Plus"];
 
   function getAllowedTypes(cat) {
     if(cat === "tech") return ["color", "model"];
@@ -665,12 +691,61 @@ function openProductModal(p) {
     inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); doAdd(); } });
   }
 
+  function getQuickSizes(cat) {
+    return cat === "shoes" ? QUICK_SIZES_SHOES : QUICK_SIZES_FASHION;
+  }
+
+  window.quickAddColor = function(name, hex) {
+    if(window._variants.some(function(v){ return v.type==="color" && v.value.toLowerCase()===name.toLowerCase(); })) return;
+    window._variants.push({ type:"color", value:name, color_hex:hex });
+    renderVarList("color");
+  };
+  window.quickAddSize = function(s) {
+    if(window._variants.some(function(v){ return v.type==="size" && v.value===s; })) return;
+    window._variants.push({ type:"size", value:s, color_hex:"" });
+    renderVarList("size");
+  };
+  window.quickAddAllSizes = function(cat) {
+    getQuickSizes(cat).forEach(function(s){
+      if(!window._variants.some(function(v){ return v.type==="size" && v.value===s; }))
+        window._variants.push({ type:"size", value:s, color_hex:"" });
+    });
+    renderVarList("size");
+  };
+  window.quickAddModel = function(m) {
+    if(window._variants.some(function(v){ return v.type==="model" && v.value===m; })) return;
+    window._variants.push({ type:"model", value:m, color_hex:"" });
+    renderVarList("model");
+  };
+
   function rebuildVariantSections(cat) {
     var allowed = getAllowedTypes(cat);
     var wrap = document.getElementById("varSectionsWrap");
     if(!wrap) return;
     wrap.innerHTML = allowed.map(function(type){
       var key = type.charAt(0).toUpperCase() + type.slice(1);
+
+      var quickHtml = "";
+      if(type === "color") {
+        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+
+          QUICK_COLORS.map(function(c){
+            return '<button onclick="quickAddColor(''+c.name.replace(/'/g,"\'")+"','"+c.hex+'')" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2)">'+
+              '<span style="width:13px;height:13px;border-radius:50%;background:'+c.hex+';flex:none;border:1px solid rgba(0,0,0,.12)"></span>'+c.name+'</button>';
+          }).join("")+'</div>';
+      } else if(type === "size") {
+        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+
+          getQuickSizes(cat).map(function(s){
+            return '<button onclick="quickAddSize(''+s+'')" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink-2)">'+s+'</button>';
+          }).join("")+
+          '<button onclick="quickAddAllSizes(''+cat+'')" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--brand);background:var(--brand-soft);cursor:pointer;font-size:12px;font-weight:700;color:var(--brand)">Hammasini qo\'sh ✓</button>'+
+        '</div>';
+      } else if(type === "model") {
+        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+
+          QUICK_MODELS.map(function(m){
+            return '<button onclick="quickAddModel(''+m+'')" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2)">'+m+'</button>';
+          }).join("")+'</div>';
+      }
+
       var addRow = type === "color"
         ? '<div style="display:flex;gap:8px;align-items:center">'+
             '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:38px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none;margin-bottom:0"/>'+
@@ -681,10 +756,11 @@ function openProductModal(p) {
             '<input id="varInput'+key+'" placeholder="'+VAR_PH[type]+'" style="flex:1;margin-bottom:0"/>'+
             '<button class="btn btn-sm" id="varAdd'+key+'" style="white-space:nowrap;flex:none">+ Qo&#39;sh</button>'+
           '</div>';
+
       return '<div style="margin-bottom:16px">'+
         '<div style="font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px">'+VAR_ICONS[type]+'</div>'+
         '<div id="varList'+key+'"></div>'+
-        addRow+
+        quickHtml+addRow+
       '</div>';
     }).join("");
     allowed.forEach(function(t){ setupVarAdd(t); });
