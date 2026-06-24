@@ -202,25 +202,29 @@
 
 
 
+
+  .hero-search-wrap { margin-top: 20px; max-width: 480px; }
+  .hero-search-wrap .search-wrap { max-width: 100%; }
+  .hero-search-wrap input { font-size: 15px; padding: 14px 20px 14px 44px; border-radius: 14px; box-shadow: 0 4px 20px rgba(100,60,200,.15); }
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
   .search-dropdown {
-    position: fixed; top: 64px; left: 0; right: 0; width: 100%;
-    background: #fff; border-top: 2px solid var(--brand); border-bottom: 1px solid var(--line-2);
-    box-shadow: 0 8px 32px rgba(27,20,48,.14); z-index: 9999;
-    overflow: hidden; max-height: 400px; overflow-y: auto;
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #fff; border: 1.5px solid var(--line-2); border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(27,20,48,.14); z-index: 200;
+    overflow: hidden; max-height: 360px; overflow-y: auto;
   }
   .sd-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 12px 32px; cursor: pointer; transition: background .12s;
-    border-bottom: 1px solid var(--line); max-width: 800px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; cursor: pointer; transition: background .12s;
+    border-bottom: 1px solid var(--line);
   }
   .sd-item:last-child { border-bottom: none; }
   .sd-item:hover { background: var(--brand-soft); }
   .sd-img { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: none; background: var(--surface-2); }
   .sd-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .sd-info { flex: 1; min-width: 0; }
-  .sd-name { font-weight: 700; font-size: 14px; color: var(--ink); white-space: normal; }
+  .sd-name { font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sd-price { font-size: 12px; color: var(--brand); font-weight: 700; margin-top: 2px; }
   .sd-empty { padding: 20px; text-align: center; color: var(--ink-3); font-size: 14px; }
   @media (max-width: 980px) {
@@ -1121,7 +1125,6 @@ function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, 
           {user && <button onClick={onMyOrders}>{t.nav_track}</button>}
           <button onClick={onHelp}>{t.nav_help}</button>
         </nav>
-        <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
         <div className="hdr-actions">
           <div className="lang">
             <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
@@ -1210,7 +1213,7 @@ function MobileSearch({ t, query, onSearch, products, onSelect, lang }) {
 }
 
 /* ---- Hero ---- */
-function Hero({ t, lang, product, onView, onAdd }) {
+function Hero({ t, lang, product, onView, onAdd, query, onSearch, products, onSelect }) {
   const b = breakdown(product);
   return (
     <section className="hero">
@@ -1224,6 +1227,9 @@ function Hero({ t, lang, product, onView, onAdd }) {
               {t.hero_cta} <I.arrow style={{ width: 18, height: 18 }} />
             </button>
             <button className="btn-ghost" onClick={() => onView(product)}>{t.hero_secondary}</button>
+          </div>
+          <div className="hero-search-wrap">
+            <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
           </div>
         </div>
 
@@ -2551,7 +2557,7 @@ function App() {
 
       {view === "home" && (
         <main>
-          <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
+          <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} query={query} onSearch={setQuery} products={products} onSelect={openProduct} />
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
           <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query}
             onView={openProduct}
@@ -2843,25 +2849,29 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 
 
+
+  .hero-search-wrap { margin-top: 20px; max-width: 480px; }
+  .hero-search-wrap .search-wrap { max-width: 100%; }
+  .hero-search-wrap input { font-size: 15px; padding: 14px 20px 14px 44px; border-radius: 14px; box-shadow: 0 4px 20px rgba(100,60,200,.15); }
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
   .search-dropdown {
-    position: fixed; top: 64px; left: 0; right: 0; width: 100%;
-    background: #fff; border-top: 2px solid var(--brand); border-bottom: 1px solid var(--line-2);
-    box-shadow: 0 8px 32px rgba(27,20,48,.14); z-index: 9999;
-    overflow: hidden; max-height: 400px; overflow-y: auto;
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #fff; border: 1.5px solid var(--line-2); border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(27,20,48,.14); z-index: 200;
+    overflow: hidden; max-height: 360px; overflow-y: auto;
   }
   .sd-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 12px 32px; cursor: pointer; transition: background .12s;
-    border-bottom: 1px solid var(--line); max-width: 800px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; cursor: pointer; transition: background .12s;
+    border-bottom: 1px solid var(--line);
   }
   .sd-item:last-child { border-bottom: none; }
   .sd-item:hover { background: var(--brand-soft); }
   .sd-img { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: none; background: var(--surface-2); }
   .sd-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .sd-info { flex: 1; min-width: 0; }
-  .sd-name { font-weight: 700; font-size: 14px; color: var(--ink); white-space: normal; }
+  .sd-name { font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sd-price { font-size: 12px; color: var(--brand); font-weight: 700; margin-top: 2px; }
   .sd-empty { padding: 20px; text-align: center; color: var(--ink-3); font-size: 14px; }
   @media (max-width: 980px) {
@@ -3762,7 +3772,6 @@ function Header({ t, lang, setLang, cartCount, onCart, onHome, user, onAccount, 
           {user && <button onClick={onMyOrders}>{t.nav_track}</button>}
           <button onClick={onHelp}>{t.nav_help}</button>
         </nav>
-        <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
         <div className="hdr-actions">
           <div className="lang">
             <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
@@ -3851,7 +3860,7 @@ function MobileSearch({ t, query, onSearch, products, onSelect, lang }) {
 }
 
 /* ---- Hero ---- */
-function Hero({ t, lang, product, onView, onAdd }) {
+function Hero({ t, lang, product, onView, onAdd, query, onSearch, products, onSelect }) {
   const b = breakdown(product);
   return (
     <section className="hero">
@@ -3865,6 +3874,9 @@ function Hero({ t, lang, product, onView, onAdd }) {
               {t.hero_cta} <I.arrow style={{ width: 18, height: 18 }} />
             </button>
             <button className="btn-ghost" onClick={() => onView(product)}>{t.hero_secondary}</button>
+          </div>
+          <div className="hero-search-wrap">
+            <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
           </div>
         </div>
 
