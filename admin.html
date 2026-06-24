@@ -45,7 +45,7 @@
   .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-weight: 700; }
  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237c3aed'/><path d='M25 35h50l-6 30a3 3 0 0 1-3 2.5H34a3 3 0 0 1-3-2.5Z' fill='white'/><path d='M32 35L38 22L50 35M68 35L62 22L50 35' stroke='white' stroke-width='4' stroke-linecap='round' fill='none'/><circle cx='42' cy='50' r='3' fill='%237c3aed'/><circle cx='58' cy='50' r='3' fill='%237c3aed'/></svg>">
   
-  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .15s; }
+  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .15s; }
   .order-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
   .order-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 14px; }
   .order-head-left { flex: 1; min-width: 0; }
@@ -292,7 +292,14 @@ function loadOrders() {
     if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
-        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
+        var varStr = it.variant ? '<span style="color:var(--brand);font-size:12px;font-weight:600;margin-left:6px;">['+h(it.variant)+']</span>' : '';
+        var nameHtml = it.id
+          ? '<a href="https://www.savatmarket.uz" target="_blank" style="color:var(--ink);text-decoration:none;font-weight:600;border-bottom:1px dashed var(--brand);cursor:pointer;" title="Mahsulotni ko\'rish">'+h(it.name_uz||'Mahsulot')+'</a>'
+          : '<span style="font-weight:600;">'+h(it.name_uz||'Mahsulot')+'</span>';
+        return '<div style="padding:6px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+          '<span><b style="color:var(--brand)">'+it.qty+'×</b> '+nameHtml+varStr+'</span>'+
+          '<span style="font-weight:700;white-space:nowrap;color:var(--ink);">'+fmt(it.price*it.qty)+' so\'m</span>'+
+        '</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
