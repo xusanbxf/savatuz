@@ -205,33 +205,35 @@
 
   /* ===== BIG SEARCH ===== */
   .big-search-wrap {
-    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-    border-radius: 24px;
-    padding: 32px 28px 36px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
     text-align: center;
   }
   .big-search-inner {
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
+    position: relative;
   }
   .big-search-inner .search-wrap,
   .big-search-inner .search { max-width: 100% !important; width: 100% !important; }
   .big-search-inner .search input {
     height: 56px !important;
-    font-size: 16px !important;
-    border-radius: 16px !important;
-    border: none !important;
-    background: rgba(255,255,255,0.97) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.2) !important;
-    padding: 0 20px 0 52px !important;
+    font-size: 15.5px !important;
+    border-radius: var(--r-pill) !important;
+    border: 2px solid var(--line-2) !important;
+    background: #fff !important;
+    box-shadow: 0 4px 24px rgba(108,43,217,.10), 0 1px 4px rgba(27,20,48,.06) !important;
+    padding: 0 24px 0 54px !important;
+    transition: border-color .18s, box-shadow .18s !important;
   }
   .big-search-inner .search input:focus {
-    box-shadow: 0 8px 40px rgba(0,0,0,.28) !important;
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 0 4px rgba(108,43,217,.13), 0 4px 24px rgba(108,43,217,.14) !important;
     background: #fff !important;
+    outline: none !important;
   }
-  .big-search-inner .search svg { color: #7c3aed !important; width: 20px !important; height: 20px !important; }
-  .big-search-inner .search-dropdown { border-radius: 16px !important; margin-top: 8px; }
+  .big-search-inner .search svg { color: var(--brand) !important; width: 20px !important; height: 20px !important; left: 18px !important; }
+  .big-search-inner .search-dropdown { border-radius: 20px !important; margin-top: 8px; }
+  .big-search-inner .search-clear { right: 18px !important; }
 
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
@@ -747,6 +749,8 @@
     ]).then(function(results) {
       var rows = results[0];
       var varRows = results[1] || [];
+      // Supabase xato qaytarsa (array emas object), fallback
+      if (!Array.isArray(rows)) return [];
       var varIds = new Set(varRows.map(function(v){ return Number(v.product_id); }));
       var mapped = rows.map(function (r) {
         return {
@@ -819,8 +823,8 @@
     var cargo = cargoFee(p.weight);
     var service = serviceFee(p.weight);
     var total = p.china + cargo + service;
-    var save = p.market - total;
-    var pct = Math.round(save / p.market * 100);
+    var save = Math.max(0, p.market - total);
+    var pct = p.market > 0 ? Math.max(0, Math.round(save / p.market * 100)) : 0;
     return { china: p.china, cargo: cargo, service: service, total: total, market: p.market, save: save, pct: pct };
   }
 
@@ -3392,6 +3396,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     ]).then(function(results) {
       var rows = results[0];
       var varRows = results[1] || [];
+      // Supabase xato qaytarsa (array emas object), fallback
+      if (!Array.isArray(rows)) return [];
       var varIds = new Set(varRows.map(function(v){ return Number(v.product_id); }));
       var mapped = rows.map(function (r) {
         return {
@@ -3464,8 +3470,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     var cargo = cargoFee(p.weight);
     var service = serviceFee(p.weight);
     var total = p.china + cargo + service;
-    var save = p.market - total;
-    var pct = Math.round(save / p.market * 100);
+    var save = Math.max(0, p.market - total);
+    var pct = p.market > 0 ? Math.max(0, Math.round(save / p.market * 100)) : 0;
     return { china: p.china, cargo: cargo, service: service, total: total, market: p.market, save: save, pct: pct };
   }
 
