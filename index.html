@@ -2534,9 +2534,11 @@ function App() {
           if (pid) {
             var found = rows.find(function(r){ return String(r.id) === String(pid); });
             if (found) {
-              setCurrent(found);
-              setView("product");
-              window.scrollTo({ top: 0 });
+              setTimeout(function(){
+                setCurrent(found);
+                setView("product");
+                window.scrollTo({ top: 0 });
+              }, 100);
             }
           }
         }
