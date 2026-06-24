@@ -203,35 +203,36 @@
 
 
 
-  .hero-search-wrap { margin-top: 24px; max-width: 500px; }
-  .hero-search-wrap .search-wrap { max-width: 100%; }
-  .hero-search-wrap .search { max-width: 100% !important; }
-  .hero-search-wrap .search input { 
-    font-size: 15px; 
-    height: 52px;
-    padding: 0 20px 0 50px; 
-    border-radius: 16px; 
-    border: none !important;
-    background: rgba(255,255,255,0.95) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.18);
-    color: #1b1430;
+  /* ===== BIG SEARCH ===== */
+  .big-search-wrap {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+    border-radius: 24px;
+    padding: 32px 28px 36px;
+    margin-bottom: 32px;
+    text-align: center;
   }
-  .hero-search-wrap .search input:focus { 
+  .big-search-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .big-search-inner .search-wrap,
+  .big-search-inner .search { max-width: 100% !important; width: 100% !important; }
+  .big-search-inner .search input {
+    height: 56px !important;
+    font-size: 16px !important;
+    border-radius: 16px !important;
     border: none !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.25) !important;
+    background: rgba(255,255,255,0.97) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2) !important;
+    padding: 0 20px 0 52px !important;
+  }
+  .big-search-inner .search input:focus {
+    box-shadow: 0 8px 40px rgba(0,0,0,.28) !important;
     background: #fff !important;
   }
-  .hero-search-wrap .search svg { color: #7c3aed; }
-  .hero-search-wrap .search-dropdown { 
-    border-radius: 16px; 
-    margin-top: 8px; 
-    position: fixed !important;
-    z-index: 9999 !important;
-    left: auto !important;
-    right: auto !important;
-    width: 500px;
-    max-width: 90vw;
-  }
+  .big-search-inner .search svg { color: #7c3aed !important; width: 20px !important; height: 20px !important; }
+  .big-search-inner .search-dropdown { border-radius: 16px !important; margin-top: 8px; }
+
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
   .search-dropdown {
@@ -1239,7 +1240,7 @@ function MobileSearch({ t, query, onSearch, products, onSelect, lang }) {
 }
 
 /* ---- Hero ---- */
-function Hero({ t, lang, product, onView, onAdd, query, onSearch, products, onSelect }) {
+function Hero({ t, lang, product, onView, onAdd }) {
   const b = breakdown(product);
   return (
     <section className="hero">
@@ -1253,9 +1254,6 @@ function Hero({ t, lang, product, onView, onAdd, query, onSearch, products, onSe
               {t.hero_cta} <I.arrow style={{ width: 18, height: 18 }} />
             </button>
             <button className="btn-ghost" onClick={() => onView(product)}>{t.hero_secondary}</button>
-          </div>
-          <div className="hero-search-wrap">
-            <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
           </div>
         </div>
 
@@ -1341,9 +1339,14 @@ function ProductCard({ p, t, lang, qty, onView, onAdd, onInc, onDec }) {
 }
 
 /* ---- Grid section ---- */
-function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec, query }) {
+function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec, query, onSearch, allProducts, onSelect }) {
   return (
     <section className="wrap">
+      <div className="big-search-wrap">
+        <div className="big-search-inner">
+          <SearchBox t={t} query={query} onSearch={onSearch} products={allProducts} onSelect={onSelect} lang={lang} bigMode={true} />
+        </div>
+      </div>
       <div className="sec-head">
         <div>
           <h2 className="sec-title">
@@ -2583,9 +2586,9 @@ function App() {
 
       {view === "home" && (
         <main>
-          <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} query={query} onSearch={setQuery} products={products} onSelect={openProduct} />
+          <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
-          <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query}
+          <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query} onSearch={setQuery} allProducts={products} onSelect={openProduct}
             onView={openProduct}
             onAdd={(p) => {
               if (p._hasVariants) { openProduct(p); }
@@ -2875,36 +2878,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 
 
-
-  .hero-search-wrap { margin-top: 24px; max-width: 500px; }
-  .hero-search-wrap .search-wrap { max-width: 100%; }
-  .hero-search-wrap .search { max-width: 100% !important; }
-  .hero-search-wrap .search input { 
-    font-size: 15px; 
-    height: 52px;
-    padding: 0 20px 0 50px; 
-    border-radius: 16px; 
-    border: none !important;
-    background: rgba(255,255,255,0.95) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.18);
-    color: #1b1430;
-  }
-  .hero-search-wrap .search input:focus { 
-    border: none !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.25) !important;
-    background: #fff !important;
-  }
-  .hero-search-wrap .search svg { color: #7c3aed; }
-  .hero-search-wrap .search-dropdown { 
-    border-radius: 16px; 
-    margin-top: 8px; 
-    position: fixed !important;
-    z-index: 9999 !important;
-    left: auto !important;
-    right: auto !important;
-    width: 500px;
-    max-width: 90vw;
-  }
   /* Search dropdown */
   .search-wrap { position: relative; flex: 1; max-width: 460px; }
   .search-dropdown {
@@ -3912,7 +3885,7 @@ function MobileSearch({ t, query, onSearch, products, onSelect, lang }) {
 }
 
 /* ---- Hero ---- */
-function Hero({ t, lang, product, onView, onAdd, query, onSearch, products, onSelect }) {
+function Hero({ t, lang, product, onView, onAdd }) {
   const b = breakdown(product);
   return (
     <section className="hero">
@@ -3926,9 +3899,6 @@ function Hero({ t, lang, product, onView, onAdd, query, onSearch, products, onSe
               {t.hero_cta} <I.arrow style={{ width: 18, height: 18 }} />
             </button>
             <button className="btn-ghost" onClick={() => onView(product)}>{t.hero_secondary}</button>
-          </div>
-          <div className="hero-search-wrap">
-            <SearchBox t={t} query={query} onSearch={onSearch} products={products} onSelect={onSelect} lang={lang} />
           </div>
         </div>
 
@@ -4014,9 +3984,14 @@ function ProductCard({ p, t, lang, qty, onView, onAdd, onInc, onDec }) {
 }
 
 /* ---- Grid section ---- */
-function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec, query }) {
+function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec, query, onSearch, allProducts, onSelect }) {
   return (
     <section className="wrap">
+      <div className="big-search-wrap">
+        <div className="big-search-inner">
+          <SearchBox t={t} query={query} onSearch={onSearch} products={allProducts} onSelect={onSelect} lang={lang} bigMode={true} />
+        </div>
+      </div>
       <div className="sec-head">
         <div>
           <h2 className="sec-title">
