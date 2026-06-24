@@ -58,9 +58,10 @@
   @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } .order-total { margin-left: 0; } }
   .items-list { font-size: 13.5px; line-height: 1.9; color: var(--ink-2); }
   .items-list b { color: var(--ink); }
-  .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 13.5px; }
-  .info-label { color: var(--ink-3); font-weight: 600; white-space: nowrap; }
-  .info-val { color: var(--ink-2); }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 13px; }
+  .info-cell { display: flex; flex-direction: column; gap: 1px; }
+  .info-label { color: var(--ink-3); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .info-val { color: var(--ink); font-weight: 500; }
   .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
   .info-row b { color: var(--ink); font-weight: 600; }
   select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; width: auto; margin-bottom: 0; }
@@ -313,12 +314,12 @@ function loadOrders() {
         '<div class="order-body">'+
           '<div class="items-list">'+items+'</div>'+
           '<div class="info-grid">'+
-            '<span class="info-label">📞 Tel</span><span class="info-val">'+h(o.phone||"—")+'</span>'+
-            '<span class="info-label">📍 Hudud</span><span class="info-val">'+(REGIONS[o.region]||h(o.region||"—"))+'</span>'+
-            '<span class="info-label">🏙 Shahar</span><span class="info-val">'+h(o.city||"—")+'</span>'+
-            '<span class="info-label">🏠 Manzil</span><span class="info-val">'+h(o.address||"—")+'</span>'+
-            (o.comment?'<span class="info-label">💬 Izoh</span><span class="info-val">'+h(o.comment)+'</span>':'')+
-            '<span class="info-label">💳 To\'lov</span><span class="info-val">'+h(o.pay_method||"—")+'</span>'+
+            '<div class="info-cell"><span class="info-label">Tel</span><span class="info-val">'+h(o.phone||"—")+'</span></div>'+
+            '<div class="info-cell"><span class="info-label">Hudud</span><span class="info-val">'+(REGIONS[o.region]||h(o.region||"—"))+'</span></div>'+
+            '<div class="info-cell"><span class="info-label">Shahar</span><span class="info-val">'+h(o.city||"—")+'</span></div>'+
+            '<div class="info-cell"><span class="info-label">Manzil</span><span class="info-val">'+h(o.address||"—")+'</span></div>'+
+            '<div class="info-cell"><span class="info-label">To\'lov</span><span class="info-val">'+h(o.pay_method||"—")+'</span></div>'+
+            (o.comment?'<div class="info-cell" style="grid-column:1/-1"><span class="info-label">Izoh</span><span class="info-val">'+h(o.comment)+'</span></div>':'')+
           '</div>'+
         '</div>'+
       '</div>';
