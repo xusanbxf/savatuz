@@ -2525,7 +2525,22 @@ function App() {
   }, [user]);
   useEffect(() => {
     D.fetchProducts()
-      .then((rows) => { if (rows && rows.length) setProducts(rows); })
+      .then((rows) => {
+        if (rows && rows.length) {
+          setProducts(rows);
+          // URL da ?p=ID bo'lsa o'sha mahsulotni och
+          var params = new URLSearchParams(window.location.search);
+          var pid = params.get("p");
+          if (pid) {
+            var found = rows.find(function(r){ return String(r.id) === String(pid); });
+            if (found) {
+              setCurrent(found);
+              setView("product");
+              window.scrollTo({ top: 0 });
+            }
+          }
+        }
+      })
       .catch((err) => { console.error("Mahsulotlarni yuklashda xato:", err); })
       .finally(() => setProductsLoading(false));
   }, []);
