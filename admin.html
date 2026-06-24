@@ -273,8 +273,9 @@ function statusClass(s){
 }
 
 function loadOrders() {
+  var authToken = token || SERVICE_KEY;
   fetch(SB+"/rest/v1/orders?select=*&order=created_at.desc",{
-    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+    headers:{"apikey":KEY,"Authorization":"Bearer "+authToken}
   }).then(function(r){
     if(r.status===401){doLogout();return Promise.reject();}
     return r.json();
@@ -322,8 +323,9 @@ function loadOrders() {
 }
 
 function loadProducts() {
+  var authToken = token || SERVICE_KEY;
   fetch(SB+"/rest/v1/products?select=*&order=id",{
-    headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+    headers:{"apikey":KEY,"Authorization":"Bearer "+authToken}
   }).then(function(r){ return r.json(); })
   .then(function(products){
     var cont = document.getElementById("content");
