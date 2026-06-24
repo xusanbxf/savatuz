@@ -2,7 +2,6 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8" />
-  <meta name="google-site-verification" content="6wzuHYCVWORKlOOoEY9MOrbmsJ0WkxTapAJAUwT5XDQ" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SAVAT.UZ — Xitoydan to'g'ridan-to'g'ri | Arzon narxlar</title>
 
@@ -1785,7 +1784,7 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
     const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
     const orderItems = items.map((it) => {
       const b = AC_D.breakdown(it.p);
-      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total };
+      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total, variant: it.variant || "" };
     });
     onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
   };
@@ -2544,11 +2543,11 @@ function App() {
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2000);
   };
-  const addToCart = (p) => {
+  const addToCart = (p, e, varLabel) => {
     setCart((c) => {
       const f = c.find((it) => it.p.id === p.id);
-      if (f) return c.map((it) => it.p.id === p.id ? { ...it, q: it.q + 1 } : it);
-      return [...c, { p, q: 1 }];
+      if (f) return c.map((it) => it.p.id === p.id ? { ...it, q: it.q + 1, variant: varLabel || it.variant } : it);
+      return [...c, { p, q: 1, variant: varLabel || "" }];
     });
     showToast(t.added);
   };
@@ -4432,7 +4431,7 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
     const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
     const orderItems = items.map((it) => {
       const b = AC_D.breakdown(it.p);
-      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total };
+      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total, variant: it.variant || "" };
     });
     onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
   };
