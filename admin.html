@@ -45,23 +45,15 @@
   .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-weight: 700; }
  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237c3aed'/><path d='M25 35h50l-6 30a3 3 0 0 1-3 2.5H34a3 3 0 0 1-3-2.5Z' fill='white'/><path d='M32 35L38 22L50 35M68 35L62 22L50 35' stroke='white' stroke-width='4' stroke-linecap='round' fill='none'/><circle cx='42' cy='50' r='3' fill='%237c3aed'/><circle cx='58' cy='50' r='3' fill='%237c3aed'/></svg>">
   
-  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .15s; }
-  .order-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
-  .order-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 14px; }
-  .order-head-left { flex: 1; min-width: 0; }
-  .order-num { font-family: var(--display); font-weight: 800; font-size: 16px; color: var(--brand); }
-  .order-date { color: var(--ink-3); font-size: 12px; margin-top: 2px; }
-  .order-email { color: var(--ink-3); font-size: 12px; margin-top: 1px; }
-  .order-total { font-family: var(--display); font-weight: 800; font-size: 20px; color: var(--ink); margin-left: auto; }
-  .order-actions { display: flex; gap: 8px; align-items: center; }
-  .order-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
-  @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } .order-total { margin-left: 0; } }
-  .items-list { font-size: 13.5px; line-height: 1.9; color: var(--ink-2); }
+  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
+  .order-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
+  .order-num { font-family: var(--display); font-weight: 800; font-size: 17px; }
+  .order-date { color: var(--ink-3); font-size: 13px; }
+  .order-total { font-family: var(--display); font-weight: 800; font-size: 18px; }
+  .order-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } }
+  .items-list { font-size: 14px; line-height: 1.8; color: var(--ink-2); }
   .items-list b { color: var(--ink); }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 13px; }
-  .info-cell { display: flex; flex-direction: column; gap: 1px; }
-  .info-label { color: var(--ink-3); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  .info-val { color: var(--ink); font-weight: 500; }
   .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
   .info-row b { color: var(--ink); font-weight: 600; }
   select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; width: auto; margin-bottom: 0; }
@@ -292,41 +284,27 @@ function loadOrders() {
     if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
-        var varStr = it.variant ? '<span style="color:var(--brand);font-size:12px;font-weight:600;margin-left:6px;">['+h(it.variant)+']</span>' : '';
-        var nameHtml = it.id
-          ? '<a href="https://www.savatmarket.uz/product.html?p='+it.id+'" target="_blank" style="color:var(--ink);text-decoration:none;font-weight:600;border-bottom:1px dashed var(--brand);cursor:pointer;" title="Mahsulotni ko\'rish">'+h(it.name_uz||'Mahsulot')+'</a>'
-          : '<span style="font-weight:600;">'+h(it.name_uz||'Mahsulot')+'</span>';
-        return '<div style="padding:6px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
-          '<span><b style="color:var(--brand)">'+it.qty+'×</b> '+nameHtml+varStr+'</span>'+
-          '<span style="font-weight:700;white-space:nowrap;color:var(--ink);">'+fmt(it.price*it.qty)+' so\'m</span>'+
-        '</div>';
+        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
       }).join("");
-      var emailStr = o.user_email ? '<div class="order-email">✉️ '+h(o.user_email)+'</div>' : '';
       return '<div class="order-card" data-order-id="'+o.id+'">'+
         '<div class="order-head">'+
-          '<div class="order-head-left">'+
-            '<div class="order-num">'+h(o.order_num)+'</div>'+
-            '<div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div>'+
-            emailStr+
-          '</div>'+
+          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
           '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
-          '<div class="order-actions">'+
-            '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
-            '<button class="btn btn-sm btn-danger" onclick="deleteOrder('+o.id+',\''+h(o.order_num)+'\')" title="O\'chirish" style="flex:none">🗑</button>'+
-          '</div>'+
+          '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
+          '<button class="btn btn-sm btn-danger" onclick="deleteOrder('+o.id+',\''+h(o.order_num)+'\')" style="flex:none">O\'chirish</button>'+
         '</div>'+
         '<div class="order-body">'+
           '<div class="items-list">'+items+'</div>'+
-          '<div class="info-grid">'+
-            '<div class="info-cell"><span class="info-label">Tel</span><span class="info-val">'+h(o.phone||"—")+'</span></div>'+
-            '<div class="info-cell"><span class="info-label">Hudud</span><span class="info-val">'+(REGIONS[o.region]||h(o.region||"—"))+'</span></div>'+
-            '<div class="info-cell"><span class="info-label">Shahar</span><span class="info-val">'+h(o.city||"—")+'</span></div>'+
-            '<div class="info-cell"><span class="info-label">Manzil</span><span class="info-val">'+h(o.address||"—")+'</span></div>'+
-            '<div class="info-cell"><span class="info-label">To\'lov</span><span class="info-val">'+h(o.pay_method||"—")+'</span></div>'+
-            (o.comment?'<div class="info-cell" style="grid-column:1/-1"><span class="info-label">Izoh</span><span class="info-val">'+h(o.comment)+'</span></div>':'')+
+          '<div>'+
+            '<div class="info-row"><b>Tel:</b> '+h(o.phone||"—")+'</div>'+
+            '<div class="info-row"><b>Hudud:</b> '+(REGIONS[o.region]||h(o.region||"—"))+'</div>'+
+            '<div class="info-row"><b>Shahar:</b> '+h(o.city||"—")+'</div>'+
+            '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
+            (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
+            '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
           '</div>'+
         '</div>'+
       '</div>';
@@ -402,40 +380,152 @@ function deleteProduct(id, name) {
 
 function openProductModal(p) {
   var isEdit = !!p;
+  var CARGO_PER_KG = 120000;
+  var SERVICE_UNDER = 20000;
+  var SERVICE_PER_KG = 15000;
+  function calcTotal(china, weight) {
+    if(!china || !weight) return 0;
+    var cargo = Math.round(weight * CARGO_PER_KG / 1000) * 1000;
+    var svc = weight < 1 ? SERVICE_UNDER : Math.ceil(weight) * SERVICE_PER_KG;
+    return china + cargo + svc;
+  }
+  function calcPct(total, market) {
+    if(!total || !market || market <= total) return 0;
+    return Math.round((market - total) / market * 100);
+  }
+
   document.body.insertAdjacentHTML("beforeend",
     '<div class="modal-bg" id="modalBg">'+
-      '<div class="modal">'+
-        '<h2>'+(isEdit?"Tahrirlash":"Yangi mahsulot")+'</h2>'+
-        '<label>Nomi (uz)</label><input id="f_name_uz" value="'+h(p?p.name_uz:"")+'" placeholder="Sport krossovka" />'+
-        '<label>Nomi (ru)</label><input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" />'+
-        '<label>Tavsif (uz)</label><input id="f_sub_uz" value="'+h(p?p.sub_uz:"")+'" placeholder="Erkaklar uchun..." />'+
-        '<label>Tavsif (ru)</label><input id="f_sub_ru" value="'+h(p?p.sub_ru:"")+'" placeholder="Мужские..." />'+
-        '<label>SKU (mahsulot kodi)</label><input id="f_sku" value="'+h(p?p.sku||"":"")+'" placeholder="SHOES-001, TECH-042..." />'+
-        '<div class="form-row">'+
-          '<div><label>Xitoy narxi (so\'m)</label><input id="f_china" type="number" value="'+(p?p.china:"")+'" /></div>'+
-          '<div><label>Biz narxi (so\'m)</label><input id="f_market" type="number" value="'+(p?p.market:"")+'" /></div>'+
+    '<div class="modal" style="max-width:560px;padding:28px">'+
+
+    // Header
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">'+
+      '<h2 style="margin:0;font-family:var(--display);font-size:20px">'+(isEdit?"✏️ Tahrirlash":"➕ Yangi mahsulot")+'</h2>'+
+      '<button onclick="closeModal()" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">×</button>'+
+    '</div>'+
+
+    // Section 1: Asosiy ma'lumot
+    '<div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px">'+
+      '<div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">📝 Asosiy ma\'lumot</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        '<div style="grid-column:1/-1"><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Nomi (uz) <span style="color:#e11d48">*</span></label>'+
+          '<input id="f_name_uz" value="'+h(p?p.name_uz:"")+ '" placeholder="Sport krossovka" style="margin-bottom:0"/></div>'+
+        '<div style="grid-column:1/-1"><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Nomi (ru)</label>'+
+          '<input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" style="margin-bottom:0"/></div>'+
+        '<div><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Tavsif (uz)</label>'+
+          '<input id="f_sub_uz" value="'+h(p?p.sub_uz||"":"")+'" placeholder="Erkaklar uchun..." style="margin-bottom:0"/></div>'+
+        '<div><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Tavsif (ru)</label>'+
+          '<input id="f_sub_ru" value="'+h(p?p.sub_ru||"":"")+'" placeholder="Мужские..." style="margin-bottom:0"/></div>'+
+      '</div>'+
+    '</div>'+
+
+    // Section 2: Narx kalkulyator
+    '<div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px">'+
+      '<div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">💰 Narx kalkulyator</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Xitoy narxi (so\'m) <span style="color:#e11d48">*</span></label>'+
+          '<input id="f_china" type="number" value="'+(p?p.china:"")+'" placeholder="95000" style="margin-bottom:0" oninput="updateCalc()"/>'+
         '</div>'+
-        '<div class="form-row">'+
-          '<div><label>Vazni (kg)</label><input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" /></div>'+
-          '<div><label>Kategoriya</label>'+
-            '<select id="f_cat">'+CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+'</select>'+
-          '</div>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Vazni (kg) <span style="color:#e11d48">*</span></label>'+
+          '<input id="f_weight" type="number" step="0.01" value="'+(p?p.weight:"")+'" placeholder="0.8" style="margin-bottom:0" oninput="updateCalc()"/>'+
         '</div>'+
-        '<label>Mahsulot rasmlari <span style="color:var(--ink-3);font-weight:500;font-size:12px">(8 tagacha, istalgan tartibda)</span></label>'+
-        '<div class="imgs-grid" id="imgsGrid"></div>'+
-        '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
-        '<div class="upload-progress" id="uploadProgress">Yuklanmoqda...</div>'+
-        '<div class="variants-section"><h4>Variantlar</h4><div id="varSectionsWrap"></div></div>'+
-                '<div class="err" id="modalErr"></div>'+
-        '<div style="display:flex;gap:10px;">'+
-          '<button class="btn btn-ghost" style="width:auto;flex:1" id="cancelBtn">Bekor qilish</button>'+
-          '<button class="btn" style="flex:2" id="saveBtn">'+(isEdit?"Saqlash":"Qo\'shish")+'</button>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Bozor narxi (so\'m) <span style="color:#e11d48">*</span></label>'+
+          '<input id="f_market" type="number" value="'+(p?p.market:"")+'" placeholder="650000" style="margin-bottom:0" oninput="updateCalc()"/>'+
         '</div>'+
       '</div>'+
-    '</div>'
+      // Kalkulyator natija
+      '<div id="calcResult" style="background:#fff;border-radius:10px;padding:12px;border:1.5px solid var(--line);display:none">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'+
+          '<div style="text-align:center"><div style="font-size:11px;color:var(--ink-3);font-weight:600">Kargo</div><div id="cr_cargo" style="font-size:15px;font-weight:800;color:var(--ink)">—</div></div>'+
+          '<div style="text-align:center"><div style="font-size:11px;color:var(--ink-3);font-weight:600">Xizmat</div><div id="cr_svc" style="font-size:15px;font-weight:800;color:var(--ink)">—</div></div>'+
+          '<div style="text-align:center"><div style="font-size:11px;color:var(--ink-3);font-weight:600">Jami narx</div><div id="cr_total" style="font-size:15px;font-weight:800;color:#6c2bd9">—</div></div>'+
+        '</div>'+
+        '<div id="cr_save" style="background:#e7f7ee;border-radius:8px;padding:8px 12px;text-align:center;font-size:13px;font-weight:700;color:#12a150"></div>'+
+      '</div>'+
+    '</div>'+
+
+    // Section 3: Kategoriya + SKU
+    '<div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px">'+
+      '<div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🏷️ Kategoriya</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Kategoriya <span style="color:#e11d48">*</span></label>'+
+          '<select id="f_cat" style="margin-bottom:0" onchange="onCatChange()">'+
+            CATS.map(function(c){ return '<option value="'+c.id+'"'+(p&&p.cat===c.id?" selected":"")+'>'+c.label+'</option>'; }).join("")+
+          '</select>'+
+        '</div>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">SKU (ixtiyoriy)</label>'+
+          '<input id="f_sku" value="'+h(p?p.sku||"":"")+'" placeholder="SHOES-001" style="margin-bottom:0"/>'+
+        '</div>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Reyting</label>'+
+          '<input id="f_rating" type="number" step="0.1" min="1" max="5" value="'+(p?p.rating||4.5:4.5)+'" style="margin-bottom:0"/>'+
+        '</div>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Yetkazish (kun)</label>'+
+          '<input id="f_days" type="number" value="'+(p?p.days||12:12)+'" style="margin-bottom:0"/>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+
+    // Section 4: Rasmlar
+    '<div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px">'+
+      '<div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🖼️ Rasmlar <span style="font-weight:500;text-transform:none;font-size:11px">(8 tagacha)</span></div>'+
+      '<div class="imgs-grid" id="imgsGrid"></div>'+
+      '<input type="file" id="f_img_add" accept="image/*" multiple style="display:none" />'+
+      '<div id="uploadProgress" style="font-size:13px;color:var(--brand);margin-top:6px;display:none">Yuklanmoqda...</div>'+
+    '</div>'+
+
+    // Section 5: Variantlar
+    '<div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:20px">'+
+      '<div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🎨 Variantlar</div>'+
+      '<div id="varSectionsWrap"></div>'+
+    '</div>'+
+
+    '<div class="err" id="modalErr" style="margin-bottom:12px"></div>'+
+    '<div style="display:flex;gap:10px">'+
+      '<button class="btn btn-ghost" onclick="closeModal()" style="width:auto;flex:1">Bekor qilish</button>'+
+      '<button class="btn" id="saveBtn" style="flex:2">'+(isEdit?"💾 Saqlash":"➕ Qo\'shish")+'</button>'+
+    '</div>'+
+    '</div></div>'
   );
 
-  // Ko'p rasm — state: [{url, blob, isNew}]
+  // ===== KALKULYATOR =====
+  window.updateCalc = function() {
+    var china = parseInt(document.getElementById("f_china").value)||0;
+    var weight = parseFloat(document.getElementById("f_weight").value)||0;
+    var market = parseInt(document.getElementById("f_market").value)||0;
+    var res = document.getElementById("calcResult");
+    if(!china || !weight) { if(res) res.style.display="none"; return; }
+    var cargo = Math.round(weight * CARGO_PER_KG / 1000) * 1000;
+    var svc = weight < 1 ? SERVICE_UNDER : Math.ceil(weight) * SERVICE_PER_KG;
+    var total = china + cargo + svc;
+    if(res) {
+      res.style.display="block";
+      document.getElementById("cr_cargo").textContent = fmt(cargo)+" so'm";
+      document.getElementById("cr_svc").textContent = fmt(svc)+" so'm";
+      document.getElementById("cr_total").textContent = fmt(total)+" so'm";
+      var saveEl = document.getElementById("cr_save");
+      if(market > total) {
+        var pct = Math.round((market-total)/market*100);
+        saveEl.textContent = "✅ Mijoz "+pct+"% tejaydi — "+fmt(market-total)+" so'm kam to'laydi";
+        saveEl.style.display="block";
+      } else if(market && market <= total) {
+        saveEl.style.background="#fff0f0";
+        saveEl.style.color="#e11d48";
+        saveEl.textContent = "⚠️ Bozor narxi biznikidan past — tekshiring!";
+        saveEl.style.display="block";
+      } else {
+        saveEl.style.display="none";
+      }
+    }
+  };
+
+  // ===== RASMLAR =====
   window._imgList = [];
   var existingUrls = [];
   if(p && p.image_urls && p.image_urls.length) existingUrls = p.image_urls;
@@ -448,12 +538,13 @@ function openProductModal(p) {
     grid.innerHTML = window._imgList.map(function(item, idx){
       return '<div class="img-thumb-wrap">'+
         '<img src="'+h(item.url)+'" />'+
-        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="Ochirish">\u00d7</button>'+
+        '<button class="img-thumb-del" onclick="window._removeImg('+idx+')" title="O\'chirish">\u00d7</button>'+
+        (idx===0?'<div style="position:absolute;bottom:3px;left:3px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px">ASOSIY</div>':'')+
       '</div>';
     }).join("") +
     (window._imgList.length < 8 ?
       '<div class="img-add-box" id="imgAddBox">'+
-        '<span style="font-size:22px">+</span><span>Rasm qushish</span>'+
+        '<span style="font-size:24px">+</span><span>Rasm</span>'+
       '</div>' : "");
     var addBox = document.getElementById("imgAddBox");
     if(addBox) addBox.onclick = function(){ var inp = document.getElementById("f_img_add"); if(inp) inp.click(); };
@@ -461,10 +552,7 @@ function openProductModal(p) {
     if(inp) inp.onchange = function(){ addImages(this.files); this.value=""; };
   }
 
-  window._removeImg = function(idx) {
-    window._imgList.splice(idx, 1);
-    renderImgsGrid();
-  };
+  window._removeImg = function(idx) { window._imgList.splice(idx, 1); renderImgsGrid(); };
 
   function compressFile(file, cb) {
     var reader = new FileReader();
@@ -498,52 +586,49 @@ function openProductModal(p) {
       });
     });
   }
-
   renderImgsGrid();
 
-
-  // ===== VARIANTS =====
+  // ===== VARIANTLAR =====
   window._variants = [];
-  var currentCat = p ? (p.cat || "fashion") : "fashion";
+  var currentCat = p ? (p.cat || "fashion") : (document.getElementById("f_cat")||{value:"fashion"}).value;
 
-  var VAR_ICONS = { color: "Ranglar", size: "Razmerlar", model: "Modellar" };
-  var VAR_PLACEHOLDERS = {
-    color: "Rang nomi (Qizil, Zangori...)",
-    size: "Razmer (S, M, L, XL, 40, 41...)",
-    model: "Model (128GB, Pro Max...)"
+  var VAR_ICONS = { color: "🎨 Ranglar", size: "📐 Razmerlar", model: "📦 Modellar" };
+  var VAR_PH = {
+    color: "Rang nomi (Qizil, Zangori, Oq...)",
+    size: "Razmer (S, M, L, XL, 40, 41, 42...)",
+    model: "Model (128GB, Pro, Standart...)"
   };
 
   function getAllowedTypes(cat) {
     if(cat === "tech") return ["color", "model"];
     if(cat === "home") return ["color"];
-    return ["color", "size"]; // shoes, fashion, default
+    return ["color", "size"];
   }
 
   function renderVarList(type) {
     var key = type.charAt(0).toUpperCase() + type.slice(1);
-    var listEl = document.getElementById("varList" + key);
+    var listEl = document.getElementById("varList"+key);
     if(!listEl) return;
-    var items = window._variants.filter(function(v){ return v.type === type; });
+    var items = window._variants.filter(function(v){ return v.type===type; });
     if(type === "color") {
-      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;min-height:8px";
-      listEl.innerHTML = items.map(function(v, i){
+      listEl.innerHTML = items.length ? items.map(function(v){
         var idx = window._variants.indexOf(v);
-        return "<div style='position:relative;width:52px;text-align:center'>"+
-          "<div style='width:52px;height:52px;border-radius:10px;background:"+(v.color_hex||"#ccc")+";border:1.5px solid var(--line);overflow:hidden'>"+
-          "</div>"+
-          "<div style='font-size:10px;font-weight:700;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+v.value+"</div>"+
-          "<button data-ridx='"+idx+"' data-rtype='color' class='var-remove-btn' style='position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#e11d48;color:#fff;border:none;cursor:pointer;font-size:10px;font-weight:800;padding:0'>x</button>"+
+        return "<div style='position:relative;width:56px;text-align:center;'>"+
+          "<div style='width:56px;height:40px;border-radius:8px;background:"+(v.color_hex||"#ccc")+";border:1.5px solid var(--line);'></div>"+
+          "<div style='font-size:10px;font-weight:600;color:var(--ink-2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+h(v.value)+"</div>"+
+          "<button data-ridx='"+idx+"' data-rtype='color' class='var-remove-btn' style='position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:#e11d48;color:#fff;border:none;cursor:pointer;font-size:10px;font-weight:800;padding:0;line-height:17px;text-align:center'>×</button>"+
         "</div>";
-      }).join("") || "<span style='color:var(--ink-3);font-size:12px'>Hali qo'shilmagan</span>";
+      }).join("") : "<span style='color:var(--ink-3);font-size:12px;padding:4px 0;display:block'>Hali qo'shilmagan</span>";
+      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;min-height:20px";
     } else {
-      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:8px";
-      listEl.innerHTML = items.map(function(v){
+      listEl.innerHTML = items.length ? items.map(function(v){
         var idx = window._variants.indexOf(v);
-        return "<div style='display:flex;align-items:center;gap:4px;background:var(--brand-soft);color:var(--brand);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700'>"+
-          v.value+
-          "<button data-ridx='"+idx+"' data-rtype='"+type+"' class='var-remove-btn' style='background:none;border:none;cursor:pointer;color:var(--brand);font-size:14px;font-weight:800;padding:0;line-height:1;margin-left:2px'>x</button>"+
-        "</div>";
-      }).join("") || "<span style='color:var(--ink-3);font-size:12px'>Hali qo'shilmagan</span>";
+        return "<span style='display:inline-flex;align-items:center;gap:4px;background:#f0e8ff;color:#6c2bd9;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700'>"+
+          h(v.value)+
+          "<button data-ridx='"+idx+"' data-rtype='"+type+"' class='var-remove-btn' style='background:none;border:none;cursor:pointer;color:#6c2bd9;font-size:15px;font-weight:800;padding:0;line-height:1;'>×</button>"+
+        "</span>";
+      }).join("") : "<span style='color:var(--ink-3);font-size:12px;padding:4px 0;display:block'>Hali qo'shilmagan</span>";
+      listEl.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:20px";
     }
   }
 
@@ -552,7 +637,7 @@ function openProductModal(p) {
     renderVarList(type);
   };
 
-  document.addEventListener("click", function(e) {
+  document.addEventListener("click", function varClickHandler(e) {
     var btn = e.target.closest ? e.target.closest(".var-remove-btn") : null;
     if(!btn) return;
     var idx = parseInt(btn.getAttribute("data-ridx"));
@@ -562,14 +647,17 @@ function openProductModal(p) {
 
   function setupVarAdd(type) {
     var key = type.charAt(0).toUpperCase() + type.slice(1);
-    var addBtn = document.getElementById("varAdd" + key);
-    var inp = document.getElementById("varInput" + key);
+    var addBtn = document.getElementById("varAdd"+key);
+    var inp = document.getElementById("varInput"+key);
     if(!addBtn || !inp) return;
     var doAdd = function() {
       var val = inp.value.trim();
       if(!val) return;
-      var colorHex = type === "color" ? (document.getElementById("varColorPicker") || {value:"#cccccc"}).value : "";
-      window._variants.push({ type: type, value: val, color_hex: colorHex });
+      var colorHex = type === "color" ? (document.getElementById("varColorPicker")||{value:"#cccccc"}).value : "";
+      // Check duplicate
+      var exists = window._variants.some(function(v){ return v.type===type && v.value.toLowerCase()===val.toLowerCase(); });
+      if(exists) { inp.style.borderColor="#e11d48"; setTimeout(function(){ inp.style.borderColor=""; },1000); return; }
+      window._variants.push({ type:type, value:val, color_hex:colorHex });
       inp.value = "";
       renderVarList(type);
     };
@@ -583,36 +671,34 @@ function openProductModal(p) {
     if(!wrap) return;
     wrap.innerHTML = allowed.map(function(type){
       var key = type.charAt(0).toUpperCase() + type.slice(1);
-      var colorRow = '<div class="variant-add-row" style="flex-wrap:wrap;gap:6px">'+
-        '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:36px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none"/>'+
-        '<input id="varInputColor" placeholder="'+VAR_PLACEHOLDERS.color+'" style="flex:1;min-width:100px"/>'+
-        '<button class="btn btn-sm" id="varAddColor">+ Qo&#39;sh</button>'+
-      '</div>';
-      var otherRow = '<div class="variant-add-row">'+
-        '<input id="varInput'+key+'" placeholder="'+VAR_PLACEHOLDERS[type]+'"/>'+
-        '<button class="btn btn-sm" id="varAdd'+key+'">+ Qo&#39;sh</button>'+
-      '</div>';
-      return '<div style="margin-bottom:14px">'+
-        '<div class="var-section-label">'+(type==="color"?"🎨":type==="size"?"📐":"📦")+' '+VAR_ICONS[type]+'</div>'+
+      var addRow = type === "color"
+        ? '<div style="display:flex;gap:8px;align-items:center">'+
+            '<input type="color" id="varColorPicker" value="#e11d48" style="width:42px;height:38px;padding:2px 4px;border-radius:8px;border:1.5px solid var(--line);cursor:pointer;flex:none;margin-bottom:0"/>'+
+            '<input id="varInputColor" placeholder="'+VAR_PH.color+'" style="flex:1;margin-bottom:0"/>'+
+            '<button class="btn btn-sm" id="varAddColor" style="white-space:nowrap;flex:none">+ Qo&#39;sh</button>'+
+          '</div>'
+        : '<div style="display:flex;gap:8px">'+
+            '<input id="varInput'+key+'" placeholder="'+VAR_PH[type]+'" style="flex:1;margin-bottom:0"/>'+
+            '<button class="btn btn-sm" id="varAdd'+key+'" style="white-space:nowrap;flex:none">+ Qo&#39;sh</button>'+
+          '</div>';
+      return '<div style="margin-bottom:16px">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px">'+VAR_ICONS[type]+'</div>'+
         '<div id="varList'+key+'"></div>'+
-        (type==="color" ? colorRow : otherRow)+
+        addRow+
       '</div>';
     }).join("");
     allowed.forEach(function(t){ setupVarAdd(t); });
     allowed.forEach(function(t){ renderVarList(t); });
   }
 
-  var catSel = document.getElementById("f_cat");
-  if(catSel) {
-    catSel.addEventListener("change", function(){
-      currentCat = this.value;
-      rebuildVariantSections(currentCat);
-    });
-  }
+  window.onCatChange = function() {
+    currentCat = document.getElementById("f_cat").value;
+    rebuildVariantSections(currentCat);
+  };
 
   if(p && p.id) {
     fetch(SB+"/rest/v1/product_variants?product_id=eq."+p.id+"&order=id",{
-      headers:{"apikey":KEY,"Authorization":"Bearer "+token}
+      headers:{"apikey":KEY,"Authorization":"Bearer "+(token||SERVICE_KEY)}
     }).then(function(r){ return r.json(); })
     .then(function(rows){
       window._variants = rows.map(function(r){ return {id:r.id,type:r.type,value:r.value,color_hex:r.color_hex||""}; });
@@ -622,7 +708,9 @@ function openProductModal(p) {
     rebuildVariantSections(currentCat);
   }
 
-  document.getElementById("cancelBtn").onclick = closeModal;
+  // kalkulyatorni ishga tushir
+  setTimeout(function(){ if(window.updateCalc) window.updateCalc(); }, 100);
+
   document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
   document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null); };
 }
