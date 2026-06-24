@@ -367,10 +367,11 @@ function deleteProduct(id, name) {
     text: "<b>"+name+"</b> ni o'chirishni tasdiqlaysizmi?",
     okText: "O'chirish",
     onOk: function(){
+      var authToken = token || SERVICE_KEY;
       fetch(SB+"/rest/v1/products?id=eq."+id,{
         method:"DELETE",
-        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
-      }).then(function(){ loadProducts(); });
+        headers:{"apikey":KEY,"Authorization":"Bearer "+authToken,"Prefer":"return=minimal"}
+      }).then(function(){ loadProducts(); }).catch(function(e){ console.error("Delete xato:", e); });
     }
   });
 }
@@ -712,10 +713,13 @@ function deleteOrder(id, num) {
     text: "<b>"+num+"</b> buyurtmani o'chirishni tasdiqlaysizmi?",
     okText: "O'chirish",
     onOk: function(){
+      var authToken = token || SERVICE_KEY;
       fetch(SB+"/rest/v1/orders?id=eq."+id,{
         method:"DELETE",
-        headers:{"apikey":KEY,"Authorization":"Bearer "+token,"Prefer":"return=minimal"}
-      }).then(function(){ loadOrders(); });
+        headers:{"apikey":KEY,"Authorization":"Bearer "+authToken,"Prefer":"return=minimal"}
+      }).then(function(r){
+        loadOrders();
+      }).catch(function(e){ console.error("Delete xato:", e); });
     }
   });
 }
