@@ -45,15 +45,22 @@
   .logout { width: auto; height: 36px; padding: 0 16px; font-size: 13px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-weight: 700; }
  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237c3aed'/><path d='M25 35h50l-6 30a3 3 0 0 1-3 2.5H34a3 3 0 0 1-3-2.5Z' fill='white'/><path d='M32 35L38 22L50 35M68 35L62 22L50 35' stroke='white' stroke-width='4' stroke-linecap='round' fill='none'/><circle cx='42' cy='50' r='3' fill='%237c3aed'/><circle cx='58' cy='50' r='3' fill='%237c3aed'/></svg>">
   
-  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
-  .order-head { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 12px; }
-  .order-num { font-family: var(--display); font-weight: 800; font-size: 17px; }
-  .order-date { color: var(--ink-3); font-size: 13px; }
-  .order-total { font-family: var(--display); font-weight: 800; font-size: 18px; }
-  .order-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
-  @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } }
-  .items-list { font-size: 14px; line-height: 1.8; color: var(--ink-2); }
+  .order-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .15s; }
+  .order-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+  .order-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 14px; }
+  .order-head-left { flex: 1; min-width: 0; }
+  .order-num { font-family: var(--display); font-weight: 800; font-size: 16px; color: var(--brand); }
+  .order-date { color: var(--ink-3); font-size: 12px; margin-top: 2px; }
+  .order-email { color: var(--ink-3); font-size: 12px; margin-top: 1px; }
+  .order-total { font-family: var(--display); font-weight: 800; font-size: 20px; color: var(--ink); margin-left: auto; }
+  .order-actions { display: flex; gap: 8px; align-items: center; }
+  .order-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .order-body { grid-template-columns: 1fr; } .order-total { margin-left: 0; } }
+  .items-list { font-size: 13.5px; line-height: 1.9; color: var(--ink-2); }
   .items-list b { color: var(--ink); }
+  .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 13.5px; }
+  .info-label { color: var(--ink-3); font-weight: 600; white-space: nowrap; }
+  .info-val { color: var(--ink-2); }
   .info-row { font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
   .info-row b { color: var(--ink); font-weight: 600; }
   select.status { height: 40px; border-radius: var(--r-sm); border: 1.5px solid var(--line); padding: 0 12px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: #fff; cursor: pointer; width: auto; margin-bottom: 0; }
@@ -289,22 +296,29 @@ function loadOrders() {
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
       }).join("");
+      var emailStr = o.user_email ? '<div class="order-email">✉️ '+h(o.user_email)+'</div>' : '';
       return '<div class="order-card" data-order-id="'+o.id+'">'+
         '<div class="order-head">'+
-          '<div><div class="order-num">'+h(o.order_num)+'</div><div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div></div>'+
+          '<div class="order-head-left">'+
+            '<div class="order-num">'+h(o.order_num)+'</div>'+
+            '<div class="order-date">'+new Date(o.created_at).toLocaleString("ru-RU")+'</div>'+
+            emailStr+
+          '</div>'+
           '<div class="order-total">'+fmt(o.total)+' so\'m</div>'+
-          '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
-          '<button class="btn btn-sm btn-danger" onclick="deleteOrder('+o.id+',\''+h(o.order_num)+'\')" style="flex:none">O\'chirish</button>'+
+          '<div class="order-actions">'+
+            '<select class="status '+statusClass(o.status)+'" data-id="'+o.id+'">'+opts+'</select>'+
+            '<button class="btn btn-sm btn-danger" onclick="deleteOrder('+o.id+',\''+h(o.order_num)+'\')" title="O\'chirish" style="flex:none">🗑</button>'+
+          '</div>'+
         '</div>'+
         '<div class="order-body">'+
           '<div class="items-list">'+items+'</div>'+
-          '<div>'+
-            '<div class="info-row"><b>Tel:</b> '+h(o.phone||"—")+'</div>'+
-            '<div class="info-row"><b>Hudud:</b> '+(REGIONS[o.region]||h(o.region||"—"))+'</div>'+
-            '<div class="info-row"><b>Shahar:</b> '+h(o.city||"—")+'</div>'+
-            '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
-            (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
-            '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
+          '<div class="info-grid">'+
+            '<span class="info-label">📞 Tel</span><span class="info-val">'+h(o.phone||"—")+'</span>'+
+            '<span class="info-label">📍 Hudud</span><span class="info-val">'+(REGIONS[o.region]||h(o.region||"—"))+'</span>'+
+            '<span class="info-label">🏙 Shahar</span><span class="info-val">'+h(o.city||"—")+'</span>'+
+            '<span class="info-label">🏠 Manzil</span><span class="info-val">'+h(o.address||"—")+'</span>'+
+            (o.comment?'<span class="info-label">💬 Izoh</span><span class="info-val">'+h(o.comment)+'</span>':'')+
+            '<span class="info-label">💳 To\'lov</span><span class="info-val">'+h(o.pay_method||"—")+'</span>'+
           '</div>'+
         '</div>'+
       '</div>';
