@@ -2567,7 +2567,7 @@ function App() {
   const removeItem = (id) => setCart((c) => c.filter((it) => it.p.id !== id));
   const decItem = (id) => setCart((c) => c.flatMap((it) => it.p.id === id ? (it.q > 1 ? [{ ...it, q: it.q - 1 }] : []) : [it]));
   const cartQty = (id) => { const it = cart.find((i) => i.p.id === id); return it ? it.q : 0; };
-  const openProduct = (p) => { setCurrent(p); setView("product"); window.scrollTo({ top: 0 }); };
+  const openProduct = (p) => { setCurrent(p); setView("product"); window.scrollTo({ top: 0 }); window.history.pushState({}, "", "?p="+p.id); };
 
   useEffect(() => {
     if (!productsLoading && window.__savatOpenProduct) {
@@ -2579,7 +2579,7 @@ function App() {
     }
   }, [productsLoading]);
 
-  const goHome = () => { setView("home"); window.scrollTo({ top: 0 }); };
+  const goHome = () => { setView("home"); window.scrollTo({ top: 0 }); window.history.pushState({}, "", window.location.pathname); };
   const goCheckout = () => {
     if (cart.length === 0) return;
     setCartOpen(false);
