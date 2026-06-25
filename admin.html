@@ -294,7 +294,10 @@ function loadOrders() {
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
         var pname = h(it.name_uz||'Mahsulot');
-        return '<div><b>'+it.qty+'×</b> <span onclick="goToProduct(&quot;'+pname+'&quot;)" style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:600">'+pname+'</span> — '+fmt(it.price*it.qty)+' so\'m</div>';
+        var pname_ru = it.name_ru ? ' / '+h(it.name_ru) : '';
+        var variant = it.variant ? ' <span style="background:#f0e8ff;color:#6c2bd9;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:4px">'+h(it.variant)+'</span>' : '';
+        var unitPrice = it.price ? ' <span style="color:var(--ink-3);font-size:12px">(1 ta: '+fmt(it.price)+' so\'m)</span>' : '';
+        return '<div style="margin-bottom:4px"><b>'+it.qty+'×</b> <span onclick="goToProduct(&quot;'+pname+'&quot;)" style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:600">'+pname+'</span>'+variant+' — <b>'+fmt(it.price*it.qty)+' so\'m</b>'+unitPrice+'</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
@@ -309,12 +312,14 @@ function loadOrders() {
         '<div class="order-body">'+
           '<div class="items-list">'+items+'</div>'+
           '<div>'+
+            (o.user_email?'<div class="info-row"><b>Email:</b> '+h(o.user_email)+'</div>':'')+
             '<div class="info-row"><b>Tel:</b> '+h(o.phone||"—")+'</div>'+
             '<div class="info-row"><b>Hudud:</b> '+(REGIONS[o.region]||h(o.region||"—"))+'</div>'+
             '<div class="info-row"><b>Shahar:</b> '+h(o.city||"—")+'</div>'+
             '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
             (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
             '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
+            '<div class="info-row"><b>Mahsulotlar soni:</b> '+(o.items||[]).reduce(function(s,it){return s+it.qty;},0)+' ta</div>'+
           '</div>'+
         '</div>'+
       '</div>';
