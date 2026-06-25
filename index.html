@@ -144,12 +144,13 @@
   .search input {
     width: 100%; height: 42px; border-radius: var(--r-pill);
     border: 1px solid var(--line); background: var(--surface-2);
-    padding: 0 16px 0 42px; font-size: 14px; font-family: inherit; color: var(--ink);
+    padding: 0 40px 0 42px; font-size: 14px; font-family: inherit; color: var(--ink);
     transition: .18s; outline: none;
   }
   .search input::placeholder { color: var(--ink-3); }
   .search input:focus { border-color: var(--brand); background: var(--surface-3); box-shadow: 0 0 0 3px var(--brand-soft); }
   .search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--ink-3); }
+  .search .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; background: var(--ink-3); color: #fff; border: none; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
   .hdr-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   .acct-btn {
     display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px;
@@ -2921,11 +2922,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   .search input {
     width: 100%; height: 44px; border-radius: var(--r-pill);
     border: 1.5px solid var(--line-2); background: var(--surface-2);
-    padding: 0 18px 0 44px; font-size: 14.5px; font-family: inherit; color: var(--ink);
+    padding: 0 42px 0 44px; font-size: 14.5px; font-family: inherit; color: var(--ink);
     transition: .18s; outline: none;
   }
-  .search input:focus { border-color: var(--brand); background: #fff; box-shadow: 0 0 0 4px var(--brand-soft); }
+  .search input:focus { border-color: var(--brand); background: var(--surface-3); box-shadow: 0 0 0 4px var(--brand-soft); }
   .search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--ink-3); }
+  .search .search-clear { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; background: var(--ink-3); color: #fff; border: none; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
   .hdr-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
   .acct-btn { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 15px; background: var(--surface-2); border: 1.5px solid var(--line-2); border-radius: var(--r-pill); font-weight: 700; font-size: 14px; color: var(--ink); transition: .18s; cursor: pointer; }
   .acct-btn:hover { border-color: var(--brand); color: var(--brand-ink); }
