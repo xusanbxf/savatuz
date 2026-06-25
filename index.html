@@ -898,6 +898,7 @@
   }
   // Mahsulot uchun to'liq narx tahlili
   function breakdown(p) {
+    if (!p) return { china: 0, cargo: 0, service: 0, total: 0, market: 0, save: 0, pct: 0 };
     var cargo = cargoFee(p.weight);
     var service = serviceFee(p.weight);
     var total = p.china + cargo + service;
@@ -2726,7 +2727,7 @@ function App() {
 
       {view === "home" && (
         <main>
-          <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
+          {featured && <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />}
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
           {productsLoading ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: "var(--ink-3)", fontSize: 15 }}>
