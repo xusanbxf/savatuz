@@ -2458,7 +2458,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
   }, [p && p.id]);
 
   const types = [...new Set(variants.map(v => v.type))];
-  const allSelected = types.length === 0 || types.every(t => selVars[t]);
+  const allSelected = types.length === 0 || types.every(tp => selVars[tp]);
   const varLabel = Object.values(selVars).map(v => v.value).join(", ");
   const under = p.weight < 1;
 
@@ -2550,7 +2550,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
             </div>
           )}
           <div className="pd-cta">
-            <button className="order" onClick={() => { if(variants.length > 0 && !allSelected) return; onOrder(p, varLabel, thumb); }} style={variants.length > 0 && !allSelected ? {opacity:.5} : {}}>{t.detail_order} <Ico.arrow style={{ width: 18, height: 18 }} /></button>
+            <button className="order" onClick={() => { if(variants.length > 0 && !allSelected) return; const _imgs = (p.image_urls&&p.image_urls.length)?p.image_urls:(p.image_url?[p.image_url]:[]); onOrder(p, varLabel, _imgs[thumb]||_imgs[0]||null); }} style={variants.length > 0 && !allSelected ? {opacity:.5} : {}}>{t.detail_order} <Ico.arrow style={{ width: 18, height: 18 }} /></button>
             {qty > 0 ? (
               <div className="stepper stepper-lg">
                 <button onClick={() => onDec(p.id)} aria-label="-"><Ico.minus /></button>
@@ -2558,7 +2558,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
                 <button onClick={() => onInc(p)} aria-label="+"><Ico.plus /></button>
               </div>
             ) : (
-              <button className="addc" onClick={(e) => { if(variants.length > 0 && !allSelected) return; onAdd(p, e, varLabel, thumb); }} style={variants.length > 0 && !allSelected ? {opacity:.5} : {}} aria-label={t.detail_add}><Ico.cart style={{ width: 22, height: 22 }} /></button>
+              <button className="addc" onClick={(e) => { if(variants.length > 0 && !allSelected) return; const _imgs = (p.image_urls&&p.image_urls.length)?p.image_urls:(p.image_url?[p.image_url]:[]); onAdd(p, e, varLabel, _imgs[thumb]||_imgs[0]||null); }} style={variants.length > 0 && !allSelected ? {opacity:.5} : {}} aria-label={t.detail_add}><Ico.cart style={{ width: 22, height: 22 }} /></button>
             )}
           </div>
         </div>
@@ -2682,9 +2682,9 @@ function App() {
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 2000);
   };
-  const addToCart = (p, e, varLabel, thumbIdx) => {
+  const addToCart = (p, e, varLabel, selectedImgUrl) => {
     const imgs = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
-    const selectedImg = imgs[thumbIdx || 0] || imgs[0] || null;
+    const selectedImg = selectedImgUrl || imgs[0] || null;
     setCart((c) => {
       const f = c.find((it) => it.p.id === p.id);
       if (f) return c.map((it) => it.p.id === p.id ? { ...it, q: it.q + 1, variant: varLabel || it.variant, selectedImg: selectedImg || it.selectedImg } : it);
@@ -2811,7 +2811,7 @@ function App() {
       {view === "product" && (
         <main>
           <ProductDetail p={current} t={t} lang={lang} qty={cartQty(current.id)} onBack={goHome}
-            onAdd={(p, e, v, ti) => addToCart(p, e, v, ti)} onOrder={(p, v, ti) => { addToCart(p, null, v, ti); goCheckout(); }}
+            onAdd={(p, e, v, imgUrl) => addToCart(p, e, v, imgUrl)} onOrder={(p, v, imgUrl) => { addToCart(p, null, v, imgUrl); goCheckout(); }}
             onInc={(p) => addToCart(p)} onDec={decItem} />
           <Footer t={t} />
         </main>
