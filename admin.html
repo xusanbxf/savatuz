@@ -273,10 +273,11 @@ function statusClass(s){
 }
 
 function goToProduct(nameUz) {
+  var decoded = nameUz.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
   currentTab = "products";
   renderMain();
   setTimeout(function(){
-    loadProducts(nameUz);
+    loadProducts(decoded);
   }, 100);
 }
 
@@ -292,8 +293,8 @@ function loadOrders() {
     if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
-        return '<div><b>'+it.qty+'×</b> <span onclick="goToProduct(\''+h(it.name_uz||'')+'\')"
-        style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:600">'+h(it.name_uz||'Mahsulot')+'</span> — '+fmt(it.price*it.qty)+' so\'m</div>';
+        var pname = h(it.name_uz||'Mahsulot');
+        return '<div><b>'+it.qty+'×</b> <span onclick="goToProduct(&quot;'+pname+'&quot;)" style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:600">'+pname+'</span> — '+fmt(it.price*it.qty)+' so\'m</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
