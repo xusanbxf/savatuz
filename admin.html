@@ -727,22 +727,22 @@ function openProductModal(p) {
 
       var quickHtml = "";
       if(type === "color") {
-        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+
-          QUICK_COLORS.map(function(c){
-            return '<button onclick="quickAddColor(''+c.name.replace(/'/g,"\'")+"','"+c.hex+'')" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2)">'+
+        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px" id="quickColorRow">'+
+          QUICK_COLORS.map(function(c, ci){
+            return '<button data-qcolor-idx="'+ci+'" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2)">'+
               '<span style="width:13px;height:13px;border-radius:50%;background:'+c.hex+';flex:none;border:1px solid rgba(0,0,0,.12)"></span>'+c.name+'</button>';
           }).join("")+'</div>';
       } else if(type === "size") {
-        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+
+        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px" id="quickSizeRow" data-cat="'+cat+'">'+
           getQuickSizes(cat).map(function(s){
-            return '<button onclick="quickAddSize(''+s+'')" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink-2)">'+s+'</button>';
+            return '<button data-qsize="'+s+'" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink-2)">'+s+'</button>';
           }).join("")+
-          '<button onclick="quickAddAllSizes(''+cat+'')" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--brand);background:var(--brand-soft);cursor:pointer;font-size:12px;font-weight:700;color:var(--brand)">Hammasini qo\'sh ✓</button>'+
+          '<button data-qsize-all="1" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--brand);background:var(--brand-soft);cursor:pointer;font-size:12px;font-weight:700;color:var(--brand)">Hammasini qo\'sh ✓</button>'+
         '</div>';
       } else if(type === "model") {
-        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">'+
+        quickHtml = '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px" id="quickModelRow">'+
           QUICK_MODELS.map(function(m){
-            return '<button onclick="quickAddModel(''+m+'')" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2)">'+m+'</button>';
+            return '<button data-qmodel="'+m+'" style="padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2)">'+m+'</button>';
           }).join("")+'</div>';
       }
 
@@ -771,6 +771,23 @@ function openProductModal(p) {
     currentCat = document.getElementById("f_cat").value;
     rebuildVariantSections(currentCat);
   };
+
+  // Quick button delegation - data attribute orqali
+  document.addEventListener("click", function quickDelegation(e) {
+    var btn = e.target.closest ? e.target.closest("[data-qcolor-idx],[data-qsize],[data-qsize-all],[data-qmodel]") : null;
+    if(!btn) return;
+    if(btn.hasAttribute("data-qcolor-idx")) {
+      var idx = parseInt(btn.getAttribute("data-qcolor-idx"));
+      if(!isNaN(idx) && QUICK_COLORS[idx]) window.quickAddColor(QUICK_COLORS[idx].name, QUICK_COLORS[idx].hex);
+    } else if(btn.hasAttribute("data-qsize-all")) {
+      var row = btn.closest("[data-cat]");
+      window.quickAddAllSizes(row ? row.getAttribute("data-cat") : currentCat);
+    } else if(btn.hasAttribute("data-qsize")) {
+      window.quickAddSize(btn.getAttribute("data-qsize"));
+    } else if(btn.hasAttribute("data-qmodel")) {
+      window.quickAddModel(btn.getAttribute("data-qmodel"));
+    }
+  });
 
   if(p && p.id) {
     fetch(SB+"/rest/v1/product_variants?product_id=eq."+p.id+"&order=id",{
