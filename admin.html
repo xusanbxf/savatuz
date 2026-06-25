@@ -294,10 +294,24 @@ function loadOrders() {
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
         var pname = h(it.name_uz||'Mahsulot');
-        var variant = it.variant ? '<span style="background:#ede9fe;color:#6c2bd9;font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px;margin-left:6px">'+h(it.variant)+'</span>' : '';
-        var unitPrice = it.price ? '<span style="color:var(--ink-3);font-size:12px;margin-left:4px">(1 ta: '+fmt(it.price)+' so\'m)</span>' : '';
-        var img = it.image_url ? '<img src="'+h(it.image_url)+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0;border:1px solid var(--line);vertical-align:middle" onerror="this.style.display=\'none\'" />' : '<span style="width:44px;height:44px;background:var(--surface-2);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;margin-right:10px;flex-shrink:0;font-size:20px">📦</span>';
-        return '<div style="display:flex;align-items:center;margin-bottom:8px;padding:8px;background:var(--bg);border-radius:10px">'+img+'<div><div><b>'+it.qty+'×</b> <span onclick="goToProduct(&quot;'+pname+'&quot;)" style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:600">'+pname+'</span>'+variant+'</div><div style="margin-top:2px"><b>'+fmt(it.price*it.qty)+' so\'m</b> '+unitPrice+'</div></div></div>';
+        var pname_ru = it.name_ru ? h(it.name_ru) : '';
+        var variantParts = it.variant ? it.variant.split(',').map(function(v){ return v.trim(); }) : [];
+        var variantBadges = variantParts.map(function(v){
+          return '<span style="background:#ede9fe;color:#6c2bd9;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;margin-right:4px">'+h(v)+'</span>';
+        }).join('');
+        var variantRow = variantBadges ? '<div style="margin-top:5px">'+variantBadges+'</div>' : '';
+        var img = it.image_url
+          ? '<img src="'+h(it.image_url)+'" style="width:80px;height:80px;object-fit:cover;border-radius:10px;margin-right:14px;flex-shrink:0;border:1px solid var(--line)" onerror="this.style.display=\'none\'" />'
+          : '<div style="width:80px;height:80px;background:var(--surface-2);border-radius:10px;margin-right:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px">📦</div>';
+        return '<div style="display:flex;align-items:flex-start;margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1px solid var(--line)">'+
+          img+
+          '<div style="flex:1">'+
+            '<div style="font-weight:700;font-size:14px"><span onclick="goToProduct(&quot;'+pname+'&quot;)" style="cursor:pointer;color:var(--brand);text-decoration:underline">'+pname+'</span></div>'+
+            (pname_ru ? '<div style="color:var(--ink-3);font-size:12px;margin-top:1px">'+pname_ru+'</div>' : '')+
+            variantRow+
+            '<div style="margin-top:6px;font-size:13px"><b style="font-size:15px">'+it.qty+' dona</b> × '+fmt(it.price)+' = <b style="color:var(--brand)">'+fmt(it.price*it.qty)+' so\'m</b></div>'+
+          '</div>'+
+        '</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
