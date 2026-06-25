@@ -2727,13 +2727,10 @@ function App() {
 
       {view === "home" && (
         <main>
-          {featured && <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />}
+          {featured ? <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} /> : <div style={{ minHeight: 320 }} />}
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
           {productsLoading ? (
-            <div style={{ textAlign: "center", padding: "60px 0", color: "var(--ink-3)", fontSize: 15 }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-              Mahsulotlar yuklanmoqda...
-            </div>
+            <div style={{ minHeight: "60vh" }} />
           ) : (
             <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query} onSearch={setQuery} allProducts={products} onSelect={openProduct}
               onView={openProduct}
