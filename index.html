@@ -2809,7 +2809,7 @@ function App() {
       {view === "product" && (
         <main>
           <ProductDetail p={current} t={t} lang={lang} qty={cartQty(current.id)} onBack={goHome}
-            onAdd={(p) => addToCart(p)} onOrder={(p) => { addToCart(p); goCheckout(); }}
+            onAdd={(p, e, v) => addToCart(p, e, v)} onOrder={(p, v) => { addToCart(p, null, v); goCheckout(); }}
             onInc={(p) => addToCart(p)} onDec={decItem} />
           <Footer t={t} />
         </main>
