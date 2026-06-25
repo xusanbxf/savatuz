@@ -2604,7 +2604,7 @@ function App() {
   });
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState(null);
-  const [products, setProducts] = useState(D.PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem("savat_user") || "null"); } catch (e) { return null; }
@@ -2728,13 +2728,20 @@ function App() {
         <main>
           <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} />
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
-          <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query} onSearch={setQuery} allProducts={products} onSelect={openProduct}
-            onView={openProduct}
-            onAdd={(p) => {
-              if (p._hasVariants) { openProduct(p); }
-              else { addToCart(p); }
-            }}
-            onInc={(p) => addToCart(p)} onDec={decItem} />
+          {productsLoading ? (
+            <div style={{ textAlign: "center", padding: "60px 0", color: "var(--ink-3)", fontSize: 15 }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+              Mahsulotlar yuklanmoqda...
+            </div>
+          ) : (
+            <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query} onSearch={setQuery} allProducts={products} onSelect={openProduct}
+              onView={openProduct}
+              onAdd={(p) => {
+                if (p._hasVariants) { openProduct(p); }
+                else { addToCart(p); }
+              }}
+              onInc={(p) => addToCart(p)} onDec={decItem} />
+          )}
           <Why t={t} />
           <Footer t={t} />
         </main>
