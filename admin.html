@@ -272,6 +272,14 @@ function statusClass(s){
   return "status-bekor";
 }
 
+function goToProduct(nameUz) {
+  currentTab = "products";
+  renderMain();
+  setTimeout(function(){
+    loadProducts(nameUz);
+  }, 100);
+}
+
 function loadOrders() {
   var authToken = token || SERVICE_KEY;
   fetch(SB+"/rest/v1/orders?select=*&order=created_at.desc",{
@@ -284,7 +292,8 @@ function loadOrders() {
     if(!orders.length){ cont.innerHTML='<div class="empty">Hozircha buyurtmalar yo\'q</div>'; return; }
     cont.innerHTML = orders.map(function(o){
       var items = (o.items||[]).map(function(it){
-        return '<div><b>'+it.qty+'×</b> '+h(it.name_uz||"Mahsulot")+' — '+fmt(it.price*it.qty)+' so\'m</div>';
+        return '<div><b>'+it.qty+'×</b> <span onclick="goToProduct(\''+h(it.name_uz||'')+'\')"
+        style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:600">'+h(it.name_uz||'Mahsulot')+'</span> — '+fmt(it.price*it.qty)+' so\'m</div>';
       }).join("");
       var opts = STATUSES.map(function(s){
         return '<option value="'+s.id+'"'+(s.id===o.status?" selected":"")+'>'+s.label+'</option>';
@@ -322,7 +331,7 @@ function loadOrders() {
   }).catch(function(){});
 }
 
-function loadProducts() {
+function loadProducts(highlightName) {
   var authToken = token || SERVICE_KEY;
   fetch(SB+"/rest/v1/products?select=*&order=id",{
     headers:{"apikey":KEY,"Authorization":"Bearer "+authToken}
@@ -355,6 +364,20 @@ function loadProducts() {
         }).join("")+
       '</div>';
     document.getElementById("addBtn").onclick = function(){ openProductModal(null); };
+    if(highlightName) {
+      setTimeout(function(){
+        var cards = document.querySelectorAll(".prod-card");
+        cards.forEach(function(card){
+          var nameEl = card.querySelector(".prod-name");
+          if(nameEl && nameEl.textContent.indexOf(highlightName) !== -1){
+            card.style.outline = "3px solid var(--brand)";
+            card.style.borderRadius = "12px";
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+            setTimeout(function(){ card.style.outline = ""; }, 3000);
+          }
+        });
+      }, 200);
+    }
   });
 }
 
