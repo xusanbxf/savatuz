@@ -841,24 +841,17 @@ function doAutoTranslate() {
   if(!nameUz.trim()) return;
   if(btn) { btn.textContent = "⏳ Tarjima..."; btn.disabled = true; }
 
-  var prompt = "Translate these Uzbek product texts to Russian. Return ONLY JSON, no extra text:\n" +
-    "Input: name_uz=\"" + nameUz + "\" sub_uz=\"" + subUz + "\"\n" +
-    "Output format: {\"name_ru\":\"...\"," + "\"sub_ru\":\"...\"}";
+  // MyMemory - bepul tarjima API (key shart emas)
+  function translateText(text) {
+    if(!text || !text.trim()) return Promise.resolve("");
+    return fetch("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=uz|ru")
+      .then(function(r){ return r.json(); })
+      .then(function(d){ return (d.responseData && d.responseData.translatedText) || ""; });
+  }
 
-  fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 200,
-      messages: [{ role: "user", content: prompt }]
-    })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    var text = (data.content && data.content[0] && data.content[0].text) || "";
-    text = text.replace(/```json|```/g, "").trim();
-    var result = JSON.parse(text);
+  Promise.all([translateText(nameUz), translateText(subUz)])
+  .then(function(results) {
+    var result = { name_ru: results[0], sub_ru: results[1] };
     if(result.name_ru && nameRuEl) {
       nameRuEl.value = result.name_ru;
       nameRuEl.style.borderColor = "#12a150";
