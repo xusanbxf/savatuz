@@ -409,12 +409,20 @@ function openProductModal(p) {
       '<div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">📝 Asosiy ma\'lumot</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         '<div style="grid-column:1/-1"><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Nomi (uz) <span style="color:#e11d48">*</span></label>'+
-          '<input id="f_name_uz" value="'+h(p?p.name_uz:"")+ '" placeholder="Sport krossovka" style="margin-bottom:0"/></div>'+
-        '<div style="grid-column:1/-1"><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Nomi (ru)</label>'+
+          '<input id="f_name_uz" value="'+h(p?p.name_uz:"")+ '" placeholder="Sport krossovka" style="margin-bottom:0" oninput="scheduleAutoTranslate()"/></div>'+
+        '<div style="grid-column:1/-1">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+            '<label style="font-size:12px;font-weight:700;color:var(--ink-2)">Nomi (ru)</label>'+
+            '<button type="button" id="autoTranslateBtn" onclick="doAutoTranslate()" style="font-size:11px;font-weight:700;color:#6c2bd9;background:#f0e8ff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;display:flex;align-items:center;gap:4px">'+
+              '✨ Auto tarjima'+
+            '</button>'+
+          '</div>'+
           '<input id="f_name_ru" value="'+h(p?p.name_ru:"")+'" placeholder="Спортивные кроссовки" style="margin-bottom:0"/></div>'+
-        '<div><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Tavsif (uz)</label>'+
-          '<input id="f_sub_uz" value="'+h(p?p.sub_uz||"":"")+'" placeholder="Erkaklar uchun..." style="margin-bottom:0"/></div>'+
-        '<div><label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Tavsif (ru)</label>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Tavsif (uz)</label>'+
+          '<input id="f_sub_uz" value="'+h(p?p.sub_uz||"":"")+'" placeholder="Erkaklar uchun..." style="margin-bottom:0" oninput="scheduleAutoTranslate()"/></div>'+
+        '<div>'+
+          '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">Tavsif (ru)</label>'+
           '<input id="f_sub_ru" value="'+h(p?p.sub_ru||"":"")+'" placeholder="Мужские..." style="margin-bottom:0"/></div>'+
       '</div>'+
     '</div>'+
@@ -806,6 +814,67 @@ function openProductModal(p) {
 
   document.getElementById("modalBg").onclick = function(e){ if(e.target===this) closeModal(); };
   document.getElementById("saveBtn").onclick = function(){ saveProduct(p?p.id:null); };
+}
+
+// ===== AUTO TRANSLATE =====
+var _translateTimer = null;
+
+function scheduleAutoTranslate() {
+  clearTimeout(_translateTimer);
+  _translateTimer = setTimeout(function() {
+    var nameUz = (document.getElementById("f_name_uz") || {}).value || "";
+    var nameRu = (document.getElementById("f_name_ru") || {}).value || "";
+    // Faqat ru bo'sh bo'lsa avtomatik ishga tushir
+    if(nameUz.trim().length > 2 && !nameRu.trim()) {
+      doAutoTranslate();
+    }
+  }, 1200);
+}
+
+function doAutoTranslate() {
+  var nameUz = (document.getElementById("f_name_uz") || {}).value || "";
+  var subUz  = (document.getElementById("f_sub_uz")  || {}).value || "";
+  var nameRuEl = document.getElementById("f_name_ru");
+  var subRuEl  = document.getElementById("f_sub_ru");
+  var btn = document.getElementById("autoTranslateBtn");
+
+  if(!nameUz.trim()) return;
+  if(btn) { btn.textContent = "⏳ Tarjima..."; btn.disabled = true; }
+
+  var prompt = "Translate these Uzbek product texts to Russian. Return ONLY JSON, no extra text:\n" +
+    "Input: name_uz=\"" + nameUz + "\" sub_uz=\"" + subUz + "\"\n" +
+    "Output format: {\"name_ru\":\"...\"," + "\"sub_ru\":\"...\"}";
+
+  fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 200,
+      messages: [{ role: "user", content: prompt }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = (data.content && data.content[0] && data.content[0].text) || "";
+    text = text.replace(/```json|```/g, "").trim();
+    var result = JSON.parse(text);
+    if(result.name_ru && nameRuEl) {
+      nameRuEl.value = result.name_ru;
+      nameRuEl.style.borderColor = "#12a150";
+      setTimeout(function(){ nameRuEl.style.borderColor = ""; }, 2000);
+    }
+    if(result.sub_ru && subRuEl) {
+      subRuEl.value = result.sub_ru;
+      subRuEl.style.borderColor = "#12a150";
+      setTimeout(function(){ subRuEl.style.borderColor = ""; }, 2000);
+    }
+    if(btn) { btn.textContent = "✅ Tarjima qilindi"; btn.disabled = false; setTimeout(function(){ if(btn) btn.textContent = "✨ Auto tarjima"; }, 2000); }
+  })
+  .catch(function(e) {
+    console.error("Tarjima xato:", e);
+    if(btn) { btn.textContent = "❌ Xato"; btn.disabled = false; setTimeout(function(){ if(btn) btn.textContent = "✨ Auto tarjima"; }, 2000); }
+  });
 }
 
 function closeModal() {
