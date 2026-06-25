@@ -431,6 +431,30 @@
   .card-add:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
   .card-add svg { width: 18px; height: 18px; }
 
+  /* Skeleton loading */
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 8px;
+  }
+  .sk-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r); overflow: hidden;
+  }
+  .sk-img { aspect-ratio: 1/1; width: 100%; }
+  .sk-body { padding: 14px; }
+  .sk-line { height: 14px; margin-bottom: 8px; border-radius: 6px; }
+  .sk-line.short { width: 60%; }
+  .sk-line.xshort { width: 40%; }
+  .sk-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .sk-price { height: 20px; width: 45%; border-radius: 6px; }
+  .sk-btn { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; }
+
   /* Stepper */
   .stepper {
     display: inline-flex; align-items: center; gap: 2px;
@@ -2727,10 +2751,46 @@ function App() {
 
       {view === "home" && (
         <main>
-          {featured ? <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} /> : <div style={{ minHeight: 320 }} />}
+          {featured ? <Hero t={t} lang={lang} product={featured} onView={openProduct} onAdd={addToCart} /> : (
+            <div style={{ minHeight: 320, padding: "32px 0" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "stretch", minHeight: 240 }}>
+                <div>
+                  <div className="skeleton" style={{ height: 16, width: "30%", marginBottom: 16, borderRadius: 6 }} />
+                  <div className="skeleton" style={{ height: 40, width: "80%", marginBottom: 12, borderRadius: 8 }} />
+                  <div className="skeleton" style={{ height: 40, width: "60%", marginBottom: 24, borderRadius: 8 }} />
+                  <div className="skeleton" style={{ height: 18, width: "90%", marginBottom: 8, borderRadius: 6 }} />
+                  <div className="skeleton" style={{ height: 18, width: "70%", marginBottom: 32, borderRadius: 6 }} />
+                  <div style={{ display: "flex", gap: 12 }}>
+                    <div className="skeleton" style={{ height: 50, width: 160, borderRadius: 25 }} />
+                    <div className="skeleton" style={{ height: 50, width: 130, borderRadius: 25 }} />
+                  </div>
+                </div>
+                <div className="skeleton" style={{ borderRadius: 20, minHeight: 240 }} />
+              </div>
+            </div>
+          )}
           <Cats cats={D.CATS} lang={lang} active={cat} onPick={setCat} />
           {productsLoading ? (
-            <div style={{ minHeight: "60vh" }} />
+            <div style={{ padding: "40px 0" }}>
+              <div className="skeleton" style={{ height: 22, width: 180, marginBottom: 8, borderRadius: 8 }} />
+              <div className="skeleton" style={{ height: 14, width: 260, marginBottom: 24, borderRadius: 6 }} />
+              <div className="grid">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="sk-card">
+                    <div className="skeleton sk-img" />
+                    <div className="sk-body">
+                      <div className="skeleton sk-line" />
+                      <div className="skeleton sk-line short" />
+                      <div className="skeleton sk-line xshort" />
+                      <div className="sk-foot">
+                        <div className="skeleton sk-price" />
+                        <div className="skeleton sk-btn" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <Bestsellers products={list} t={t} lang={lang} qtyFor={cartQty} query={query} onSearch={setQuery} allProducts={products} onSelect={openProduct}
               onView={openProduct}
