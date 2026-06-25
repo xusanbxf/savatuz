@@ -1050,7 +1050,17 @@
       pay_payme_d: "Onlayn karta orqali", pay_click_d: "Onlayn karta orqali",
       soon: "Tez orada",
       ok_t: "Buyurtma qabul qilindi!", ok_d: "Operatorlarimiz 15 daqiqada siz bilan bog'lanadi.",
-      ok_num: "Buyurtma raqami", ok_home: "Bosh sahifaga qaytish", ok_items: "mahsulot"
+      ok_num: "Buyurtma raqami", ok_home: "Bosh sahifaga qaytish", ok_items: "mahsulot",
+      help_title: "Yordam markazi", help_sub: "Ko'p so'raladigan savollarga javoblar",
+      faqs: [
+        { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
+        { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni." },
+        { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo + xizmat haqi. Hech qanday yashirin to'lov yo'q." },
+        { q: "Mahsulot sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz — to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
+        { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul." },
+        { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
+        { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." }
+      ]
     },
     ru: {
       tag: "Напрямую из Китая",
@@ -1105,7 +1115,17 @@
       pay_payme_d: "Онлайн картой", pay_click_d: "Онлайн картой",
       soon: "Скоро",
       ok_t: "Заказ принят!", ok_d: "Наш оператор свяжется с вами в течение 15 минут.",
-      ok_num: "Номер заказа", ok_home: "Вернуться на главную", ok_items: "товаров"
+      ok_num: "Номер заказа", ok_home: "Вернуться на главную", ok_items: "товаров",
+      help_title: "Центр помощи", help_sub: "Ответы на часто задаваемые вопросы",
+      faqs: [
+        { q: "Безопасно ли заказывать из Китая?", a: "Да, мы несём полную ответственность. Оплата поступает нам, и только после подтверждения товара переводится в Китай." },
+        { q: "Сколько времени занимает доставка?", a: "Из Китая до Узбекистана обычно 10–16 рабочих дней." },
+        { q: "Что входит в цену?", a: "Цена завода + карго + сервисный сбор. Никаких скрытых платежей." },
+        { q: "Что если товар окажется некачественным?", a: "Мы даём гарантию — полный возврат средств или повторный заказ." },
+        { q: "Как можно оплатить?", a: "Click, Payme или наличными." },
+        { q: "Есть ли минимальная сумма заказа?", a: "Нет, можно заказать на любую сумму." },
+        { q: "Есть ли скидка при заказе нескольких товаров?", a: "Да, стоимость карго делится — чем больше товаров, тем меньше карго на каждый." }
+      ]
     }
   };
 
@@ -2049,15 +2069,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
   const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
-  const faqs = [
-    { q: "Xitoydan buyurtma qilish xavfsizmi?", a: "Ha, biz siz uchun to'liq javob beramiz. To'lov bizga keladi, mahsulot tasdiqlangandan keyingina Xitoyga o'tkaziladi." },
-    { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni." },
-    { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo + xizmat haqi. Hech qanday yashirin to'lov yo'q." },
-    { q: "Mahsulot sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz — to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
-    { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul." },
-    { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
-    { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." },
-  ];
+  const faqs = t.faqs || [];
 
   const fetchMessages = React.useCallback(() => {
     if (!user) return;
@@ -2111,9 +2123,9 @@ function HelpPage({ t, onHome, user, onLogin }) {
 
   return (
     <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 100px" }}>
-      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>← Bosh sahifa</button>
-      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>Yordam markazi</h2>
-      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 24px" }}>Ko'p so'raladigan savollarga javoblar</p>
+      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>{t.help_back || "← Bosh sahifa"}</button>
+      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>{t.help_title || "Yordam markazi"}</h2>
+      <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 24px" }}>{t.help_sub}</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
         {faqs.map((f, i) => (
