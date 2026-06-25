@@ -144,8 +144,8 @@
   .search input {
     width: 100%; height: 42px; border-radius: var(--r-pill);
     border: 1px solid var(--line); background: var(--surface-2);
-    padding: 0 40px 0 42px; font-size: 14px; font-family: inherit; color: var(--ink);
-    transition: .18s; outline: none;
+    padding: 0 40px 0 42px; font-size: 14px; font-family: inherit; color: var(--ink) !important;
+    caret-color: var(--ink); transition: .18s; outline: none;
   }
   .search input::placeholder { color: var(--ink-3); }
   .search input:focus { border-color: var(--brand); background: var(--surface-3); box-shadow: 0 0 0 3px var(--brand-soft); }
@@ -336,8 +336,8 @@
     .mobile-search .search input {
       width: 100%; height: 40px; border-radius: var(--r-pill);
       border: 1px solid var(--line); background: var(--surface-2);
-      padding: 0 14px 0 40px; font-size: 14px; font-family: inherit;
-      color: var(--ink); outline: none; transition: .18s;
+      padding: 0 38px 0 40px; font-size: 14px; font-family: inherit;
+      color: var(--ink) !important; caret-color: var(--ink); outline: none; transition: .18s;
     }
     .mobile-search .search input::placeholder { color: var(--ink-3); }
     .mobile-search .search input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
@@ -2922,8 +2922,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   .search input {
     width: 100%; height: 44px; border-radius: var(--r-pill);
     border: 1.5px solid var(--line-2); background: var(--surface-2);
-    padding: 0 42px 0 44px; font-size: 14.5px; font-family: inherit; color: var(--ink);
-    transition: .18s; outline: none;
+    padding: 0 42px 0 44px; font-size: 14.5px; font-family: inherit; color: var(--ink) !important;
+    caret-color: var(--ink); transition: .18s; outline: none;
   }
   .search input:focus { border-color: var(--brand); background: var(--surface-3); box-shadow: 0 0 0 4px var(--brand-soft); }
   .search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--ink-3); }
