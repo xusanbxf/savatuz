@@ -1915,7 +1915,8 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
     const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
     const orderItems = items.map((it) => {
       const b = AC_D.breakdown(it.p);
-      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total, variant: it.variant || "" };
+      const imgs = it.p.image_urls && it.p.image_urls.length ? it.p.image_urls : (it.p.image_url ? [it.p.image_url] : []);
+      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total, variant: it.variant || "", image_url: imgs[0] || null };
     });
     onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
   };
