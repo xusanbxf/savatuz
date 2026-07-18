@@ -49,6 +49,9 @@
   .chat-li-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
   #msgList { background: #faf8fe; }
 
+  /* Pastki navigatsiya — faqat mobilda */
+  .bottom-nav { display: none; }
+
   .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
   .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
   .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
@@ -86,13 +89,11 @@
   @media (max-width: 640px) {
     .wrap { padding: 12px; }
     
-    /* Top nav — scroll yoki wrap */
-    .top { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 16px; }
+    /* Top nav — mobilda yuqori tablar yashirin, pastki nav ishlaydi */
+    .top { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
     .top-title { font-size: 18px; }
-    .nav-tabs { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
-    .nav-tabs::-webkit-scrollbar { display: none; }
-    .tab { white-space: nowrap; flex-shrink: 0; height: 34px; padding: 0 14px; font-size: 13px; }
-    .logout { width: 100%; }
+    .nav-tabs { display: none; }
+    .logout { width: auto; padding: 8px 14px; font-size: 13px; }
 
     /* Orders */
     .order-body { grid-template-columns: 1fr; }
@@ -147,6 +148,26 @@
     .chat-back { display: inline-flex !important; }
     /* Login */
     .login-box { margin: 48px auto; padding: 22px; }
+
+    /* Pastki navigatsiya — mobil */
+    .wrap { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    .bottom-nav {
+      display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+      background: rgba(255,255,255,.96); backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line);
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -4px 20px rgba(27,20,48,.06);
+    }
+    .bn-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      background: none; border: none; cursor: pointer; padding: 6px 2px;
+      border-radius: 12px; transition: background .15s;
+    }
+    .bn-item:active { background: #f0e8ff; }
+    .bn-ico { font-size: 20px; line-height: 1; filter: grayscale(1) opacity(.55); transition: filter .15s; }
+    .bn-lbl { font-size: 10.5px; font-weight: 600; color: var(--ink-3); }
+    .bn-item.active .bn-ico { filter: none; }
+    .bn-item.active .bn-lbl { color: #6c2bd9; font-weight: 800; }
   }
   .items-list { font-size: 14px; line-height: 1.8; color: var(--ink-2); }
   .items-list b { color: var(--ink); }
@@ -346,13 +367,32 @@ function renderMain() {
         '<button class="logout" id="logoutBtn">Chiqish</button>'+
       '</div>'+
       '<div id="content">Yuklanmoqda...</div>'+
-    '</div>';
+    '</div>'+
+    /* Mobil pastki navigatsiya */
+    '<nav class="bottom-nav">'+
+      '<button class="bn-item'+(currentTab==="orders"?" active":"")+'" id="bnOrders">'+
+        '<span class="bn-ico">🛍️</span><span class="bn-lbl">Buyurtma</span></button>'+
+      '<button class="bn-item'+(currentTab==="products"?" active":"")+'" id="bnProducts">'+
+        '<span class="bn-ico">📦</span><span class="bn-lbl">Mahsulot</span></button>'+
+      '<button class="bn-item'+(currentTab==="messages"?" active":"")+'" id="bnMessages">'+
+        '<span class="bn-ico">💬</span><span class="bn-lbl">Xabarlar</span></button>'+
+      '<button class="bn-item'+(currentTab==="users"?" active":"")+'" id="bnUsers">'+
+        '<span class="bn-ico">👥</span><span class="bn-lbl">Mijozlar</span></button>'+
+      '<button class="bn-item'+(currentTab==="import"?" active":"")+'" id="bnImport">'+
+        '<span class="bn-ico">📥</span><span class="bn-lbl">Import</span></button>'+
+    '</nav>';
   document.getElementById("logoutBtn").onclick = doLogout;
-  document.getElementById("tabOrders").onclick = function(){ currentTab="orders"; renderMain(); };
-  document.getElementById("tabProducts").onclick = function(){ currentTab="products"; renderMain(); };
-  document.getElementById("tabUsers").onclick = function(){ currentTab="users"; renderMain(); };
-  document.getElementById("tabMessages").onclick = function(){ currentTab="messages"; renderMain(); };
-  document.getElementById("tabImport").onclick = function(){ currentTab="import"; renderMain(); };
+  var go = function(tab){ return function(){ currentTab=tab; renderMain(); }; };
+  document.getElementById("tabOrders").onclick = go("orders");
+  document.getElementById("tabProducts").onclick = go("products");
+  document.getElementById("tabUsers").onclick = go("users");
+  document.getElementById("tabMessages").onclick = go("messages");
+  document.getElementById("tabImport").onclick = go("import");
+  document.getElementById("bnOrders").onclick = go("orders");
+  document.getElementById("bnProducts").onclick = go("products");
+  document.getElementById("bnUsers").onclick = go("users");
+  document.getElementById("bnMessages").onclick = go("messages");
+  document.getElementById("bnImport").onclick = go("import");
   if(currentTab==="orders") loadOrders();
   else if(currentTab==="products") loadProducts();
   else if(currentTab==="users") loadUsers();
