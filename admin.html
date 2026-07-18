@@ -38,6 +38,17 @@
   .uc-lbl { color: var(--ink-3); font-weight: 600; }
   .uc-btn { width: 100%; }
 
+  /* Chat — zamonaviy ko'rinish */
+  .chat-ava { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#a855f7); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; flex-shrink: 0; }
+  .chat-li { display: flex; align-items: center; gap: 11px; padding: 11px 14px; cursor: pointer; border-bottom: 1px solid var(--line); transition: background .15s; }
+  .chat-li:hover { background: #f7f3ff; }
+  .chat-li.active { background: #f0e8ff; }
+  .chat-li-txt { min-width: 0; flex: 1; }
+  .chat-li-name { font-weight: 600; font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-li.active .chat-li-name { font-weight: 800; color: #6c2bd9; }
+  .chat-li-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+  #msgList { background: #faf8fe; }
+
   .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
   .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
   .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
@@ -1559,12 +1570,13 @@ function fmtT(iso) {
 
 function renderMsg(m) {
   var isAdmin = m.sender === "admin";
-  return '<div style="display:flex;justify-content:'+(isAdmin?'flex-end':'flex-start')+';margin-bottom:10px;">'+
-    '<div style="max-width:70%;padding:10px 14px;border-radius:'+(isAdmin?'16px 16px 4px 16px':'16px 16px 16px 4px')+';'+
-      'background:'+(isAdmin?'linear-gradient(135deg,#7c3aed,#a855f7)':'#f3f0fa')+';color:'+(isAdmin?'#fff':'#1b1430')+';font-size:14px;line-height:1.5;">'+
-      (isAdmin?'':'<div style="font-size:11px;font-weight:700;color:#6c2bd9;margin-bottom:3px">Foydalanuvchi</div>')+
+  return '<div class="chat-msg" style="display:flex;justify-content:'+(isAdmin?'flex-end':'flex-start')+';margin-bottom:8px;">'+
+    '<div style="max-width:74%;padding:9px 13px;border-radius:'+(isAdmin?'18px 18px 5px 18px':'18px 18px 18px 5px')+';'+
+      'background:'+(isAdmin?'linear-gradient(135deg,#7c3aed,#a855f7)':'#fff')+';'+
+      'color:'+(isAdmin?'#fff':'#1b1430')+';font-size:14px;line-height:1.45;'+
+      'box-shadow:0 1px 2px rgba(27,20,48,.06);'+(isAdmin?'':'border:1px solid var(--line);')+'">'+
       h(m.message)+
-      '<div style="font-size:10px;opacity:.6;margin-top:3px;text-align:right">'+fmtT(m.created_at)+'</div>'+
+      '<div style="font-size:10px;opacity:.6;margin-top:4px;text-align:right;">'+fmtT(m.created_at)+'</div>'+
     '</div>'+
   '</div>';
 }
@@ -1581,9 +1593,13 @@ function loadMessages() {
 
     var listHtml = users.map(function(email){
       var active = currentChatEmail===email;
-      return '<div onclick="openChat(\''+h(email)+'\')" '+
-        'style="padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);background:'+(active?'#f0e8ff':'')+';transition:.15s;">'+
-        '<div style="font-weight:'+(active?'800':'600')+';font-size:13.5px;color:'+(active?'#6c2bd9':'var(--ink)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+h(email)+'</div>'+
+      var initial = (email||"?").trim().charAt(0).toUpperCase();
+      return '<div onclick="openChat(\''+h(email)+'\')" class="chat-li'+(active?' active':'')+'">'+
+        '<div class="chat-ava">'+h(initial)+'</div>'+
+        '<div class="chat-li-txt">'+
+          '<div class="chat-li-name">'+h(email)+'</div>'+
+          '<div class="chat-li-sub">Suhbatni ochish</div>'+
+        '</div>'+
       '</div>';
     }).join("");
 
@@ -1621,9 +1637,13 @@ function openChat(email) {
   if(!chatBox) return;
 
   chatBox.innerHTML =
-    '<div style="padding:14px 18px;border-bottom:1px solid var(--line);background:#fff;font-weight:700;font-size:14px;flex-shrink:0;display:flex;align-items:center;gap:10px;">'+
+    '<div style="padding:12px 16px;border-bottom:1px solid var(--line);background:#fff;flex-shrink:0;display:flex;align-items:center;gap:11px;">'+
       '<button class="chat-back" onclick="closeChatMobile()" style="display:none;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line);background:var(--bg);border-radius:9px;cursor:pointer;font-size:18px;padding:0;flex-shrink:0;">‹</button>'+
-      '<span>💬 '+h(email)+'</span>'+
+      '<div class="chat-ava" style="width:38px;height:38px;font-size:16px;flex-shrink:0;">'+h((email||"?").trim().charAt(0).toUpperCase())+'</div>'+
+      '<div style="min-width:0;">'+
+        '<div style="font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+h(email)+'</div>'+
+        '<div style="font-size:11.5px;color:#12a150;font-weight:600;">● Onlayn</div>'+
+      '</div>'+
     '</div>'+
     '<div id="msgList" style="flex:1;overflow-y:auto;padding:14px 16px;min-height:0;"></div>'+
     '<div style="padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;background:#fff;flex-shrink:0;">'+
