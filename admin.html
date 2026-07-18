@@ -27,6 +27,17 @@
   .users-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .users-table { min-width: 480px; }
 
+  /* Foydalanuvchi kartalari — scrollsiz, chiroyli */
+  .user-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 4px; }
+  .user-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .uc-main { min-width: 0; }
+  .uc-email { font-weight: 700; font-size: 15px; color: var(--ink); overflow-wrap: anywhere; margin-bottom: 3px; }
+  .uc-name { font-size: 13.5px; color: var(--ink-2); }
+  .uc-meta { display: flex; flex-direction: column; gap: 7px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .uc-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13.5px; }
+  .uc-lbl { color: var(--ink-3); font-weight: 600; }
+  .uc-btn { width: 100%; }
+
   .login-box { max-width: 380px; margin: 80px auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 28px; box-shadow: 0 8px 30px rgba(27,20,48,.08); }
   .login-box h1 { font-family: var(--display); font-size: 22px; margin: 0 0 6px; text-align: center; }
   .login-box p { color: var(--ink-3); font-size: 13.5px; text-align: center; margin: 0 0 22px; }
@@ -1495,34 +1506,26 @@ function loadUsers() {
     if(!users.length){ cont.innerHTML='<div class="empty">Hozircha foydalanuvchilar yo\'q</div>'; return; }
     cont.innerHTML =
       '<div class="add-btn-row"><span>Jami: <b>'+users.length+'</b> ta foydalanuvchi</span></div>'+
-      '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'+
-      '<table style="width:100%;min-width:480px;border-collapse:collapse;background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);">'+
-        '<thead><tr style="background:var(--bg);">'+
-          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Email</th>'+
-          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Ism</th>'+
-          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Ro\'yxat sanasi</th>'+
-          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Holat</th>'+
-          '<th style="padding:12px 16px;text-align:left;font-size:13px;color:var(--ink-3);">Amal</th>'+
-        '</tr></thead>'+
-        '<tbody>'+
-          users.map(function(u){
-            var name = (u.user_metadata && u.user_metadata.name) ? h(u.user_metadata.name) : "—";
-            var date = new Date(u.created_at).toLocaleDateString("ru-RU");
-            var confirmed = u.email_confirmed_at
-              ? '<span style="color:#12a150;font-weight:600">✓ Tasdiqlangan</span>'
-              : '<span style="color:#f59e0b;font-weight:600">⏳ Tasdiqlanmagan</span>';
-            return '<tr style="border-top:1px solid var(--line);">'+
-              '<td style="padding:12px 16px;font-size:14px;">'+h(u.email)+'</td>'+
-              '<td style="padding:12px 16px;font-size:14px;">'+name+'</td>'+
-              '<td style="padding:12px 16px;font-size:14px;color:var(--ink-3);">'+date+'</td>'+
-              '<td style="padding:12px 16px;font-size:14px;">'+confirmed+'</td>'+
-              '<td style="padding:12px 16px;">'+
-                '<button class="btn btn-sm btn-ghost" onclick="resetPassword(\''+h(u.email)+'\')">Parol reset</button>'+
-              '</td>'+
-            '</tr>';
-          }).join("")+
-        '</tbody>'+
-      '</table></div>';
+      '<div class="user-cards">'+
+        users.map(function(u){
+          var name = (u.user_metadata && u.user_metadata.name) ? h(u.user_metadata.name) : "—";
+          var date = new Date(u.created_at).toLocaleDateString("ru-RU");
+          var confirmed = u.email_confirmed_at
+            ? '<span style="color:#12a150;font-weight:600">✓ Tasdiqlangan</span>'
+            : '<span style="color:#f59e0b;font-weight:600">⏳ Tasdiqlanmagan</span>';
+          return '<div class="user-card">'+
+            '<div class="uc-main">'+
+              '<div class="uc-email">'+h(u.email)+'</div>'+
+              '<div class="uc-name">'+(name==="—"?'<span style="color:var(--ink-3)">Ism kiritilmagan</span>':name)+'</div>'+
+            '</div>'+
+            '<div class="uc-meta">'+
+              '<div class="uc-row"><span class="uc-lbl">Ro\'yxat</span><span>'+date+'</span></div>'+
+              '<div class="uc-row"><span class="uc-lbl">Holat</span><span>'+confirmed+'</span></div>'+
+            '</div>'+
+            '<button class="btn btn-sm btn-ghost uc-btn" onclick="resetPassword(\''+h(u.email)+'\')">🔑 Parol reset</button>'+
+          '</div>';
+        }).join("")+
+      '</div>';
   }).catch(function(){
     document.getElementById("content").innerHTML = '<div class="empty">Xatolik yuz berdi</div>';
   });
