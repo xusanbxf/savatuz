@@ -369,7 +369,8 @@
   }
   .cat:hover { border-color: var(--brand); color: var(--ink); }
   .cat.on { background: var(--brand); color: #fff; border-color: var(--brand); box-shadow: var(--sh-brand); }
-  .cat-emoji { font-size: 15px; line-height: 1; }
+  .cat-emoji { font-size: 15px; line-height: 1; display: inline-flex; align-items: center; }
+  .cat-emoji svg { display: block; }
 
   /* ===== SECTION HEADER ===== */
   .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin: 36px 0 20px; }
@@ -1218,6 +1219,11 @@ const Icons = {
   home: (p) => <S {...p}><path d="M3 12L12 4l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z"/></S>,
   grid: (p) => <S {...p}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></S>,
   box: (p) => <S {...p}><path d="M12 3L3 8v8l9 5 9-5V8L12 3Z"/><path d="M3 8l9 5 9-5M12 13v8"/></S>,
+  cat_all: (p) => <S {...p}><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></S>,
+  cat_tech: (p) => <S {...p}><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></S>,
+  cat_fashion: (p) => <S {...p}><path d="M8.5 3 6 6l2 2v13h8V8l2-2-2.5-3-1.5 2h-2L8.5 3Z"/></S>,
+  cat_shoes: (p) => <S {...p}><path d="M2.5 15.5c3-.3 4.5-1.2 6-3l1.5 1.5 3 .8c2 .5 5 .7 8.5.7v2.5H2.5v-2.5Z"/><path d="M8.5 12.5c-.3-1.5.3-3 1.5-4"/></S>,
+  cat_home: (p) => <S {...p}><path d="M4 11 12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/><path d="M10 20v-5h4v5"/></S>,
   help: (p) => <S {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/></S>,
 };
 
