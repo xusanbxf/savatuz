@@ -18,8 +18,6 @@
 
 const SUPABASE_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
 
-export const config = { api: { bodyParser: false } };
-
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -41,7 +39,7 @@ const FORWARD_REQUEST_HEADERS = [
 
 const FORWARD_RESPONSE_HEADERS = ["content-type", "content-range", "content-disposition"];
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   try {
     const url = new URL(req.url, "http://placeholder");
     const upstreamPath = url.pathname.replace(/^\/api\/sb\//, "");
@@ -79,3 +77,6 @@ export default async function handler(req, res) {
     res.status(502).json({ error: "proxy_failed", message: String(e) });
   }
 }
+
+handler.config = { api: { bodyParser: false } };
+module.exports = handler;
