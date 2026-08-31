@@ -846,7 +846,7 @@
 /* ============ SAVAT.UZ — data, i18n, narx mantiqi ============ */
 (function () {
   // ---- Supabase ulanish ----
-  var SUPABASE_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  var SUPABASE_URL = "/api/sb";
   var SUPABASE_KEY = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
 
   // Supabase'dan mahsulotlarni olib, sahifa kutgan formatga o'tkazadi
@@ -1595,7 +1595,7 @@ function AuthModal({ open, t, onClose, onAuth }) {
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  const SB_URL = "/api/sb";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
   useEffect(() => { if (open) { setErr(""); setInfo(""); setLoading(false); } }, [open, tab]);
@@ -2058,7 +2058,7 @@ function OrderSuccess({ order, t, onHome }) {
 function MyOrders({ user, t, onHome }) {
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
-  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  const SB_URL = "/api/sb";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
   const STATUS_LABELS = { yangi: "🟡 Yangi", tasdiqlangan: "🔵 Tasdiqlangan", yetkazilmoqda: "🟣 Yetkazilmoqda", yakunlangan: "🟢 Yakunlangan", bekor: "🔴 Bekor" };
@@ -2107,7 +2107,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
   const inputRef = React.useRef(null);
   const lastIdRef = React.useRef(0);
 
-  const SB_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+  const SB_URL = "/api/sb";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
   const faqs = t.faqs || [];
@@ -2477,7 +2477,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
 
   useEffect(() => {
     if(!p || !p.id) return;
-    const SB = "https://gjsaelqqubmlwnmfyuso.supabase.co";
+    const SB = "/api/sb";
     const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
     fetch(SB + "/rest/v1/product_variants?product_id=eq." + p.id + "&order=id", {
       headers: { apikey: KEY }
