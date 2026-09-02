@@ -447,8 +447,9 @@
   /* ===== WHY STRIP ===== */
   .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 56px 0 16px; }
   .why-card {
-    background: none; border: none;
-    padding: 0; position: relative;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 28px; position: relative; overflow: hidden;
+    box-shadow: var(--sh-1);
   }
   .why-ic { width: 44px; height: 44px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; margin-bottom: 16px; }
   .why-ic svg { width: 21px; height: 21px; }
