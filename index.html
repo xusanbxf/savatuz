@@ -1028,6 +1028,12 @@
       hero_save: "Tejaysiz",
       hero_cta: "Hoziroq buyurtma",
       hero_secondary: "Narxni ko'rish",
+      hero_ticker_t: "Bozordan arzon",
+      hero_ticker_d: "To'g'ridan-to'g'ri Xitoy zavodidan",
+      not_found: "Hech narsa topilmadi",
+      search_results_prefix: "Qidiruv natijalari: ",
+      search_results_suffix: " ta mahsulot",
+      no_products_for_query: "bo'yicha mahsulot yo'q",
       cats_title: "Kategoriyalar",
       best_title: "Hit savdo",
       best_sub: "Eng ko'p sotilayotgan mahsulotlar",
@@ -1094,6 +1100,12 @@
       hero_save: "Экономия",
       hero_cta: "Заказать сейчас",
       hero_secondary: "Смотреть цену",
+      hero_ticker_t: "Дешевле рынка",
+      hero_ticker_d: "Прямо с заводов Китая",
+      not_found: "Ничего не найдено",
+      search_results_prefix: "Результаты поиска: ",
+      search_results_suffix: " товаров",
+      no_products_for_query: "по вашему запросу нет товаров",
       cats_title: "Категории",
       best_title: "Хиты продаж",
       best_sub: "Самые покупаемые товары",
@@ -1338,7 +1350,7 @@ function SearchBox({ t, query, onSearch, products, onSelect, lang, mobile }) {
       {open && query.trim().length > 0 && (
         <div className="search-dropdown">
           {suggestions.length === 0 ? (
-            <div className="sd-empty">🔍 {lang === "ru" ? "Ничего не найдено" : "Hech narsa topilmadi"}</div>
+            <div className="sd-empty">🔍 {t.not_found}</div>
           ) : suggestions.map(p => {
             const b = bd(p);
             const imgUrl = (p.image_urls && p.image_urls[0]) || p.image_url;
@@ -1379,8 +1391,8 @@ function Hero({ t, lang, product, onView, onAdd }) {
           <div className="hero-ticker">
             <div className="hero-ticker-num">3–5×</div>
             <div className="hero-ticker-label">
-              <strong>{lang === "ru" ? "Дешевле рынка" : "Bozordan arzon"}</strong>
-              {lang === "ru" ? "Прямо с заводов Китая" : "To'g'ridan-to'g'ri Xitoy zavodidan"}
+              <strong>{t.hero_ticker_t}</strong>
+              {t.hero_ticker_d}
             </div>
           </div>
           <div className="hero-cta-row">
@@ -1472,16 +1484,16 @@ function Bestsellers({ products, t, lang, qtyFor, onView, onAdd, onInc, onDec, q
           <h2 className="sec-title">
             {query ? <><span style={{fontSize:22}}>🔍</span> "{query}"</> : <><span className="sec-flame">🔥</span> {t.best_title}</>}
           </h2>
-          <p className="sec-sub">{query ? (lang==="ru" ? "Результаты поиска: " : "Qidiruv natijalari: ") + products.length + (lang==="ru" ? " товаров" : " ta mahsulot") : t.best_sub}</p>
+          <p className="sec-sub">{query ? t.search_results_prefix + products.length + t.search_results_suffix : t.best_sub}</p>
         </div>
       </div>
       {products.length === 0 ? (
         <div style={{ textAlign:"center", padding:"60px 0", color:"var(--ink-3)" }}>
           <div style={{ fontSize:48, marginBottom:12 }}>🔍</div>
           <div style={{ fontFamily:"Sora,sans-serif", fontWeight:800, fontSize:18, color:"var(--ink)", marginBottom:8 }}>
-            {lang==="ru" ? "Ничего не найдено" : "Hech narsa topilmadi"}
+            {t.not_found}
           </div>
-          <div style={{ fontSize:14 }}>"{query}" {lang==="ru" ? "по вашему запросу нет товаров" : "bo'yicha mahsulot yo'q"}</div>
+          <div style={{ fontSize:14 }}>"{query}" {t.no_products_for_query}</div>
         </div>
       ) : (
         <div className="grid">
