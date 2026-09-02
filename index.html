@@ -374,7 +374,7 @@
   .cat:hover { border-color: var(--brand); color: var(--ink); }
   .cat.on { background: var(--brand); color: #fff; border-color: var(--brand); box-shadow: var(--sh-brand); }
   .cat-emoji { font-size: 15px; line-height: 1; display: inline-flex; align-items: center; }
-  .cat-emoji svg { display: block; }
+  .cat-emoji svg { display: block; width: 16px; height: 16px; }
 
   /* ===== SECTION HEADER ===== */
   .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin: 36px 0 20px; }
@@ -495,8 +495,20 @@
 
   /* ===== FOOTER ===== */
   .ftr { margin-top: 64px; border-top: 1px solid var(--line); background: var(--surface); }
-  .ftr-row { display: flex; align-items: center; justify-content: space-between; padding: 28px 0; gap: 20px; flex-wrap: wrap; }
+  .ftr-cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 28px; padding: 36px 0 8px; }
+  .ftr-col { display: flex; flex-direction: column; gap: 10px; }
+  .ftr-h { font-size: 13px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: .02em; margin-bottom: 2px; }
+  .ftr-col button { text-align: left; background: none; border: none; padding: 0; color: var(--ink-3); font-size: 14px; font-weight: 500; cursor: pointer; transition: .15s; width: fit-content; }
+  .ftr-col button:hover { color: var(--brand); }
+  .ftr-tag { color: var(--ink-3); font-size: 13.5px; line-height: 1.5; max-width: 34ch; margin: 0; }
+  .ftr-note { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 13.5px; }
+  .ftr-note svg { flex-shrink: 0; opacity: .8; }
+  .ftr-row { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 28px; gap: 20px; flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: 24px; }
   .ftr small { color: var(--ink-3); font-size: 13px; }
+  @media (max-width: 760px) {
+    .ftr-cols { grid-template-columns: 1fr 1fr; padding: 28px 0 4px; }
+    .ftr-brand { grid-column: 1 / -1; }
+  }
 
   /* ===== PRODUCT DETAIL ===== */
   .pd { padding: 24px 0 16px; }
@@ -790,6 +802,7 @@
     .cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 20px 0 6px; }
     .cat { padding: 11px 6px; border-radius: 12px; flex-direction: column; gap: 4px; justify-content: center; font-size: 11.5px; text-align: center; }
     .cat-emoji { font-size: 20px; }
+    .cat-emoji svg { width: 20px; height: 20px; }
     .sec-title { font-size: 20px; }
     .pd-title { font-size: 22px; }
     .calc, .co-card, .co-summary { padding: 14px; border-radius: 12px; }
@@ -1040,6 +1053,7 @@
     uz: {
       tag: "Xitoydan to'g'ridan-to'g'ri",
       nav_home: "Bosh sahifa", nav_catalog: "Katalog", nav_track: "Buyurtmalar", nav_help: "Yordam",
+      ftr_links: "Sahifalar", ftr_info: "Ma'lumot",
       search: "Mahsulot qidirish...",
       hero_kicker: "HAFTANING HITI",
       hero_title: "Xitoy narxida —\nuyingizgacha",
@@ -1105,6 +1119,7 @@
     ru: {
       tag: "Напрямую из Китая",
       nav_home: "Главная", nav_catalog: "Каталог", nav_track: "Заказы", nav_help: "Помощь",
+      ftr_links: "Страницы", ftr_info: "Информация",
       search: "Поиск товаров...",
       hero_kicker: "ХИТ НЕДЕЛИ",
       hero_title: "Цена Китая —\nдо вашей двери",
@@ -1434,16 +1449,20 @@ function Hero({ t, lang, product, onView, onAdd }) {
 
 /* ---- Category strip ---- */
 function Cats({ cats, lang, active, onPick }) {
-  const emojis = { all: "🛍️", tech: "📱", shoes: "👟", fashion: "👗", home: "🏠" };
+  const I = window.Icons;
+  const catIcons = { all: I.cat_all, tech: I.cat_tech, shoes: I.cat_shoes, fashion: I.cat_fashion, home: I.cat_home };
   return (
     <div className="wrap">
       <div className="cats">
-        {cats.map((c) => (
-          <button key={c.id} className={"cat" + (active === c.id ? " on" : "")} onClick={() => onPick(c.id)}>
-            <span className="cat-emoji">{emojis[c.id] || "📦"}</span>
-            {c[lang]}
-          </button>
-        ))}
+        {cats.map((c) => {
+          const CatIcon = catIcons[c.id] || I.box;
+          return (
+            <button key={c.id} className={"cat" + (active === c.id ? " on" : "")} onClick={() => onPick(c.id)}>
+              <span className="cat-emoji"><CatIcon strokeWidth={2} /></span>
+              {c[lang]}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1551,14 +1570,31 @@ function Why({ t }) {
 }
 
 /* ---- Footer ---- */
-function Footer({ t }) {
+function Footer({ t, onHome, onCatalog, onHelp, onMyOrders }) {
   return (
     <footer className="ftr">
-      <div className="wrap ftr-row">
-        <div className="brand">
-          <div className="brand-mark" style={{ width: 34, height: 34, borderRadius: 10 }}><I.basket style={{ width: 20, height: 20 }} /></div>
-          <div className="brand-name" style={{ fontSize: 18 }}>SAVAT<span className="uz">.UZ</span></div>
+      <div className="wrap ftr-cols">
+        <div className="ftr-col ftr-brand">
+          <div className="brand">
+            <div className="brand-mark" style={{ width: 34, height: 34, borderRadius: 10 }}><I.basket style={{ width: 20, height: 20 }} /></div>
+            <div className="brand-name" style={{ fontSize: 18 }}>SAVAT<span className="uz">.UZ</span></div>
+          </div>
+          <p className="ftr-tag">{t.tag}</p>
         </div>
+        <div className="ftr-col">
+          <div className="ftr-h">{t.ftr_links}</div>
+          {onHome && <button onClick={onHome}>{t.nav_home}</button>}
+          {onCatalog && <button onClick={onCatalog}>{t.nav_catalog}</button>}
+          {onMyOrders && <button onClick={onMyOrders}>{t.nav_track}</button>}
+          {onHelp && <button onClick={onHelp}>{t.nav_help}</button>}
+        </div>
+        <div className="ftr-col">
+          <div className="ftr-h">{t.ftr_info}</div>
+          <span className="ftr-note"><I.truck style={{ width: 15, height: 15 }} />{t.why3_d}</span>
+          <span className="ftr-note"><I.card style={{ width: 15, height: 15 }} />{t.pay_cash}</span>
+        </div>
+      </div>
+      <div className="wrap ftr-row">
         <small>© 2026 SAVAT.UZ — {t.tag}</small>
       </div>
     </footer>
@@ -2844,7 +2880,7 @@ function App() {
               onInc={(p) => addToCart(p)} onDec={decItem} />
           )}
           <Why t={t} />
-          <Footer t={t} />
+          <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
         </main>
       )}
       {view === "product" && (
@@ -2852,7 +2888,7 @@ function App() {
           <ProductDetail p={current} t={t} lang={lang} qty={cartQty(current.id)} onBack={goHome}
             onAdd={(p, e, v, imgUrl) => addToCart(p, e, v, imgUrl)} onOrder={(p, v, imgUrl) => { addToCart(p, null, v, imgUrl); goCheckout(); }}
             onInc={(p) => addToCart(p)} onDec={decItem} />
-          <Footer t={t} />
+          <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
         </main>
       )}
       {view === "checkout" && (
@@ -2860,13 +2896,13 @@ function App() {
           <Checkout items={cart} t={t} lang={lang} user={user}
             onBack={() => (current ? openProduct(current) : goHome())}
             onPlace={placeOrder} onRequireAuth={() => setAuthOpen(true)} />
-          <Footer t={t} />
+          <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
         </main>
       )}
       {view === "success" && order && (
         <main>
           <OrderSuccess order={order} t={t} onHome={goHome} />
-          <Footer t={t} />
+          <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
         </main>
       )}
       {view === "myorders" && (
