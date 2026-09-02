@@ -457,8 +457,9 @@
 
   /* ===== FOOTER ===== */
   .ftr { margin-top: 64px; background: var(--surface); }
-  .ftr-cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 28px; padding: 36px 0 8px; }
-  .ftr-col { display: flex; flex-direction: column; gap: 10px; }
+  .ftr-cols { display: flex; flex-wrap: wrap; gap: 64px; padding: 36px 0 8px; }
+  .ftr-col { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
+  .ftr-col.ftr-brand { flex: 1 1 260px; max-width: 320px; }
   .ftr-h { font-size: 13px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: .02em; margin-bottom: 2px; }
   .ftr-col button { text-align: left; background: none; border: none; padding: 0; color: var(--ink-3); font-size: 14px; font-weight: 500; cursor: pointer; transition: .15s; width: fit-content; }
   .ftr-col button:hover { color: var(--brand); }
@@ -468,8 +469,8 @@
   .ftr-row { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 28px; gap: 20px; flex-wrap: wrap; margin-top: 24px; }
   .ftr small { color: var(--ink-3); font-size: 13px; }
   @media (max-width: 760px) {
-    .ftr-cols { grid-template-columns: 1fr 1fr; padding: 28px 0 4px; }
-    .ftr-brand { grid-column: 1 / -1; }
+    .ftr-cols { gap: 32px; padding: 28px 0 4px; }
+    .ftr-col.ftr-brand { flex: 1 1 100%; max-width: none; }
   }
 
   /* ===== PRODUCT DETAIL ===== */
