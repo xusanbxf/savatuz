@@ -1034,6 +1034,16 @@
       search_results_prefix: "Qidiruv natijalari: ",
       search_results_suffix: " ta mahsulot",
       no_products_for_query: "bo'yicha mahsulot yo'q",
+      back_home: "← Bosh sahifa",
+      chat_admin_title: "Admin bilan chat",
+      chat_admin_sub: "Kirish yoki ro'yxatdan o'tib, bevosita muloqot qiling",
+      chat_login_btn: "Kirish / Ro'yxatdan o'tish",
+      chat_title: "SAVAT.UZ Yordam",
+      chat_online: "Online",
+      chat_greeting: "Salom! Savolingizni yozing",
+      chat_placeholder: "Xabar yozing...",
+      myorders_title: "Mening buyurtmalarim",
+      myorders_empty: "Hozircha buyurtmalar yo'q",
       cats_title: "Kategoriyalar",
       best_title: "Hit savdo",
       best_sub: "Eng ko'p sotilayotgan mahsulotlar",
@@ -1106,6 +1116,16 @@
       search_results_prefix: "Результаты поиска: ",
       search_results_suffix: " товаров",
       no_products_for_query: "по вашему запросу нет товаров",
+      back_home: "← Главная",
+      chat_admin_title: "Чат с администратором",
+      chat_admin_sub: "Войдите или зарегистрируйтесь для прямого общения",
+      chat_login_btn: "Войти / Зарегистрироваться",
+      chat_title: "Поддержка SAVAT.UZ",
+      chat_online: "Онлайн",
+      chat_greeting: "Здравствуйте! Напишите ваш вопрос",
+      chat_placeholder: "Введите сообщение...",
+      myorders_title: "Мои заказы",
+      myorders_empty: "Пока нет заказов",
       cats_title: "Категории",
       best_title: "Хиты продаж",
       best_sub: "Самые покупаемые товары",
@@ -1852,7 +1872,7 @@ function MobileMenu({ open, t, lang, setLang, onClose, onHome, user, onAccount, 
             <button className={lang === "uz" ? "on" : ""} onClick={() => setLang("uz")}>UZ</button>
             <button className={lang === "ru" ? "on" : ""} onClick={() => setLang("ru")}>RU</button>
           </div>
-          {user && <button className="mm-logout" style={{ background: "#f0e8ff", color: "#6c2bd9", marginBottom: 8 }} onClick={() => { onClose(); onMyOrders(); }}>Mening buyurtmalarim</button>}
+          {user && <button className="mm-logout" style={{ background: "#f0e8ff", color: "#6c2bd9", marginBottom: 8 }} onClick={() => { onClose(); onMyOrders(); }}>{t.myorders_title}</button>}
           {user && <button className="mm-logout" onClick={() => { onClose(); onLogout(); }}>{t.auth_logout}</button>}
         </div>
       </aside>
@@ -2071,10 +2091,10 @@ function MyOrders({ user, t, onHome }) {
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: "24px 16px", minHeight: "calc(100vh - 140px)" }}>
-      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 16, padding: 0 }}>← Bosh sahifa</button>
-      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 20px" }}>Mening buyurtmalarim</h2>
+      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 16, padding: 0 }}>{t.back_home}</button>
+      <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 22, margin: "0 0 20px" }}>{t.myorders_title}</h2>
       {loading && <p style={{ color: "#8a849c" }}>Yuklanmoqda...</p>}
-      {!loading && !orders.length && <p style={{ color: "#8a849c" }}>Hozircha buyurtmalar yo'q</p>}
+      {!loading && !orders.length && <p style={{ color: "#8a849c" }}>{t.myorders_empty}</p>}
       {orders.map(o => (
         <div key={o.id} style={{ background: "#fff", border: "1px solid #ece8f4", borderRadius: 14, padding: 18, marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -2162,7 +2182,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
 
   return (
     <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 16px 100px" }}>
-      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>{t.help_back || "← Bosh sahifa"}</button>
+      <button onClick={onHome} style={{ background: "none", border: "none", cursor: "pointer", color: "#6c2bd9", fontWeight: 700, fontSize: 14, marginBottom: 20, padding: 0 }}>{t.back_home}</button>
       <h2 style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 24, margin: "0 0 6px" }}>{t.help_title || "Yordam markazi"}</h2>
       <p style={{ color: "#8a849c", fontSize: 14, margin: "0 0 24px" }}>{t.help_sub}</p>
 
@@ -2182,9 +2202,9 @@ function HelpPage({ t, onHome, user, onLogin }) {
       {!user && (
         <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", borderRadius: 18, padding: "22px 24px", textAlign: "center", color: "#fff" }}>
           <div style={{ fontSize: 28, marginBottom: 10 }}>💬</div>
-          <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 8 }}>Admin bilan chat</div>
-          <div style={{ fontSize: 13.5, opacity: .85, marginBottom: 16 }}>Kirish yoki ro'yxatdan o'tib, bevosita muloqot qiling</div>
-          <button onClick={onLogin} style={{ background: "#fff", color: "#6c2bd9", border: "none", borderRadius: 10, padding: "12px 28px", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>Kirish / Ro'yxatdan o'tish</button>
+          <div style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 16, marginBottom: 8 }}>{t.chat_admin_title}</div>
+          <div style={{ fontSize: 13.5, opacity: .85, marginBottom: 16 }}>{t.chat_admin_sub}</div>
+          <button onClick={onLogin} style={{ background: "#fff", color: "#6c2bd9", border: "none", borderRadius: 10, padding: "12px 28px", fontFamily: "inherit", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>{t.chat_login_btn}</button>
         </div>
       )}
 
@@ -2201,15 +2221,15 @@ function HelpPage({ t, onHome, user, onLogin }) {
           <div style={{ background: "linear-gradient(135deg,#5b21b6,#7c3aed)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <div style={{ width: 36, height: 36, background: "rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🛍️</div>
             <div style={{ flex: 1 }}>
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "Sora, sans-serif" }}>SAVAT.UZ Yordam</div>
-              <div style={{ color: "rgba(255,255,255,.75)", fontSize: 11.5 }}>🟢 Online</div>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "Sora, sans-serif" }}>{t.chat_title}</div>
+              <div style={{ color: "rgba(255,255,255,.75)", fontSize: 11.5 }}>🟢 {t.chat_online}</div>
             </div>
             <button onClick={() => setChatOpen(false)} style={{ background: "rgba(255,255,255,.15)", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", color: "#fff", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "14px", background: "#f7f5fb", display: "flex", flexDirection: "column", gap: 8 }}>
             {messages.length === 0 && (
               <div style={{ textAlign: "center", color: "#8a849c", padding: "20px 0", fontSize: 13.5 }}>
-                <div style={{ fontSize: 30, marginBottom: 6 }}>👋</div>Salom! Savolingizni yozing
+                <div style={{ fontSize: 30, marginBottom: 6 }}>👋</div>{t.chat_greeting}
               </div>
             )}
             {messages.map((m, i) => {
@@ -2228,7 +2248,7 @@ function HelpPage({ t, onHome, user, onLogin }) {
           <div style={{ padding: "10px 12px", borderTop: "1px solid #ece8f4", display: "flex", gap: 8, background: "#fff", flexShrink: 0 }}>
             <input ref={inputRef} value={msg} onChange={e => setMsg(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); sendMsg(); } }}
-              placeholder="Xabar yozing..." disabled={sending}
+              placeholder={t.chat_placeholder} disabled={sending}
               style={{ flex: 1, border: "1.5px solid #ece8f4", borderRadius: 10, padding: "10px 12px", fontSize: 14, fontFamily: "inherit", background: "#f7f5fb", outline: "none" }} />
             <button onClick={sendMsg} disabled={sending || !msg.trim()}
               style={{ width: 40, height: 40, borderRadius: 10, border: "none", background: msg.trim() ? "linear-gradient(135deg,#7c3aed,#a855f7)" : "#ece8f4", color: msg.trim() ? "#fff" : "#8a849c", cursor: msg.trim() ? "pointer" : "default", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>↑</button>
@@ -2895,27 +2915,27 @@ function App() {
       <nav className="bottom-nav">
         <button className={view === "home" ? "active" : ""} onClick={goHome}>
           <Ico.home style={{ width: 22, height: 22 }} />
-          <span>Bosh</span>
+          <span>{t.nav_home}</span>
         </button>
         <button onClick={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 100); }}>
           <Ico.grid style={{ width: 22, height: 22 }} />
-          <span>Katalog</span>
+          <span>{t.nav_catalog}</span>
         </button>
         {user ? (
           <button className={view === "myorders" ? "active" : ""} onClick={() => setView("myorders")}>
             <Ico.box style={{ width: 22, height: 22 }} />
-            <span>Buyurtmalar</span>
+            <span>{t.nav_track}</span>
           </button>
         ) : (
           <button className={view === "help" ? "active" : ""} onClick={() => setView("help")}>
             <Ico.help style={{ width: 22, height: 22 }} />
-            <span>Yordam</span>
+            <span>{t.nav_help}</span>
           </button>
         )}
         <button className="bn-cart" onClick={() => setCartOpen(true)}>
           <Ico.cart style={{ width: 22, height: 22 }} />
           {cartCount > 0 && <span className="bn-badge">{cartCount}</span>}
-          <span>Savat</span>
+          <span>{t.cart_title}</span>
         </button>
       </nav>
 
