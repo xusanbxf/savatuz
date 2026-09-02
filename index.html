@@ -458,20 +458,24 @@
 
   /* ===== FOOTER ===== */
   .ftr { margin-top: 64px; background: var(--surface); }
-  .ftr-cols { display: flex; flex-wrap: wrap; gap: 64px; padding: 36px 0 8px; }
-  .ftr-col { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
-  .ftr-col.ftr-brand { flex: 1 1 260px; max-width: 320px; }
-  .ftr-h { font-size: 13px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: .02em; margin-bottom: 2px; }
-  .ftr-col button { text-align: left; background: none; border: none; padding: 0; color: var(--ink-3); font-size: 14px; font-weight: 500; cursor: pointer; transition: .15s; width: fit-content; }
-  .ftr-col button:hover { color: var(--brand); }
-  .ftr-tag { color: var(--ink-3); font-size: 13.5px; line-height: 1.5; max-width: 34ch; margin: 0; }
+  .ftr-cols { display: flex; align-items: center; gap: 20px; padding: 28px 0; flex-wrap: wrap; }
+  .ftr-nav { display: flex; gap: 2px; margin-left: 12px; }
+  .ftr-nav button {
+    padding: 8px 14px; border-radius: var(--r-pill);
+    font-weight: 500; font-size: 14px; color: var(--ink-3);
+    background: transparent; border: 1px solid transparent;
+    transition: .15s;
+  }
+  .ftr-nav button:hover { color: var(--ink); background: var(--surface-2); border-color: var(--line); }
+  .ftr-info { display: flex; align-items: center; gap: 20px; margin-left: auto; }
   .ftr-note { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 13.5px; }
   .ftr-note svg { flex-shrink: 0; opacity: .8; }
-  .ftr-row { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 28px; gap: 20px; flex-wrap: wrap; margin-top: 24px; }
+  .ftr-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 28px; gap: 20px; flex-wrap: wrap; }
   .ftr small { color: var(--ink-3); font-size: 13px; }
   @media (max-width: 760px) {
-    .ftr-cols { gap: 32px; padding: 28px 0 4px; }
-    .ftr-col.ftr-brand { flex: 1 1 100%; max-width: none; }
+    .ftr-cols { gap: 12px; }
+    .ftr-nav { margin-left: 0; flex-wrap: wrap; }
+    .ftr-info { margin-left: 0; flex-direction: column; align-items: flex-start; gap: 8px; }
   }
 
   /* ===== PRODUCT DETAIL ===== */
@@ -1518,22 +1522,20 @@ function Footer({ t, onHome, onCatalog, onHelp, onMyOrders }) {
   return (
     <footer className="ftr">
       <div className="wrap ftr-cols">
-        <div className="ftr-col ftr-brand">
-          <div className="brand">
-            <div className="brand-mark" style={{ width: 34, height: 34, borderRadius: 10 }}><I.basket style={{ width: 20, height: 20 }} /></div>
-            <div className="brand-name" style={{ fontSize: 18 }}>SAVAT<span className="uz">.UZ</span></div>
+        <div className="brand">
+          <div className="brand-mark"><I.basket /></div>
+          <div>
+            <div className="brand-name">SAVAT<span className="uz">.UZ</span></div>
+            <div className="brand-tag">{t.tag}</div>
           </div>
-          <p className="ftr-tag">{t.tag}</p>
         </div>
-        <div className="ftr-col">
-          <div className="ftr-h">{t.ftr_links}</div>
+        <nav className="ftr-nav">
           {onHome && <button onClick={onHome}>{t.nav_home}</button>}
           {onCatalog && <button onClick={onCatalog}>{t.nav_catalog}</button>}
           {onMyOrders && <button onClick={onMyOrders}>{t.nav_track}</button>}
           {onHelp && <button onClick={onHelp}>{t.nav_help}</button>}
-        </div>
-        <div className="ftr-col">
-          <div className="ftr-h">{t.ftr_info}</div>
+        </nav>
+        <div className="ftr-info">
           <span className="ftr-note"><I.truck style={{ width: 15, height: 15 }} />{t.why3_d}</span>
           <span className="ftr-note"><I.card style={{ width: 15, height: 15 }} />{t.pay_cash}</span>
         </div>
