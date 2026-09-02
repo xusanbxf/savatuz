@@ -1044,6 +1044,11 @@
       chat_placeholder: "Xabar yozing...",
       myorders_title: "Mening buyurtmalarim",
       myorders_empty: "Hozircha buyurtmalar yo'q",
+      status_yangi: "🟡 Yangi",
+      status_tasdiqlangan: "🔵 Tasdiqlangan",
+      status_yetkazilmoqda: "🟣 Yetkazilmoqda",
+      status_yakunlangan: "🟢 Yakunlangan",
+      status_bekor: "🔴 Bekor",
       cats_title: "Kategoriyalar",
       best_title: "Hit savdo",
       best_sub: "Eng ko'p sotilayotgan mahsulotlar",
@@ -1126,6 +1131,11 @@
       chat_placeholder: "Введите сообщение...",
       myorders_title: "Мои заказы",
       myorders_empty: "Пока нет заказов",
+      status_yangi: "🟡 Новый",
+      status_tasdiqlangan: "🔵 Подтверждён",
+      status_yetkazilmoqda: "🟣 Доставляется",
+      status_yakunlangan: "🟢 Завершён",
+      status_bekor: "🔴 Отменён",
       cats_title: "Категории",
       best_title: "Хиты продаж",
       best_sub: "Самые покупаемые товары",
@@ -1381,7 +1391,7 @@ function SearchBox({ t, query, onSearch, products, onSelect, lang, mobile }) {
                 </div>
                 <div className="sd-info">
                   <div className="sd-name">{p.name[lang||"uz"]}</div>
-                  <div className="sd-price">{fmt(b.total)} so'm</div>
+                  <div className="sd-price">{fmt(b.total)} {t.unit}</div>
                 </div>
               </div>
             );
@@ -2073,13 +2083,13 @@ function OrderSuccess({ order, t, onHome }) {
   );
 }
 
-function MyOrders({ user, t, onHome }) {
+function MyOrders({ user, t, lang, onHome }) {
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const SB_URL = "/api/sb";
   const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqc2FlbHFxdWJtbHdubWZ5dXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDY5MzAsImV4cCI6MjA5NzAyMjkzMH0.zLx1yBAUdMqtTW61zibbhQts3zVk-aRQTmTjn0L1U9Y";
 
-  const STATUS_LABELS = { yangi: "🟡 Yangi", tasdiqlangan: "🔵 Tasdiqlangan", yetkazilmoqda: "🟣 Yetkazilmoqda", yakunlangan: "🟢 Yakunlangan", bekor: "🔴 Bekor" };
+  const STATUS_LABELS = { yangi: t.status_yangi, tasdiqlangan: t.status_tasdiqlangan, yetkazilmoqda: t.status_yetkazilmoqda, yakunlangan: t.status_yakunlangan, bekor: t.status_bekor };
 
   useEffect(() => {
     if (!user || !user.email) { setLoading(false); return; }
@@ -2102,10 +2112,10 @@ function MyOrders({ user, t, onHome }) {
             <span style={{ fontSize: 13, color: "#8a849c" }}>{new Date(o.created_at).toLocaleDateString("ru-RU")}</span>
           </div>
           <div style={{ fontSize: 14, color: "#4a4360", marginBottom: 8 }}>
-            {(o.items || []).map((it, i) => <div key={i}>{it.qty}× {it.name_uz} — {Math.round(it.price * it.qty).toLocaleString()} so'm</div>)}
+            {(o.items || []).map((it, i) => <div key={i}>{it.qty}× {(lang === "ru" ? it.name_ru : it.name_uz) || it.name_uz || it.name_ru} — {Math.round(it.price * it.qty).toLocaleString()} {t.unit}</div>)}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17 }}>{Math.round(o.total).toLocaleString()} so'm</span>
+            <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 800, fontSize: 17 }}>{Math.round(o.total).toLocaleString()} {t.unit}</span>
             <span style={{ fontSize: 13, fontWeight: 700 }}>{STATUS_LABELS[o.status] || o.status}</span>
           </div>
         </div>
@@ -2890,7 +2900,7 @@ function App() {
       )}
       {view === "myorders" && (
         <main>
-          <MyOrders user={user} t={t} onHome={goHome} />
+          <MyOrders user={user} t={t} lang={lang} onHome={goHome} />
         </main>
       )}
       {view === "help" && (
