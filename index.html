@@ -2033,10 +2033,10 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth }) {
               {items.map((it) => {
                 const b = AC_D.breakdown(it.p);
                 return (
-                  <div className="co-item" key={it.p.id}>
+                  <div className="co-item" key={it.p.id + "::" + (it.variant || "")}>
                     <div className="co-item-media"><Media p={it.p} label="" /></div>
                     <div className="co-item-info">
-                      <p className="co-item-name">{it.p.name[lang]}</p>
+                      <p className="co-item-name">{it.p.name[lang]}{it.variant ? <span style={{ color: "var(--ink-3)", fontWeight: 500 }}> · {it.variant}</span> : null}</p>
                       <span className="co-item-qty">{it.q} × {AC_D.fmt(b.total)} {t.unit}</span>
                     </div>
                     <span className="co-item-sum">{AC_D.fmt(b.total * it.q)}</span>
@@ -2494,7 +2494,7 @@ function VariantPicker({ variants, selected, onSelect, productImages }) {
 }
 
 /* ---------- Product Detail ---------- */
-function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }) {
+function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDec }) {
   const b = D.breakdown(p);
   const [thumb, setThumb] = useState(0);
   const [selImg, setSelImg] = useState(null);
@@ -2515,6 +2515,7 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
   const types = [...new Set(variants.map(v => v.type))];
   const allSelected = types.length === 0 || types.every(tp => selVars[tp]);
   const varLabel = Object.values(selVars).map(v => v.value).join(", ");
+  const qty = qtyFor(p.id, varLabel);
   const pdImgs = (p.image_urls && p.image_urls.length > 0) ? p.image_urls : (p.image_url ? [p.image_url] : []);
   const imgRequired = pdImgs.length > 1;
   const canOrder = allSelected && (!imgRequired || selImg !== null);
@@ -2616,9 +2617,9 @@ function ProductDetail({ p, t, lang, qty, onBack, onAdd, onOrder, onInc, onDec }
             <button className="order" onClick={() => { if(!canOrder) return; onOrder(p, varLabel, selImg || pdImgs[0] || null); }} style={!canOrder ? {opacity:.5} : {}}>{t.detail_order} <Ico.arrow style={{ width: 18, height: 18 }} /></button>
             {qty > 0 ? (
               <div className="stepper stepper-lg">
-                <button onClick={() => onDec(p.id)} aria-label="-"><Ico.minus /></button>
+                <button onClick={() => onDec(p.id, varLabel)} aria-label="-"><Ico.minus /></button>
                 <span>{qty}</span>
-                <button onClick={() => onInc(p)} aria-label="+"><Ico.plus /></button>
+                <button onClick={() => onInc(p, varLabel)} aria-label="+"><Ico.plus /></button>
               </div>
             ) : (
               <button className="addc" onClick={(e) => { if(!canOrder) return; onAdd(p, e, varLabel, selImg || pdImgs[0] || null); }} style={!canOrder ? {opacity:.5} : {}} aria-label={t.detail_add}><Ico.cart style={{ width: 22, height: 22 }} /></button>
@@ -2651,20 +2652,20 @@ function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout
           ) : items.map((it) => {
             const b = D.breakdown(it.p);
             return (
-              <div className="ci" key={it.p.id}>
+              <div className="ci" key={it.p.id + "::" + (it.variant || "")}>
                 <div className="ci-media"><Media p={it.p} label="" /></div>
                 <div className="ci-info">
-                  <p className="ci-name">{it.p.name[lang]}</p>
+                  <p className="ci-name">{it.p.name[lang]}{it.variant ? <span style={{ color: "var(--ink-3)", fontWeight: 500 }}> · {it.variant}</span> : null}</p>
                   <span className="ci-price">{D.fmt(b.total * it.q)} <small style={{ fontSize: 12, color: "var(--ink-3)" }}>{t.unit}</small></span>
                   <div>
                     <div className="ci-qty">
-                      <button onClick={() => onQty(it.p.id, -1)}><Ico.minus style={{ width: 14, height: 14 }} /></button>
+                      <button onClick={() => onQty(it.p.id, it.variant, -1)}><Ico.minus style={{ width: 14, height: 14 }} /></button>
                       <span>{it.q}</span>
-                      <button onClick={() => onQty(it.p.id, 1)}><Ico.plus style={{ width: 14, height: 14 }} /></button>
+                      <button onClick={() => onQty(it.p.id, it.variant, 1)}><Ico.plus style={{ width: 14, height: 14 }} /></button>
                     </div>
                   </div>
                 </div>
-                <button className="ci-rm" onClick={() => onRemove(it.p.id)}><Ico.x style={{ width: 16, height: 16 }} /></button>
+                <button className="ci-rm" onClick={() => onRemove(it.p.id, it.variant)}><Ico.x style={{ width: 16, height: 16 }} /></button>
               </div>
             );
           })}
@@ -2753,17 +2754,18 @@ function App() {
   const addToCart = (p, e, varLabel, selectedImgUrl) => {
     const imgs = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
     const selectedImg = selectedImgUrl || imgs[0] || null;
+    const v = varLabel || "";
     setCart((c) => {
-      const f = c.find((it) => it.p.id === p.id);
-      if (f) return c.map((it) => it.p.id === p.id ? { ...it, q: it.q + 1, variant: varLabel || it.variant, selectedImg: selectedImg || it.selectedImg } : it);
-      return [...c, { p, q: 1, variant: varLabel || "", selectedImg }];
+      const f = c.find((it) => it.p.id === p.id && (it.variant || "") === v);
+      if (f) return c.map((it) => it === f ? { ...it, q: it.q + 1, selectedImg: selectedImg || it.selectedImg } : it);
+      return [...c, { p, q: 1, variant: v, selectedImg }];
     });
     showToast(t.added);
   };
-  const changeQty = (id, d) => setCart((c) => c.map((it) => it.p.id === id ? { ...it, q: Math.max(1, it.q + d) } : it));
-  const removeItem = (id) => setCart((c) => c.filter((it) => it.p.id !== id));
-  const decItem = (id) => setCart((c) => c.flatMap((it) => it.p.id === id ? (it.q > 1 ? [{ ...it, q: it.q - 1 }] : []) : [it]));
-  const cartQty = (id) => { const it = cart.find((i) => i.p.id === id); return it ? it.q : 0; };
+  const changeQty = (id, variant, d) => { const v = variant || ""; setCart((c) => c.map((it) => (it.p.id === id && (it.variant || "") === v) ? { ...it, q: Math.max(1, it.q + d) } : it)); };
+  const removeItem = (id, variant) => { const v = variant || ""; setCart((c) => c.filter((it) => !(it.p.id === id && (it.variant || "") === v))); };
+  const decItem = (id, variant) => { const v = variant || ""; setCart((c) => c.flatMap((it) => (it.p.id === id && (it.variant || "") === v) ? (it.q > 1 ? [{ ...it, q: it.q - 1 }] : []) : [it])); };
+  const cartQty = (id, variant) => { const v = variant || ""; const it = cart.find((i) => i.p.id === id && (i.variant || "") === v); return it ? it.q : 0; };
   const openProduct = (p) => { setCurrent(p); setView("product"); window.scrollTo({ top: 0 }); window.history.pushState({}, "", "?p="+p.id); };
 
   useEffect(() => {
@@ -2870,7 +2872,7 @@ function App() {
                 if (p._hasVariants) { openProduct(p); }
                 else { addToCart(p); }
               }}
-              onInc={(p) => addToCart(p)} onDec={decItem} />
+              onInc={(p, v) => addToCart(p, null, v)} onDec={decItem} />
           )}
           <Why t={t} />
           <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
@@ -2878,9 +2880,9 @@ function App() {
       )}
       {view === "product" && (
         <main>
-          <ProductDetail p={current} t={t} lang={lang} qty={cartQty(current.id)} onBack={goHome}
+          <ProductDetail p={current} t={t} lang={lang} qtyFor={cartQty} onBack={goHome}
             onAdd={(p, e, v, imgUrl) => addToCart(p, e, v, imgUrl)} onOrder={(p, v, imgUrl) => { addToCart(p, null, v, imgUrl); goCheckout(); }}
-            onInc={(p) => addToCart(p)} onDec={decItem} />
+            onInc={(p, v) => addToCart(p, null, v)} onDec={decItem} />
           <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
         </main>
       )}
