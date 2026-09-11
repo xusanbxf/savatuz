@@ -564,20 +564,22 @@
   .svc-active .v { color: var(--save); }
 
   /* CTA */
-  .pd-cta { display: flex; gap: 10px; margin-top: 20px; }
+  .pd-cta { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
   .pd-cta .order {
-    flex: 1; height: 52px; background: var(--brand); color: #fff;
+    flex: 1 1 200px; height: 52px; background: var(--brand); color: #fff;
     border-radius: var(--r); font-weight: 700; font-size: 15px;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     transition: .18s; box-shadow: var(--sh-brand);
   }
   .pd-cta .order:hover { background: var(--brand-2); transform: translateY(-2px); }
   .pd-cta .addc {
-    width: 52px; height: 52px; background: var(--brand-soft); color: var(--brand);
-    border-radius: var(--r); display: grid; place-items: center; transition: .15s;
-    border: 1px solid rgba(123,79,255,.2);
+    flex: 1 1 200px; height: 52px; padding: 0 18px; background: var(--brand-soft); color: var(--brand);
+    border-radius: var(--r); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-weight: 700; font-size: 15px; transition: .15s;
+    border: 1.5px solid rgba(123,79,255,.35);
   }
-  .pd-cta .addc:hover { background: var(--brand); color: #fff; }
+  .pd-cta .addc:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .pd-cta .stepper-lg { flex: 1 1 200px; }
 
   /* ===== CART DRAWER ===== */
   .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 90; opacity: 0; pointer-events: none; transition: .25s; }
@@ -2622,7 +2624,7 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
                 <button onClick={() => onInc(p, varLabel)} aria-label="+"><Ico.plus /></button>
               </div>
             ) : (
-              <button className="addc" onClick={(e) => { if(!canOrder) return; onAdd(p, e, varLabel, selImg || pdImgs[0] || null); }} style={!canOrder ? {opacity:.5} : {}} aria-label={t.detail_add}><Ico.cart style={{ width: 22, height: 22 }} /></button>
+              <button className="addc" onClick={(e) => { if(!canOrder) return; onAdd(p, e, varLabel, selImg || pdImgs[0] || null); }} style={!canOrder ? {opacity:.5} : {}}><Ico.cart style={{ width: 19, height: 19 }} />{t.detail_add}</button>
             )}
           </div>
         </div>
