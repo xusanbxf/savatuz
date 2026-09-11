@@ -14,12 +14,19 @@ async function handler(req, res) {
   const { url } = req.query;
   if (!url) { res.status(400).json({ error: "url kerak" }); return; }
 
+  // Plain fetch first (fast); if name or images are still missing, also try
+  // the JS-rendered fetch (slower) and fill in whatever the first pass
+  // missed — some sites (e.g. 1688.com) only populate their image gallery
+  // JSON after client-side rendering, even though the name/title is already
+  // present in the raw HTML.
   const attempts = [
     `https://api.scraperapi.com/?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&country_code=cn`,
     `https://api.scraperapi.com/?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=true&country_code=cn`,
   ];
 
   let lastError = "";
+  let best = { name: "", price: "", images: [] };
+
   for (const scraperUrl of attempts) {
     try {
       const controller = new AbortController();
@@ -32,29 +39,38 @@ async function handler(req, res) {
       const info = parseProduct(html, url);
       if (!info.name && info.images.length === 0) { lastError = "Malumot topilmadi"; continue; }
 
-      // Translate name via Google Translate (free endpoint)
-      if (info.name) {
-        try {
-          const [uz, ru] = await Promise.all([
-            translate(info.name, "uz"),
-            translate(info.name, "ru"),
-          ]);
-          info.name_uz = uz || info.name;
-          info.name_ru = ru || info.name;
-        } catch (e) {
-          info.name_uz = info.name;
-          info.name_ru = info.name;
-        }
-      }
+      if (!best.name && info.name) best.name = info.name;
+      if (!best.price && info.price) best.price = info.price;
+      if (best.images.length === 0 && info.images.length > 0) best.images = info.images;
 
-      res.status(200).json(info);
-      return;
+      // Good enough already — no need to pay for the render=true attempt.
+      if (best.name && best.images.length > 0) break;
     } catch (e) {
       lastError = e.message;
     }
   }
 
-  res.status(500).json({ error: lastError || "Ishlamadi" });
+  if (!best.name && best.images.length === 0) {
+    res.status(500).json({ error: lastError || "Ishlamadi" });
+    return;
+  }
+
+  // Translate name via Google Translate (free endpoint)
+  if (best.name) {
+    try {
+      const [uz, ru] = await Promise.all([
+        translate(best.name, "uz"),
+        translate(best.name, "ru"),
+      ]);
+      best.name_uz = uz || best.name;
+      best.name_ru = ru || best.name;
+    } catch (e) {
+      best.name_uz = best.name;
+      best.name_ru = best.name;
+    }
+  }
+
+  res.status(200).json(best);
 }
 
 async function translate(text, to) {
@@ -142,6 +158,7 @@ function parseProduct(html, sourceUrl) {
       /https?:\/\/img\.pddpic\.com\/[^"'\s,}{>\]\\]{20,}/g,
       /https?:\/\/img\.alicdn\.com\/imgextra\/[^"'\s,}{>\]\\]{20,}/g,
       /https?:\/\/gw\.alicdn\.com\/bao\/[^"'\s,}{>\]\\]{20,}/g,
+      /https?:\/\/cbu01\.alicdn\.com\/img\/ibank\/[^"'\s,}{>\]\\]{10,}/g,
     ];
     for (const pat of imgPatterns) {
       for (let u of (html.match(pat) || [])) {
