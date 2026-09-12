@@ -522,7 +522,6 @@
   .swiper-thumb.on { border-color: var(--brand); }
   .swiper-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .swiper-badge { position: absolute; top: 12px; left: 12px; z-index: 3; }
-  .swiper-btn-off { opacity: .35; cursor: default; pointer-events: none; }
   .swiper-slide img { cursor: zoom-in; }
   .img-zoom-overlay {
     position: fixed; inset: 0; z-index: 99999; background: rgba(10,10,15,.92);
@@ -533,20 +532,20 @@
   .img-zoom-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; cursor: default; }
   .img-zoom-close {
     position: absolute; top: 16px; right: 16px; z-index: 100001;
-    width: 40px; height: 40px; border-radius: 50%; border: none;
-    background: rgba(255,255,255,.14); color: #fff; font-size: 24px; line-height: 1;
+    width: 40px; height: 40px; border-radius: 50%; border: none; padding: 0;
+    background: rgba(255,255,255,.14); color: #fff;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
   }
+  .img-zoom-close svg { width: 18px; height: 18px; }
   .img-zoom-close:hover { background: rgba(255,255,255,.26); }
   .img-zoom-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 100000;
-    width: 48px; height: 48px; border-radius: 50%; border: none;
+    width: 48px; height: 48px; border-radius: 50%; border: none; padding: 0;
     background: rgba(255,255,255,.14); color: #fff; cursor: pointer;
     display: flex; align-items: center; justify-content: center; transition: .15s;
   }
   .img-zoom-nav svg { width: 22px; height: 22px; }
-  .img-zoom-nav:hover:not(.img-zoom-nav-off) { background: rgba(255,255,255,.26); }
-  .img-zoom-nav-off { opacity: .3; cursor: default; }
+  .img-zoom-nav:hover { background: rgba(255,255,255,.26); }
   .img-zoom-prev { left: 16px; }
   .img-zoom-next { right: 16px; }
   .img-zoom-counter {
@@ -2328,22 +2327,33 @@ function ImageSwiper({ p, lang, onThumbChange, onImgSelect, selectedImg, imgRequ
   React.useEffect(() => { idxRef.current = idx; }, [idx]);
 
   const goTo = (i) => { if(i < 0 || i >= total) return; setIdx(i); if(onThumbChange) onThumbChange(i); if(onImgSelect) onImgSelect(imgs[i], i); };
-  const prev = (e) => { if(e) e.stopPropagation(); goTo(idxRef.current - 1); };
-  const next = (e) => { if(e) e.stopPropagation(); goTo(idxRef.current + 1); };
+  // Loop around at the ends: next() from the last image goes to the first, prev() from the first goes to the last.
+  const prev = (e) => { if(e) e.stopPropagation(); if(total > 0) goTo((idxRef.current - 1 + total) % total); };
+  const next = (e) => { if(e) e.stopPropagation(); if(total > 0) goTo((idxRef.current + 1) % total); };
   const isInteractive = (el) => !!(el && el.closest && el.closest(".swiper-btn, .swiper-dot, .swiper-thumb"));
   const openZoom = (e) => { if(e) e.stopPropagation(); if(movedRef.current) return; setZoomOpen(true); };
 
   const endDragWithDx = (dx) => {
     // dx > 0 = o'ngga surdi = chapga o'tish
     // dx < 0 = chapga surdi = o'ngga o'tish
-    const cur = idxRef.current;
     if (Math.abs(dx) > 40) {
       movedRef.current = true;
-      if (dx > 0 && cur > 0) goTo(cur - 1);
-      else if (dx < 0 && cur < total - 1) goTo(cur + 1);
+      if (dx > 0) prev(); else next();
     }
     startX.current = null; dragXRef.current = 0; setDragX(0); setDragging(false);
   };
+
+  // Arrow-key navigation and Escape-to-close while the zoom overlay is open.
+  React.useEffect(() => {
+    if (!zoomOpen) return;
+    const onKey = (e) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") setZoomOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [zoomOpen, total]);
 
   const onTouchStart = (e) => {
     if (isInteractive(e.target)) return;
@@ -2386,6 +2396,7 @@ function ImageSwiper({ p, lang, onThumbChange, onImgSelect, selectedImg, imgRequ
 
   const ChevL = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
   const ChevR = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>;
+  const IcoX = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>;
 
   return (
     <div>
@@ -2419,18 +2430,8 @@ function ImageSwiper({ p, lang, onThumbChange, onImgSelect, selectedImg, imgRequ
 
         {total > 1 && (
           <>
-            <button
-              className={"swiper-btn swiper-prev" + (idx === 0 ? " swiper-btn-off" : "")}
-              onClick={prev}
-              disabled={idx === 0}
-              aria-label="Oldingi"
-            ><ChevL /></button>
-            <button
-              className={"swiper-btn swiper-next" + (idx === total - 1 ? " swiper-btn-off" : "")}
-              onClick={next}
-              disabled={idx === total - 1}
-              aria-label="Keyingi"
-            ><ChevR /></button>
+            <button className="swiper-btn swiper-prev" onClick={prev} aria-label="Oldingi"><ChevL /></button>
+            <button className="swiper-btn swiper-next" onClick={next} aria-label="Keyingi"><ChevR /></button>
           </>
         )}
       </div>
@@ -2464,21 +2465,11 @@ function ImageSwiper({ p, lang, onThumbChange, onImgSelect, selectedImg, imgRequ
 
       {zoomOpen && ReactDOM.createPortal(
         <div className="img-zoom-overlay" onClick={() => setZoomOpen(false)}>
-          <button className="img-zoom-close" onClick={(e) => { e.stopPropagation(); setZoomOpen(false); }} aria-label="Yopish">&times;</button>
+          <button className="img-zoom-close" onClick={(e) => { e.stopPropagation(); setZoomOpen(false); }} aria-label="Yopish"><IcoX /></button>
           {total > 1 && (
             <>
-              <button
-                className={"img-zoom-nav img-zoom-prev" + (idx === 0 ? " img-zoom-nav-off" : "")}
-                onClick={(e) => { e.stopPropagation(); if (idx > 0) goTo(idx - 1); }}
-                disabled={idx === 0}
-                aria-label="Oldingi"
-              ><ChevL /></button>
-              <button
-                className={"img-zoom-nav img-zoom-next" + (idx === total - 1 ? " img-zoom-nav-off" : "")}
-                onClick={(e) => { e.stopPropagation(); if (idx < total - 1) goTo(idx + 1); }}
-                disabled={idx === total - 1}
-                aria-label="Keyingi"
-              ><ChevR /></button>
+              <button className="img-zoom-nav img-zoom-prev" onClick={prev} aria-label="Oldingi"><ChevL /></button>
+              <button className="img-zoom-nav img-zoom-next" onClick={next} aria-label="Keyingi"><ChevR /></button>
               <div className="img-zoom-counter">{idx + 1} / {total}</div>
             </>
           )}
