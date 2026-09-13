@@ -644,6 +644,7 @@
   .drawer-foot { padding: 18px 22px 22px; border-top: 1px solid var(--line); }
   .cart-sum-line { display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; color: var(--ink-3); padding: 3px 0; }
   .cart-sum-line b { color: var(--ink); font-weight: 600; }
+  .sum-rule { font-size: 11.5px; line-height: 1.45; color: var(--ink-3); margin: 2px 0 6px; }
   .cart-saved { background: var(--save-soft); color: var(--save); font-weight: 700; font-size: 12.5px; padding: 7px 12px; border-radius: 9px; margin: 8px 0 10px; text-align: center; }
   .drawer-total { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
   .drawer-total .t-l { font-weight: 500; color: var(--ink-3); font-size: 14px; }
@@ -1136,6 +1137,7 @@
       cart_title: "Savat", cart_empty: "Savat hozircha bo'sh",
       cart_total: "Jami", cart_checkout: "Rasmiylashtirish", added: "Qo'shildi",
       cart_weight: "Savat og'irligi", co_goods: "Mahsulotlar narxi",
+      service_rule_short: "1 kg gacha — 20 000 so'm · 1 kg dan ortiq — har kg uchun 15 000 so'm",
       co_saved: "Birga olganingiz uchun tejadingiz",
       service_cart_note: "Xizmat haqi butun savatga bir marta olinadi. Bir nechta mahsulot olsangiz, umumiy og'irlik bo'yicha qayta hisoblanadi va arzonlashadi.",
       unit: "so'm", market_label: "Bozor narxi", qty: "soni",
@@ -1226,6 +1228,7 @@
       cart_title: "Корзина", cart_empty: "Корзина пока пуста",
       cart_total: "Итого", cart_checkout: "Оформить", added: "Добавлено",
       cart_weight: "Вес корзины", co_goods: "Стоимость товаров",
+      service_rule_short: "до 1 кг — 20 000 сум · свыше 1 кг — 15 000 сум за кг",
       co_saved: "Вы сэкономили, заказав вместе",
       service_cart_note: "Сервисный сбор берётся один раз за весь заказ. При нескольких товарах он пересчитывается по общему весу и становится дешевле.",
       unit: "сум", market_label: "Рыночная цена", qty: "кол-во",
@@ -2140,6 +2143,7 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
               <span>{t.pc_service} · {AC_D.weightLabel(totals.weight)}</span>
               <b>{AC_D.fmt(totals.service)} {t.unit}</b>
             </div>
+            <p className="sum-rule">{t.service_rule_short}</p>
             {totals.saved > 0 && (
               <div className="cart-saved" style={{ margin: "6px 0" }}>{t.co_saved} {AC_D.fmt(totals.saved)} {t.unit}</div>
             )}
@@ -2821,6 +2825,7 @@ function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout
               <span>{t.pc_service} · {D.weightLabel(totals.weight)}</span>
               <b>{D.fmt(totals.service)} {t.unit}</b>
             </div>
+            <p className="sum-rule">{t.service_rule_short}</p>
             {totals.saved > 0 && (
               <div className="cart-saved">{t.co_saved} {D.fmt(totals.saved)} {t.unit}</div>
             )}
