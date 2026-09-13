@@ -472,6 +472,15 @@ function loadOrders() {
             (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
             '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
             '<div class="info-row"><b>Mahsulotlar soni:</b> '+(o.items||[]).reduce(function(s,it){return s+it.qty;},0)+' ta</div>'+
+            (function(){
+              // Xizmat haqi butun buyurtmaga bir marta olinadi, shuning uchun u
+              // items ichida emas — total bilan mahsulotlar yig'indisi farqi.
+              var goods = (o.items||[]).reduce(function(s,it){ return s + (it.price||0)*(it.qty||0); }, 0);
+              var service = Math.round((o.total||0) - goods);
+              if (service <= 0) return '';
+              return '<div class="info-row"><b>Mahsulotlar (kargo bilan):</b> '+fmt(goods)+' so\'m</div>'+
+                     '<div class="info-row"><b>Savat xizmati:</b> '+fmt(service)+' so\'m</div>';
+            })()+
           '</div>'+
         '</div>'+
       '</div>';

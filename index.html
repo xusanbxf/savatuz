@@ -642,7 +642,10 @@
   .cart-empty { text-align: center; padding: 60px 20px; color: var(--ink-3); }
   .cart-empty .big { width: 60px; height: 60px; margin: 0 auto 14px; border-radius: 16px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; }
   .drawer-foot { padding: 18px 22px 22px; border-top: 1px solid var(--line); }
-  .drawer-total { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; }
+  .cart-sum-line { display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; color: var(--ink-3); padding: 3px 0; }
+  .cart-sum-line b { color: var(--ink); font-weight: 600; }
+  .cart-saved { background: var(--save-soft); color: var(--save); font-weight: 700; font-size: 12.5px; padding: 7px 12px; border-radius: 9px; margin: 8px 0 10px; text-align: center; }
+  .drawer-total { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
   .drawer-total .t-l { font-weight: 500; color: var(--ink-3); font-size: 14px; }
   .drawer-total .t-v { font-family: var(--display); font-weight: 700; font-size: 24px; letter-spacing: -.03em; color: var(--ink); }
   .checkout { width: 100%; height: 50px; background: var(--brand); color: #fff; border-radius: var(--r); font-weight: 700; font-size: 15px; transition: .18s; box-shadow: var(--sh-brand); }
@@ -965,6 +968,30 @@
     return { china: p.china, cargo: cargo, service: service, total: total, market: p.market, save: save, pct: pct };
   }
 
+  function weightLabel(kg) {
+    return kg < 1 ? Math.round(kg * 1000) + " g" : (Math.round(kg * 10) / 10) + " kg";
+  }
+
+  // Xizmat haqi butun savatga BIR MARTA olinadi — savatning umumiy og'irligi
+  // bo'yicha. Har mahsulotga alohida qo'shilsa, ko'p olgan mijoz ortiqcha
+  // to'lardi: 10 ta 0.7 kg mahsulot = 200 000 o'rniga, 7 kg = 105 000 so'm.
+  // Savatdagi narx shu sababli mahsulot sahifasidagidan faqat kamayadi.
+  function cartTotals(items) {
+    var goods = 0, weight = 0, perItemService = 0;
+    (items || []).forEach(function (it) {
+      var b = breakdown(it.p);
+      goods += (it.p.china + b.cargo) * it.q;
+      weight += it.p.weight * it.q;
+      perItemService += b.service * it.q;
+    });
+    var service = (items && items.length) ? serviceFee(weight) : 0;
+    return {
+      goods: goods, weight: weight, service: service,
+      total: goods + service,
+      saved: Math.max(0, perItemService - service)
+    };
+  }
+
   // ---- Mahsulotlar ----
   // china = Xitoy zavod narxi, market = O'zbek bozori narxi, weight = kg
   var PRODUCTS = [
@@ -1108,6 +1135,9 @@
       why3_t: "Ishonchli yetkazish", why3_d: "9–16 kunda eshigingizgacha.",
       cart_title: "Savat", cart_empty: "Savat hozircha bo'sh",
       cart_total: "Jami", cart_checkout: "Rasmiylashtirish", added: "Qo'shildi",
+      cart_weight: "Savat og'irligi", co_goods: "Mahsulotlar narxi",
+      co_saved: "Birga olganingiz uchun tejadingiz",
+      service_cart_note: "Xizmat haqi butun savatga bir marta olinadi. Bir nechta mahsulot olsangiz, umumiy og'irlik bo'yicha qayta hisoblanadi va arzonlashadi.",
       unit: "so'm", market_label: "Bozor narxi", qty: "soni",
       // hisob / auth
       login: "Kirish", account: "Hisob", menu: "Menyu",
@@ -1195,6 +1225,9 @@
       why3_t: "Надёжная доставка", why3_d: "9–16 дней до вашей двери.",
       cart_title: "Корзина", cart_empty: "Корзина пока пуста",
       cart_total: "Итого", cart_checkout: "Оформить", added: "Добавлено",
+      cart_weight: "Вес корзины", co_goods: "Стоимость товаров",
+      co_saved: "Вы сэкономили, заказав вместе",
+      service_cart_note: "Сервисный сбор берётся один раз за весь заказ. При нескольких товарах он пересчитывается по общему весу и становится дешевле.",
       unit: "сум", market_label: "Рыночная цена", qty: "кол-во",
       // auth
       login: "Вход", account: "Аккаунт", menu: "Меню",
@@ -1239,6 +1272,7 @@
   window.SAVAT = {
     PRODUCTS: PRODUCTS, CATS: CATS, REGIONS: REGIONS, I18N: I18N,
     breakdown: breakdown, fmt: fmt, fetchProducts: fetchProducts, saveOrder: saveOrder,
+    cartTotals: cartTotals, serviceFee: serviceFee, weightLabel: weightLabel,
     CARGO_PER_KG: CARGO_PER_KG, SERVICE_UNDER: SERVICE_UNDER, SERVICE_PER_KG: SERVICE_PER_KG
   };
 })();
@@ -1966,7 +2000,8 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
     if (user && user.phone && phone.replace(/\D/g, "").length <= 3) setPhone(user.phone);
   }, [user]);
 
-  const total = items.reduce((s, it) => s + AC_D.breakdown(it.p).total * it.q, 0);
+  const totals = AC_D.cartTotals(items);
+  const total = totals.total;
   const count = items.reduce((s, it) => s + it.q, 0);
 
   const methods = [
@@ -1997,7 +2032,8 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
     const orderItems = items.map((it) => {
       const b = AC_D.breakdown(it.p);
       const imgs = it.p.image_urls && it.p.image_urls.length ? it.p.image_urls : (it.p.image_url ? [it.p.image_url] : []);
-      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: b.total, variant: it.variant || "", image_url: it.selectedImg || imgs[0] || null };
+      // price = mahsulot + kargo (xizmat haqi butun buyurtmaga alohida qo'shiladi)
+      return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: it.p.china + b.cargo, variant: it.variant || "", image_url: it.selectedImg || imgs[0] || null };
     });
     onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
   };
@@ -2083,10 +2119,10 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
                           <button onClick={() => onQty(it.p.id, it.variant, 1)}><AC_I.plus style={{ width: 14, height: 14 }} /></button>
                         </div>
                       ) : (
-                        <span className="co-item-qty">{it.q} × {AC_D.fmt(b.total)} {t.unit}</span>
+                        <span className="co-item-qty">{it.q} × {AC_D.fmt(it.p.china + b.cargo)} {t.unit}</span>
                       )}
                     </div>
-                    <span className="co-item-sum">{AC_D.fmt(b.total * it.q)}</span>
+                    <span className="co-item-sum">{AC_D.fmt((it.p.china + b.cargo) * it.q)}</span>
                     {onRemove && (
                       <button className="co-item-rm" onClick={() => onRemove(it.p.id, it.variant)} aria-label="O'chirish">
                         <AC_I.x style={{ width: 15, height: 15 }} />
@@ -2099,7 +2135,14 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
                 <p style={{ color: "var(--ink-3)", fontSize: 14, padding: "8px 0" }}>{t.cart_empty}</p>
               )}
             </div>
-            <div className="co-line"><span>{t.co_items} ({count})</span><b>{AC_D.fmt(total)} {t.unit}</b></div>
+            <div className="co-line"><span>{t.co_items} ({count})</span><b>{AC_D.fmt(totals.goods)} {t.unit}</b></div>
+            <div className="co-line">
+              <span>{t.pc_service} · {AC_D.weightLabel(totals.weight)}</span>
+              <b>{AC_D.fmt(totals.service)} {t.unit}</b>
+            </div>
+            {totals.saved > 0 && (
+              <div className="cart-saved" style={{ margin: "6px 0" }}>{t.co_saved} {AC_D.fmt(totals.saved)} {t.unit}</div>
+            )}
             <div className="co-line"><span>{t.co_delivery_fee}</span><b className="free">{t.co_free}</b></div>
             <div className="co-total">
               <span>{t.co_total}</span>
@@ -2668,6 +2711,7 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
                 <span className="now">{D.fmt(total)} <small>{t.unit}</small></span>
               </div>
               <div className="calc-save"><Ico.flame style={{ width: 15, height: 15 }} />{t.pc_save} {D.fmt(b.save)} {t.unit}</div>
+              <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-3)", margin: "10px 0 0" }}>{t.service_cart_note}</p>
             </div>
 
             {/* service explainer */}
@@ -2691,6 +2735,7 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
                   <p className="svc-note">
                     {t.service_note} <b style={{ color: "var(--ink)" }}>{wLabel} → {D.fmt(b.service)} {t.unit}</b>
                   </p>
+                  <p className="svc-note" style={{ marginTop: 6 }}>{t.service_cart_note}</p>
                 </div>
               )}
             </div>
@@ -2732,7 +2777,7 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
 
 /* ---------- Cart Drawer ---------- */
 function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout }) {
-  const total = items.reduce((s, it) => s + D.breakdown(it.p).total * it.q, 0);
+  const totals = D.cartTotals(items);
   const count = items.reduce((s, it) => s + it.q, 0);
   return (
     <>
@@ -2755,7 +2800,7 @@ function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout
                 <div className="ci-media"><Media p={it.p} label="" /></div>
                 <div className="ci-info">
                   <p className="ci-name">{it.p.name[lang]}{it.variant ? <span style={{ color: "var(--ink-3)", fontWeight: 500 }}> · {it.variant}</span> : null}</p>
-                  <span className="ci-price">{D.fmt(b.total * it.q)} <small style={{ fontSize: 12, color: "var(--ink-3)" }}>{t.unit}</small></span>
+                  <span className="ci-price">{D.fmt((it.p.china + b.cargo) * it.q)} <small style={{ fontSize: 12, color: "var(--ink-3)" }}>{t.unit}</small></span>
                   <div>
                     <div className="ci-qty">
                       <button onClick={() => onQty(it.p.id, it.variant, -1)}><Ico.minus style={{ width: 14, height: 14 }} /></button>
@@ -2771,9 +2816,17 @@ function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout
         </div>
         {items.length > 0 && (
           <div className="drawer-foot">
+            <div className="cart-sum-line"><span>{t.co_goods}</span><b>{D.fmt(totals.goods)} {t.unit}</b></div>
+            <div className="cart-sum-line">
+              <span>{t.pc_service} · {D.weightLabel(totals.weight)}</span>
+              <b>{D.fmt(totals.service)} {t.unit}</b>
+            </div>
+            {totals.saved > 0 && (
+              <div className="cart-saved">{t.co_saved} {D.fmt(totals.saved)} {t.unit}</div>
+            )}
             <div className="drawer-total">
               <span className="t-l">{t.cart_total}</span>
-              <span className="t-v">{D.fmt(total)} <small style={{ fontSize: 16 }}>{t.unit}</small></span>
+              <span className="t-v">{D.fmt(totals.total)} <small style={{ fontSize: 16 }}>{t.unit}</small></span>
             </div>
             <button className="checkout" onClick={onCheckout}>{t.cart_checkout} →</button>
           </div>
