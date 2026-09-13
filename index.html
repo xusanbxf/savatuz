@@ -898,8 +898,9 @@
           cat: r.cat,
           tile: r.tile,
           accent: r.accent,
-          name: { uz: r.name_uz, ru: r.name_ru },
-          sub: { uz: r.sub_uz, ru: r.sub_ru },
+          // Bir til bo'sh qolsa, matn umuman ko'rinmay qolmasin — ikkinchisi ishlatiladi
+          name: { uz: r.name_uz || r.name_ru || "", ru: r.name_ru || r.name_uz || "" },
+          sub: { uz: r.sub_uz || r.sub_ru || "", ru: r.sub_ru || r.sub_uz || "" },
           china: r.china,
           market: r.market,
           weight: r.weight,

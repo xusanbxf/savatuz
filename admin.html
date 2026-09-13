@@ -1014,10 +1014,13 @@ function scheduleAutoTranslate() {
   _translateTimer = setTimeout(function() {
     var nameUz = (document.getElementById("f_name_uz") || {}).value || "";
     var nameRu = (document.getElementById("f_name_ru") || {}).value || "";
-    // Faqat ru bo'sh bo'lsa avtomatik ishga tushir
-    if(nameUz.trim().length > 2 && !nameRu.trim()) {
-      doAutoTranslate();
-    }
+    var subUz  = (document.getElementById("f_sub_uz")  || {}).value || "";
+    var subRu  = (document.getElementById("f_sub_ru")  || {}).value || "";
+    // Har bir maydon alohida tekshiriladi: ilgari faqat "Nomi (ru)" bo'sh bo'lsa
+    // ishga tushardi, shuning uchun keyin yozilgan uzun tavsif tarjimasiz qolardi.
+    var needName = nameUz.trim().length > 2 && !nameRu.trim();
+    var needSub  = subUz.trim().length > 2 && !subRu.trim();
+    if(needName || needSub) doAutoTranslate();
   }, 1200);
 }
 
@@ -1031,12 +1034,43 @@ function doAutoTranslate() {
   if(!nameUz.trim()) return;
   if(btn) { btn.textContent = "⏳ Tarjima..."; btn.disabled = true; }
 
-  // MyMemory - bepul tarjima API (key shart emas)
-  function translateText(text) {
-    if(!text || !text.trim()) return Promise.resolve("");
+  // MyMemory - bepul tarjima API (key shart emas).
+  // Bepul limiti ~500 belgi, shuning uchun uzun tavsif gaplarga bo'lib yuboriladi.
+  function translateChunk(text) {
     return fetch("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=uz|ru")
       .then(function(r){ return r.json(); })
-      .then(function(d){ return (d.responseData && d.responseData.translatedText) || ""; });
+      .then(function(d){
+        var out = (d.responseData && d.responseData.translatedText) || "";
+        // Limitdan oshganda MyMemory tarjima o'rniga ogohlantirish matnini qaytaradi
+        if(/QUERY LENGTH LIMIT|MYMEMORY WARNING|INVALID LANGUAGE/i.test(out)) return "";
+        return out;
+      });
+  }
+
+  function splitText(text, max) {
+    var parts = [], rest = text.trim();
+    while(rest.length > max) {
+      var cut = rest.lastIndexOf(".", max);
+      if(cut < max * 0.5) cut = rest.lastIndexOf(" ", max);
+      if(cut < max * 0.5) cut = max;
+      parts.push(rest.slice(0, cut + 1).trim());
+      rest = rest.slice(cut + 1).trim();
+    }
+    if(rest) parts.push(rest);
+    return parts;
+  }
+
+  function translateText(text) {
+    if(!text || !text.trim()) return Promise.resolve("");
+    var chunks = splitText(text, 450);
+    // Ketma-ket yuboramiz — bepul API bir vaqtda ko'p so'rovni yoqtirmaydi
+    return chunks.reduce(function(chain, chunk) {
+      return chain.then(function(acc) {
+        return translateChunk(chunk).then(function(res) {
+          return acc ? acc + " " + res : res;
+        });
+      });
+    }, Promise.resolve("")).then(function(out){ return out.trim(); });
   }
 
   Promise.all([translateText(nameUz), translateText(subUz)])
