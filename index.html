@@ -644,6 +644,16 @@
   .drawer-foot { padding: 18px 22px 22px; border-top: 1px solid var(--line); }
   .cart-sum-line { display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; color: var(--ink-3); padding: 3px 0; }
   .cart-sum-line b { color: var(--ink); font-weight: 600; }
+  .cargo-pick { margin: 10px 0 12px; }
+  .cargo-pick-h { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .cargo-opt { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 13px; margin-bottom: 8px; cursor: pointer; transition: .15s; font: inherit; }
+  .cargo-opt:hover { border-color: var(--brand); }
+  .cargo-opt.on { border-color: var(--brand); background: var(--brand-soft); }
+  .cargo-opt .cargo-ic { display: flex; color: var(--brand); flex: none; }
+  .cargo-opt .cargo-txt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .cargo-opt .cargo-txt b { font-size: 14px; color: var(--ink); }
+  .cargo-opt .cargo-txt small { font-size: 11.5px; color: var(--ink-3); }
+  .cargo-opt .cargo-sum { font-weight: 800; font-size: 14px; color: var(--ink); white-space: nowrap; }
   .sum-rule { font-size: 11.5px; line-height: 1.45; color: var(--ink-3); margin: 2px 0 6px; }
   .cart-saved { background: var(--save-soft); color: var(--save); font-weight: 700; font-size: 12.5px; padding: 7px 12px; border-radius: 9px; margin: 8px 0 10px; text-align: center; }
   .drawer-total { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
@@ -880,6 +890,7 @@
   function fetchProducts() {
     // Products va variantlarni parallel yuklaymiz
     return Promise.all([
+      fetchSettings(),
       fetch(SUPABASE_URL + "/rest/v1/products?select=*&order=id", {
         headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
       }).then(function(res){ return res.json(); }),
@@ -887,8 +898,8 @@
         headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
       }).then(function(res){ return res.json(); }).catch(function(){ return []; })
     ]).then(function(results) {
-      var rows = results[0];
-      var varRows = results[1] || [];
+      var rows = results[1];
+      var varRows = results[2] || [];
       // Supabase xato qaytarsa (array emas object), fallback
       if (!Array.isArray(rows)) return [];
       var varIds = new Set(varRows.map(function(v){ return Number(v.product_id); }));
@@ -940,6 +951,7 @@
         phone: o.phone,
         comment: o.comment,
         pay_method: o.pay,
+        cargo_type: o.cargo_type || "avto",
         total: o.total,
         count: o.count,
         user_email: o.user_email || null
@@ -948,26 +960,72 @@
   }
 
   // ---- Narx qoidalari ----
-  var CARGO_PER_KG = 120000;       // kargo: 1 kg uchun
-  var SERVICE_UNDER = 20000;       // 1 kg gacha — sobit xizmat haqi
-  var SERVICE_PER_KG = 15000;      // 1 kg dan ortiq — har kg uchun
+  // Hammasi admin panel → Sozlamalar dan boshqariladi (settings jadvali).
+  // Bu qiymatlar shunchaki zaxira: sozlama yuklanmasa, sayt baribir ishlaydi.
+  var SETTINGS = {
+    cargo_avto: 83000,        // avto kargo: 1 kg uchun so'm
+    cargo_avia: 112000,       // avia kargo: 1 kg uchun so'm
+    cargo_avto_days: "10-20",
+    cargo_avia_days: "10",
+    service_under: 20000,     // 1 kg gacha — sobit xizmat haqi
+    service_per_kg: 15000     // 1 kg dan ortiq — har kg uchun
+  };
+
+  var CARGO_TYPES = ["avto", "avia"];
+
+  function cargoPerKg(type) {
+    return type === "avia" ? SETTINGS.cargo_avia : SETTINGS.cargo_avto;
+  }
+  function cargoDays(type) {
+    return type === "avia" ? SETTINGS.cargo_avia_days : SETTINGS.cargo_avto_days;
+  }
 
   function serviceFee(weight) {
-    if (weight < 1) return SERVICE_UNDER;
-    return Math.ceil(weight) * SERVICE_PER_KG;
+    if (weight < 1) return SETTINGS.service_under;
+    return Math.ceil(weight) * SETTINGS.service_per_kg;
   }
-  function cargoFee(weight) {
-    return Math.round(weight * CARGO_PER_KG / 1000) * 1000;
+  function cargoFee(weight, type) {
+    return Math.round(weight * cargoPerKg(type) / 1000) * 1000;
+  }
+
+  // Xizmat haqi qoidasi matni — admin paneldagi raqamlardan quriladi
+  function serviceRuleText(t) {
+    return t.service_rule_a + " " + fmt(SETTINGS.service_under) + " " + t.unit +
+           " · " + t.service_rule_b + " " + fmt(SETTINGS.service_per_kg) + " " + t.unit;
+  }
+
+  function fetchSettings() {
+    return fetch(SUPABASE_URL + "/rest/v1/settings?id=eq.1&select=*", {
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        if (Array.isArray(rows) && rows[0]) {
+          var st = rows[0];
+          if (st.cargo_avto > 0) SETTINGS.cargo_avto = st.cargo_avto;
+          if (st.cargo_avia > 0) SETTINGS.cargo_avia = st.cargo_avia;
+          if (st.cargo_avto_days) SETTINGS.cargo_avto_days = st.cargo_avto_days;
+          if (st.cargo_avia_days) SETTINGS.cargo_avia_days = st.cargo_avia_days;
+          if (st.service_under > 0) SETTINGS.service_under = st.service_under;
+          if (st.service_per_kg > 0) SETTINGS.service_per_kg = st.service_per_kg;
+        }
+      })
+      .catch(function () { /* zaxira qiymatlar bilan davom etamiz */ });
   }
   // Mahsulot uchun to'liq narx tahlili
-  function breakdown(p) {
-    if (!p) return { china: 0, cargo: 0, service: 0, total: 0, market: 0, save: 0, pct: 0 };
-    var cargo = cargoFee(p.weight);
+  function breakdown(p, type) {
+    if (!p) return { china: 0, cargo: 0, service: 0, total: 0, market: 0, save: 0, pct: 0, cargoAvto: 0, cargoAvia: 0 };
+    var cargo = cargoFee(p.weight, type);
     var service = serviceFee(p.weight);
     var total = p.china + cargo + service;
     var save = Math.max(0, p.market - total);
     var pct = p.market > 0 ? Math.max(0, Math.round(save / p.market * 100)) : 0;
-    return { china: p.china, cargo: cargo, service: service, total: total, market: p.market, save: save, pct: pct };
+    return {
+      china: p.china, cargo: cargo, service: service, total: total,
+      market: p.market, save: save, pct: pct,
+      cargoAvto: cargoFee(p.weight, "avto"),
+      cargoAvia: cargoFee(p.weight, "avia")
+    };
   }
 
   function weightLabel(kg) {
@@ -978,10 +1036,10 @@
   // bo'yicha. Har mahsulotga alohida qo'shilsa, ko'p olgan mijoz ortiqcha
   // to'lardi: 10 ta 0.7 kg mahsulot = 200 000 o'rniga, 7 kg = 105 000 so'm.
   // Savatdagi narx shu sababli mahsulot sahifasidagidan faqat kamayadi.
-  function cartTotals(items) {
+  function cartTotals(items, type) {
     var goods = 0, weight = 0, perItemService = 0;
     (items || []).forEach(function (it) {
-      var b = breakdown(it.p);
+      var b = breakdown(it.p, type);
       goods += (it.p.china + b.cargo) * it.q;
       weight += it.p.weight * it.q;
       perItemService += b.service * it.q;
@@ -1138,7 +1196,10 @@
       cart_title: "Savat", cart_empty: "Savat hozircha bo'sh",
       cart_total: "Jami", cart_checkout: "Rasmiylashtirish", added: "Qo'shildi",
       cart_weight: "Savat og'irligi", co_goods: "Mahsulotlar narxi",
-      service_rule_short: "1 kg gacha — 20 000 so'm · 1 kg dan ortiq — har kg uchun 15 000 so'm",
+      service_rule_a: "1 kg gacha —", service_rule_b: "1 kg dan ortiq — har kg uchun",
+      cargo_title: "Kargo turi", cargo_avto: "Avto kargo", cargo_avia: "Avia kargo",
+      cargo_days_suffix: "kun", cargo_with_avia: "Avia kargo bilan",
+      cargo_avto_hint: "Arzonroq, biroz sekinroq", cargo_avia_hint: "Tezroq yetkazib berish",
       co_saved: "Birga olganingiz uchun tejadingiz",
       service_cart_note: "Xizmat haqi butun savatga bir marta olinadi. Bir nechta mahsulot olsangiz, umumiy og'irlik bo'yicha qayta hisoblanadi va arzonlashadi.",
       unit: "so'm", market_label: "Bozor narxi", qty: "soni",
@@ -1229,7 +1290,10 @@
       cart_title: "Корзина", cart_empty: "Корзина пока пуста",
       cart_total: "Итого", cart_checkout: "Оформить", added: "Добавлено",
       cart_weight: "Вес корзины", co_goods: "Стоимость товаров",
-      service_rule_short: "до 1 кг — 20 000 сум · свыше 1 кг — 15 000 сум за кг",
+      service_rule_a: "до 1 кг —", service_rule_b: "свыше 1 кг — за каждый кг",
+      cargo_title: "Тип карго", cargo_avto: "Авто карго", cargo_avia: "Авиа карго",
+      cargo_days_suffix: "дней", cargo_with_avia: "С авиа карго",
+      cargo_avto_hint: "Дешевле, чуть дольше", cargo_avia_hint: "Быстрая доставка",
       co_saved: "Вы сэкономили, заказав вместе",
       service_cart_note: "Сервисный сбор берётся один раз за весь заказ. При нескольких товарах он пересчитывается по общему весу и становится дешевле.",
       unit: "сум", market_label: "Рыночная цена", qty: "кол-во",
@@ -1277,7 +1341,8 @@
     PRODUCTS: PRODUCTS, CATS: CATS, REGIONS: REGIONS, I18N: I18N,
     breakdown: breakdown, fmt: fmt, fetchProducts: fetchProducts, saveOrder: saveOrder,
     cartTotals: cartTotals, serviceFee: serviceFee, weightLabel: weightLabel,
-    CARGO_PER_KG: CARGO_PER_KG, SERVICE_UNDER: SERVICE_UNDER, SERVICE_PER_KG: SERVICE_PER_KG
+    SETTINGS: SETTINGS, CARGO_TYPES: CARGO_TYPES, cargoDays: cargoDays, cargoFee: cargoFee,
+    serviceRuleText: serviceRuleText
   };
 })();
 
@@ -1636,6 +1701,33 @@ function Why({ t }) {
   );
 }
 
+/* ---- Kargo turi tanlash (savat va rasmiylashtirishda) ---- */
+function CargoPicker({ t, value, onChange, weight }) {
+  const D2 = window.SAVAT;
+  const opts = [
+    { id: "avto", label: t.cargo_avto, hint: t.cargo_avto_hint, ic: <I.truck style={{ width: 18, height: 18 }} /> },
+    { id: "avia", label: t.cargo_avia, hint: t.cargo_avia_hint, ic: <I.plane style={{ width: 18, height: 18 }} /> },
+  ];
+  return (
+    <div className="cargo-pick">
+      <div className="cargo-pick-h">{t.cargo_title}</div>
+      {opts.map((o) => {
+        const on = value === o.id;
+        return (
+          <button key={o.id} type="button" className={"cargo-opt" + (on ? " on" : "")} onClick={() => onChange(o.id)}>
+            <span className="cargo-ic">{o.ic}</span>
+            <span className="cargo-txt">
+              <b>{o.label}</b>
+              <small>{D2.cargoDays(o.id)} {t.cargo_days_suffix} · {o.hint}</small>
+            </span>
+            <span className="cargo-sum">{D2.fmt(D2.cargoFee(weight, o.id))} <small>{t.unit}</small></span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ---- Footer ---- */
 function Footer({ t, onHome, onCatalog, onHelp, onMyOrders }) {
   return (
@@ -1990,7 +2082,7 @@ function PaymentCard({ m, t, selected, onSelect }) {
   );
 }
 
-function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemove, onQty }) {
+function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemove, onQty, cargoType, onCargoType }) {
   const Media = window.SC.Media;
   const [region, setRegion] = useState("");
   const [city, setCity] = useState("");
@@ -2004,7 +2096,7 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
     if (user && user.phone && phone.replace(/\D/g, "").length <= 3) setPhone(user.phone);
   }, [user]);
 
-  const totals = AC_D.cartTotals(items);
+  const totals = AC_D.cartTotals(items, cargoType);
   const total = totals.total;
   const count = items.reduce((s, it) => s + it.q, 0);
 
@@ -2034,12 +2126,12 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
     if (!region || !phoneValid(phone) || city.trim().length < 2 || address.trim().length < 3) { setErr(true); return; }
     const num = "SV-" + Math.floor(100000 + Math.random() * 900000);
     const orderItems = items.map((it) => {
-      const b = AC_D.breakdown(it.p);
+      const b = AC_D.breakdown(it.p, cargoType);
       const imgs = it.p.image_urls && it.p.image_urls.length ? it.p.image_urls : (it.p.image_url ? [it.p.image_url] : []);
       // price = mahsulot + kargo (xizmat haqi butun buyurtmaga alohida qo'shiladi)
       return { id: it.p.id, name_uz: it.p.name.uz, name_ru: it.p.name.ru, qty: it.q, price: it.p.china + b.cargo, variant: it.variant || "", image_url: it.selectedImg || imgs[0] || null };
     });
-    onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay });
+    onPlace({ num, total, count, items: orderItems, region, city, address, phone, comment, pay, cargo_type: cargoType });
   };
 
   return (
@@ -2108,9 +2200,10 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
         <aside className="co-side">
           <div className="co-summary">
             <h3 className="co-h" style={{ marginBottom: 14 }}>{t.co_summary}</h3>
+            <CargoPicker t={t} value={cargoType} onChange={onCargoType} weight={totals.weight} />
             <div className="co-items">
               {items.map((it) => {
-                const b = AC_D.breakdown(it.p);
+                const b = AC_D.breakdown(it.p, cargoType);
                 return (
                   <div className="co-item" key={it.p.id + "::" + (it.variant || "")}>
                     <div className="co-item-media"><Media p={it.p} label="" /></div>
@@ -2144,7 +2237,7 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
               <span>{t.pc_service} · {AC_D.weightLabel(totals.weight)}</span>
               <b>{AC_D.fmt(totals.service)} {t.unit}</b>
             </div>
-            <p className="sum-rule">{t.service_rule_short}</p>
+            <p className="sum-rule">{AC_D.serviceRuleText(t)}</p>
             {totals.saved > 0 && (
               <div className="cart-saved" style={{ margin: "6px 0" }}>{t.co_saved} {AC_D.fmt(totals.saved)} {t.unit}</div>
             )}
@@ -2671,9 +2764,11 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
   const wLabel = p.weight < 1 ? Math.round(p.weight * 1000) + " g" : p.weight + " kg";
   const rows = [
     { ic: <Ico.factory />, lbl: t.pc_china, val: b.china },
-    { ic: <Ico.plane />, lbl: t.pc_cargo, val: b.cargo },
+    { ic: <Ico.truck />, lbl: t.cargo_avto + " · " + D.cargoDays("avto") + " " + t.cargo_days_suffix, val: b.cargoAvto },
+    { ic: <Ico.plane />, lbl: t.cargo_avia + " · " + D.cargoDays("avia") + " " + t.cargo_days_suffix, val: b.cargoAvia },
     { ic: <Ico.shield />, lbl: t.pc_service, val: b.service },
   ];
+  const totalAvia = p.china + b.cargoAvia + b.service;
 
   return (
     <div className="pd wrap up">
@@ -2716,6 +2811,10 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
                 <span className="now">{D.fmt(total)} <small>{t.unit}</small></span>
               </div>
               <div className="calc-save"><Ico.flame style={{ width: 15, height: 15 }} />{t.pc_save} {D.fmt(b.save)} {t.unit}</div>
+              <div className="calc-row" style={{ marginTop: 10, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                <span className="lbl"><span className="ic"><Ico.plane /></span>{t.cargo_with_avia}</span>
+                <span className="val"><b>{D.fmt(totalAvia)} {t.unit}</b></span>
+              </div>
               <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-3)", margin: "10px 0 0" }}>{t.service_cart_note}</p>
             </div>
 
@@ -2781,8 +2880,8 @@ function ProductDetail({ p, t, lang, qtyFor, onBack, onAdd, onOrder, onInc, onDe
 }
 
 /* ---------- Cart Drawer ---------- */
-function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout }) {
-  const totals = D.cartTotals(items);
+function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout, cargoType, onCargoType }) {
+  const totals = D.cartTotals(items, cargoType);
   const count = items.reduce((s, it) => s + it.q, 0);
   return (
     <>
@@ -2799,7 +2898,7 @@ function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout
               <p>{t.cart_empty}</p>
             </div>
           ) : items.map((it) => {
-            const b = D.breakdown(it.p);
+            const b = D.breakdown(it.p, cargoType);
             return (
               <div className="ci" key={it.p.id + "::" + (it.variant || "")}>
                 <div className="ci-media"><Media p={it.p} label="" /></div>
@@ -2821,12 +2920,13 @@ function CartDrawer({ open, items, t, lang, onClose, onQty, onRemove, onCheckout
         </div>
         {items.length > 0 && (
           <div className="drawer-foot">
+            <CargoPicker t={t} value={cargoType} onChange={onCargoType} weight={totals.weight} />
             <div className="cart-sum-line"><span>{t.co_goods}</span><b>{D.fmt(totals.goods)} {t.unit}</b></div>
             <div className="cart-sum-line">
               <span>{t.pc_service} · {D.weightLabel(totals.weight)}</span>
               <b>{D.fmt(totals.service)} {t.unit}</b>
             </div>
-            <p className="sum-rule">{t.service_rule_short}</p>
+            <p className="sum-rule">{D.serviceRuleText(t)}</p>
             {totals.saved > 0 && (
               <div className="cart-saved">{t.co_saved} {D.fmt(totals.saved)} {t.unit}</div>
             )}
@@ -2848,6 +2948,7 @@ function App() {
   const [view, setView] = useState("home"); // home | product | checkout | success
   const [current, setCurrent] = useState(null);
   const [cat, setCat] = useState("all");
+  const [cargoType, setCargoType] = useState(() => localStorage.getItem("savat_cargo") || "avto");
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem("savat_cart") || "[]"); } catch(e) { return []; }
   });
@@ -2866,6 +2967,7 @@ function App() {
 
   const t = D.I18N[lang];
   useEffect(() => { localStorage.setItem("savat_lang", lang); }, [lang]);
+  useEffect(() => { localStorage.setItem("savat_cargo", cargoType); }, [cargoType]);
   useEffect(() => { localStorage.setItem("savat_cart", JSON.stringify(cart)); }, [cart]);
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   useEffect(() => {
@@ -3049,7 +3151,8 @@ function App() {
           <Checkout items={cart} t={t} lang={lang} user={user}
             onBack={() => (current ? openProduct(current) : goHome())}
             onPlace={placeOrder} onRequireAuth={() => setAuthOpen(true)}
-            onRemove={removeItem} onQty={changeQty} />
+            onRemove={removeItem} onQty={changeQty}
+            cargoType={cargoType} onCargoType={setCargoType} />
           <Footer t={t} onHome={goHome} onCatalog={() => { goHome(); setTimeout(() => document.querySelector(".cats")?.scrollIntoView({behavior:"smooth"}), 50); }} onHelp={() => setView("help")} onMyOrders={() => setView("myorders")} />
         </main>
       )}
@@ -3072,7 +3175,7 @@ function App() {
 
       <CartDrawer open={cartOpen} items={cart} t={t} lang={lang}
         onClose={() => setCartOpen(false)} onQty={changeQty} onRemove={removeItem}
-        onCheckout={goCheckout} />
+        onCheckout={goCheckout} cargoType={cargoType} onCargoType={setCargoType} />
 
       <AuthModal open={authOpen} t={t} onClose={() => setAuthOpen(false)} onAuth={onAuth} />
       <MobileMenu open={menuOpen} t={t} lang={lang} setLang={setLang}

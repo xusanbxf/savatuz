@@ -363,6 +363,7 @@ function renderMain() {
           '<button class="tab'+(currentTab==="users"?" active":"")+'" id="tabUsers">Foydalanuvchilar</button>'+
           '<button class="tab'+(currentTab==="messages"?" active":"")+'" id="tabMessages">Xabarlar</button>'+
           '<button class="tab'+(currentTab==="import"?" active":"")+' tab-import" id="tabImport">📥 Import</button>'+
+          '<button class="tab'+(currentTab==="settings"?" active":"")+'" id="tabSettings">⚙️ Sozlamalar</button>'+
         '</div>'+
         '<button class="logout" id="logoutBtn">Chiqish</button>'+
       '</div>'+
@@ -380,6 +381,8 @@ function renderMain() {
         '<span class="bn-ico">👥</span><span class="bn-lbl">Mijozlar</span></button>'+
       '<button class="bn-item'+(currentTab==="import"?" active":"")+'" id="bnImport">'+
         '<span class="bn-ico">📥</span><span class="bn-lbl">Import</span></button>'+
+      '<button class="bn-item'+(currentTab==="settings"?" active":"")+'" id="bnSettings">'+
+        '<span class="bn-ico">⚙️</span><span class="bn-lbl">Sozlama</span></button>'+
     '</nav>';
   document.getElementById("logoutBtn").onclick = doLogout;
   var go = function(tab){ return function(){ currentTab=tab; renderMain(); }; };
@@ -388,15 +391,18 @@ function renderMain() {
   document.getElementById("tabUsers").onclick = go("users");
   document.getElementById("tabMessages").onclick = go("messages");
   document.getElementById("tabImport").onclick = go("import");
+  document.getElementById("tabSettings").onclick = go("settings");
   document.getElementById("bnOrders").onclick = go("orders");
   document.getElementById("bnProducts").onclick = go("products");
   document.getElementById("bnUsers").onclick = go("users");
   document.getElementById("bnMessages").onclick = go("messages");
   document.getElementById("bnImport").onclick = go("import");
+  document.getElementById("bnSettings").onclick = go("settings");
   if(currentTab==="orders") loadOrders();
   else if(currentTab==="products") loadProducts();
   else if(currentTab==="users") loadUsers();
   else if(currentTab==="import") loadImport();
+  else if(currentTab==="settings") loadSettings();
   else loadMessages();
 }
 
@@ -471,6 +477,7 @@ function loadOrders() {
             '<div class="info-row"><b>Manzil:</b> '+h(o.address||"—")+'</div>'+
             (o.comment?'<div class="info-row"><b>Izoh:</b> '+h(o.comment)+'</div>':'')+
             '<div class="info-row"><b>To\'lov:</b> '+h(o.pay_method||"—")+'</div>'+
+            '<div class="info-row"><b>Kargo:</b> '+(o.cargo_type==="avia"?"✈️ Avia":"🚚 Avto")+'</div>'+
             '<div class="info-row"><b>Mahsulotlar soni:</b> '+(o.items||[]).reduce(function(s,it){return s+it.qty;},0)+' ta</div>'+
             (function(){
               // Xizmat haqi butun buyurtmaga bir marta olinadi, shuning uchun u
@@ -1649,6 +1656,121 @@ var chatInterval = null;
 
 function fmtT(iso) {
   return new Date(iso).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tashkent", hour12: false });
+}
+
+/* ============ Sozlamalar: kargo va xizmat haqi ============ */
+var SETTINGS_DEFAULTS = {
+  cargo_avto: 83000, cargo_avia: 112000,
+  cargo_avto_days: "10-20", cargo_avia_days: "10",
+  service_under: 20000, service_per_kg: 15000
+};
+
+function loadSettings() {
+  var c = document.getElementById("content");
+  c.innerHTML = "Yuklanmoqda...";
+  fetch(SB + "/rest/v1/settings?id=eq.1&select=*", {
+    headers: { "apikey": KEY, "Authorization": "Bearer " + authToken }
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){
+      var st = (Array.isArray(rows) && rows[0]) ? rows[0] : SETTINGS_DEFAULTS;
+      renderSettings(st, Array.isArray(rows) && rows.length > 0);
+    })
+    .catch(function(){ renderSettings(SETTINGS_DEFAULTS, false); });
+}
+
+function renderSettings(st, exists) {
+  var c = document.getElementById("content");
+  function num(id, label, val, hint) {
+    return '<div style="margin-bottom:14px">'+
+      '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">'+label+'</label>'+
+      '<input id="'+id+'" type="number" value="'+(val==null?"":val)+'" style="margin-bottom:0"/>'+
+      (hint ? '<div style="font-size:11px;color:var(--ink-3);margin-top:4px">'+hint+'</div>' : '')+
+    '</div>';
+  }
+  function txt(id, label, val, hint) {
+    return '<div style="margin-bottom:14px">'+
+      '<label style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;display:block">'+label+'</label>'+
+      '<input id="'+id+'" value="'+h(val==null?"":String(val))+'" style="margin-bottom:0"/>'+
+      (hint ? '<div style="font-size:11px;color:var(--ink-3);margin-top:4px">'+hint+'</div>' : '')+
+    '</div>';
+  }
+
+  c.innerHTML =
+    '<div style="max-width:640px">'+
+      (exists ? '' : '<div style="background:#fff4e5;border:1px solid #ffd9a8;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px">'+
+        '⚠️ <b>settings</b> jadvali hali yaratilmagan. Supabase → SQL Editor da <b>savat-settings.sql</b> ni ishga tushiring. '+
+        'Hozircha sayt va ilova standart narxlardan foydalanadi.</div>')+
+
+      '<div class="prod-card" style="padding:18px;margin-bottom:16px">'+
+        '<h3 style="margin:0 0 4px;font-size:16px">🚚 Kargo narxlari</h3>'+
+        '<p style="font-size:12px;color:var(--ink-3);margin:0 0 16px">1 kg uchun, so\'mda. Mijoz savatda qaysi birini tanlasa, o\'sha hisoblanadi.</p>'+
+        num("s_cargo_avto", "Avto kargo — 1 kg (so'm)", st.cargo_avto, "Arzonroq, sekinroq. Standart tanlov.")+
+        txt("s_cargo_avto_days", "Avto kargo — necha kunda", st.cargo_avto_days, "Masalan: 10-20")+
+        num("s_cargo_avia", "Avia kargo — 1 kg (so'm)", st.cargo_avia, "Qimmatroq, tezroq.")+
+        txt("s_cargo_avia_days", "Avia kargo — necha kunda", st.cargo_avia_days, "Masalan: 10")+
+      '</div>'+
+
+      '<div class="prod-card" style="padding:18px;margin-bottom:16px">'+
+        '<h3 style="margin:0 0 4px;font-size:16px">🛡 Savat xizmati</h3>'+
+        '<p style="font-size:12px;color:var(--ink-3);margin:0 0 16px">Butun savatga bir marta, umumiy og\'irlik bo\'yicha olinadi.</p>'+
+        num("s_service_under", "1 kg gacha (so'm)", st.service_under, "")+
+        num("s_service_per_kg", "1 kg dan ortiq — har kg uchun (so'm)", st.service_per_kg, "")+
+      '</div>'+
+
+      '<button class="btn" id="saveSettingsBtn" style="width:100%">Saqlash</button>'+
+      '<div id="settingsMsg" style="margin-top:12px;font-size:13px"></div>'+
+    '</div>';
+
+  document.getElementById("saveSettingsBtn").onclick = saveSettings;
+}
+
+function saveSettings() {
+  var btn = document.getElementById("saveSettingsBtn");
+  var msg = document.getElementById("settingsMsg");
+  function v(id){ return document.getElementById(id).value; }
+
+  var body = {
+    id: 1,
+    cargo_avto: Math.round(Number(v("s_cargo_avto")) || 0),
+    cargo_avia: Math.round(Number(v("s_cargo_avia")) || 0),
+    cargo_avto_days: v("s_cargo_avto_days").trim() || "10-20",
+    cargo_avia_days: v("s_cargo_avia_days").trim() || "10",
+    service_under: Math.round(Number(v("s_service_under")) || 0),
+    service_per_kg: Math.round(Number(v("s_service_per_kg")) || 0)
+  };
+
+  if(body.cargo_avto <= 0 || body.cargo_avia <= 0) {
+    msg.innerHTML = '<span style="color:#e11d48">Kargo narxlari 0 dan katta bo\'lishi kerak</span>';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Saqlanmoqda...";
+  // upsert — qator bo'lmasa yaratadi, bo'lsa yangilaydi
+  fetch(SB + "/rest/v1/settings", {
+    method: "POST",
+    headers: {
+      "apikey": KEY,
+      "Authorization": "Bearer " + authToken,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify(body)
+  })
+  .then(function(r){
+    btn.disabled = false; btn.textContent = "Saqlash";
+    if(r.ok) {
+      msg.innerHTML = '<span style="color:#12a150">✅ Saqlandi. Sayt va ilovada darhol amal qiladi.</span>';
+    } else {
+      return r.text().then(function(txt){
+        msg.innerHTML = '<span style="color:#e11d48">Xato: '+h(txt.slice(0,200))+'</span>';
+      });
+    }
+  })
+  .catch(function(e){
+    btn.disabled = false; btn.textContent = "Saqlash";
+    msg.innerHTML = '<span style="color:#e11d48">Xato: '+h(String(e))+'</span>';
+  });
 }
 
 function renderMsg(m) {
