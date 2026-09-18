@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maxfiylik siyosati — SAVAT.UZ</title>
+<meta name="description" content="SAVAT.UZ veb-sayti va Android ilovasi qanday ma'lumot to'playdi, nima uchun va qanday o'chiriladi." />
+<style>
+  :root {
+    --cream: #f6f5f2; --white: #fff; --ink: #14161f; --ink-2: #4a4e5c; --ink-3: #7c7f8d;
+    --line: #e6e4de; --brand: #7b4fff; --brand-soft: #f1ecff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--cream); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+  header { background: var(--white); border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 19px; letter-spacing: -.5px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--brand); }
+  a { color: var(--brand); }
+  main { padding: 34px 0 60px; }
+  h1 { font-size: 27px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -.02em; }
+  .upd { color: var(--ink-3); font-size: 13px; margin: 0 0 26px; }
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 17px; margin: 0 0 8px; letter-spacing: -.01em; }
+  p, li { color: var(--ink-2); font-size: 15px; margin: 0 0 9px; }
+  ul { padding-left: 20px; margin: 0 0 4px; }
+  .note { background: var(--brand-soft); border: 1px solid #ddd2ff; }
+  .lang { display: flex; gap: 8px; margin-bottom: 22px; }
+  .lang a {
+    text-decoration: none; background: var(--white); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 15px; font-weight: 700; font-size: 13px; color: var(--ink-2);
+  }
+  footer { border-top: 1px solid var(--line); padding: 20px 0 40px; color: var(--ink-3); font-size: 13px; }
+  @media (max-width: 600px) { h1 { font-size: 23px; } .card { padding: 17px 18px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap brand"><span class="dot"></span>SAVAT.UZ</div>
+</header>
+
+<main class="wrap">
+  <div class="lang"><a href="#uz">O'zbekcha</a><a href="#ru">Русский</a></div>
+
+  <h1 id="uz">Maxfiylik siyosati</h1>
+  <p class="upd">Oxirgi yangilanish: 2026-yil 18-sentabr</p>
+
+  <div class="card">
+    <h2>Biz kim</h2>
+    <p>SAVAT.UZ — Xitoydan tovar yetkazib beruvchi onlayn do'kon. Bu siyosat <a href="https://www.savatmarket.uz">savatmarket.uz</a> sayti va SAVAT.UZ Android ilovasiga tegishli.</p>
+    <p>Aloqa: <a href="mailto:khusanov16@gmail.com">khusanov16@gmail.com</a></p>
+  </div>
+
+  <div class="card">
+    <h2>Qanday ma'lumot to'playmiz</h2>
+    <ul>
+      <li><b>Akkaunt</b> — ism va email manzil (ro'yxatdan o'tganda).</li>
+      <li><b>Buyurtma</b> — telefon raqami, viloyat/shahar, yetkazib berish manzili va izoh.</li>
+      <li><b>Buyurtma tarixi</b> — nima buyurtma qilgansiz, narxi va holati.</li>
+    </ul>
+    <p>Boshqa hech narsa: biz joylashuvni, kontaktlarni, SMS xabarlarni, kameradagi rasmlarni va qurilmadagi fayllarni o'qimaymiz. Ilovada bunday ruxsatlar umuman so'ralmaydi — faqat internetga ulanish ishlatiladi.</p>
+  </div>
+
+  <div class="card">
+    <h2>Nima uchun ishlatamiz</h2>
+    <ul>
+      <li>Buyurtmani qabul qilish, yetkazish va siz bilan bog'lanish uchun.</li>
+      <li>Buyurtma holatini ko'rsatish uchun.</li>
+      <li>Qonun talab qilgan hisob-kitob uchun.</li>
+    </ul>
+    <p>Ma'lumotlaringizni reklama uchun ishlatmaymiz va hech kimga sotmaymiz.</p>
+  </div>
+
+  <div class="card">
+    <h2>Kimga oshkor qilinadi</h2>
+    <p>Faqat buyurtmani yetkazish uchun zarur bo'lgan hajmda — yetkazib berish xizmatiga ism, telefon va manzil beriladi. Ma'lumotlar Supabase (PostgreSQL) bulut bazasida saqlanadi; u bizning nomimizdan ma'lumotni saqlovchi xizmat ko'rsatuvchi hisoblanadi.</p>
+  </div>
+
+  <div class="card">
+    <h2>Qancha vaqt saqlanadi</h2>
+    <p>Akkaunt ma'lumotlari siz akkauntni o'chirmaguningizcha saqlanadi. Buyurtma ma'lumotlari hisob-kitob talablari uchun buyurtmadan keyin 3 yil saqlanadi, keyin o'chiriladi.</p>
+  </div>
+
+  <div class="card note">
+    <h2>Akkauntni va ma'lumotni o'chirish</h2>
+    <p>Akkauntingizni va u bilan bog'liq ma'lumotni istalgan vaqtda o'chirishni so'rashingiz mumkin:</p>
+    <ul>
+      <li>Ilovada: <b>Yordam → Akkauntni o'chirish</b>.</li>
+      <li>Yoki shu sahifa orqali: <a href="/delete-account.html">Akkauntni o'chirish so'rovi</a>.</li>
+    </ul>
+    <p>So'rovni olganimizdan keyin 7 kun ichida akkaunt, ism, email, telefon va manzil o'chiriladi. Yakunlangan buyurtmalarning hisob yozuvlari qonun talabiga ko'ra yuqorida ko'rsatilgan muddatgacha saqlanib turadi.</p>
+  </div>
+
+  <div class="card">
+    <h2>Bolalar</h2>
+    <p>Xizmat 18 yoshdan kichiklar uchun mo'ljallanmagan va biz bolalardan ataylab ma'lumot to'plamaymiz.</p>
+  </div>
+
+  <div class="card">
+    <h2>O'zgarishlar</h2>
+    <p>Bu siyosat o'zgarsa, yangi sana shu sahifada ko'rsatiladi.</p>
+  </div>
+
+  <h1 id="ru" style="margin-top:38px">Политика конфиденциальности</h1>
+  <p class="upd">Последнее обновление: 18 сентября 2026 г.</p>
+
+  <div class="card">
+    <h2>Кто мы</h2>
+    <p>SAVAT.UZ — интернет-магазин товаров из Китая. Политика относится к сайту <a href="https://www.savatmarket.uz">savatmarket.uz</a> и Android-приложению SAVAT.UZ.</p>
+    <p>Связь: <a href="mailto:khusanov16@gmail.com">khusanov16@gmail.com</a></p>
+  </div>
+
+  <div class="card">
+    <h2>Какие данные мы собираем</h2>
+    <ul>
+      <li><b>Аккаунт</b> — имя и email при регистрации.</li>
+      <li><b>Заказ</b> — номер телефона, регион/город, адрес доставки, комментарий.</li>
+      <li><b>История заказов</b> — состав, сумма и статус заказа.</li>
+    </ul>
+    <p>Больше ничего: мы не читаем геолокацию, контакты, SMS, фотографии и файлы на устройстве. Приложение вообще не запрашивает такие разрешения — используется только доступ в интернет.</p>
+  </div>
+
+  <div class="card">
+    <h2>Зачем</h2>
+    <ul>
+      <li>Чтобы принять заказ, доставить его и связаться с вами.</li>
+      <li>Чтобы показывать статус заказа.</li>
+      <li>Для бухгалтерского учёта, требуемого законом.</li>
+    </ul>
+    <p>Мы не используем данные для рекламы и никому их не продаём.</p>
+  </div>
+
+  <div class="card">
+    <h2>Кому передаём</h2>
+    <p>Только в объёме, необходимом для доставки: служба доставки получает имя, телефон и адрес. Данные хранятся в облачной базе Supabase (PostgreSQL) как у поставщика услуги хранения от нашего имени.</p>
+  </div>
+
+  <div class="card">
+    <h2>Сроки хранения</h2>
+    <p>Данные аккаунта хранятся до его удаления. Данные заказа — 3 года после заказа для учёта, затем удаляются.</p>
+  </div>
+
+  <div class="card note">
+    <h2>Удаление аккаунта и данных</h2>
+    <p>Вы можете в любой момент запросить удаление аккаунта и связанных данных:</p>
+    <ul>
+      <li>В приложении: <b>Помощь → Удалить аккаунт</b>.</li>
+      <li>Или через страницу: <a href="/delete-account.html">Запрос на удаление аккаунта</a>.</li>
+    </ul>
+    <p>В течение 7 дней после запроса удаляются аккаунт, имя, email, телефон и адрес. Бухгалтерские записи по завершённым заказам хранятся до срока, указанного выше.</p>
+  </div>
+
+  <div class="card">
+    <h2>Дети</h2>
+    <p>Сервис не предназначен для лиц младше 18 лет; мы не собираем данные детей намеренно.</p>
+  </div>
+</main>
+
+<footer class="wrap">
+  <a href="https://www.savatmarket.uz">← savatmarket.uz</a> · © 2026 SAVAT.UZ
+</footer>
+</body>
+</html>
