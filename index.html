@@ -1228,6 +1228,7 @@
       pay_cash: "Naqd — yetkazganda", pay_cash_d: "Kuryerga qo'lda to'laysiz",
       pay_payme_d: "Onlayn karta orqali", pay_click_d: "Onlayn karta orqali",
       soon: "Tez orada",
+      ftr_privacy: "Maxfiylik siyosati", ftr_delete: "Akkauntni o'chirish",
       ok_t: "Buyurtma qabul qilindi!", ok_d: "Operatorlarimiz 15 daqiqada siz bilan bog'lanadi.",
       ok_num: "Buyurtma raqami", ok_home: "Bosh sahifaga qaytish", ok_items: "mahsulot",
       help_title: "Yordam markazi", help_sub: "Ko'p so'raladigan savollarga javoblar",
@@ -1236,7 +1237,7 @@
         { q: "Yetkazib berish qancha vaqt oladi?", a: "Xitoydan O'zbekistongacha odatda 10-16 ish kuni." },
         { q: "Narxlarda nima kiradi?", a: "Zavod narxi + kargo + xizmat haqi. Hech qanday yashirin to'lov yo'q." },
         { q: "Mahsulot sifatsiz bo'lsa nima bo'ladi?", a: "Biz kafolat beramiz — to'liq qaytarib beramiz yoki qayta buyurtma qilamiz." },
-        { q: "Qanday to'lash mumkin?", a: "Click, Payme yoki naqd pul." },
+        { q: "Qanday to'lash mumkin?", a: "Hozircha naqd pul — buyurtmani olganda to'laysiz. Click va Payme tez orada." },
         { q: "Minimal buyurtma summasi bormi?", a: "Yo'q, istalgan miqdorda buyurtma qilsa bo'ladi." },
         { q: "Bir necha mahsulot buyurtsam chegirma bormi?", a: "Ha, kargo xarajati bo'linadi — ko'p mahsulot buyurtsangiz, har biriga tushadigan kargo kamayadi." }
       ]
@@ -1322,6 +1323,7 @@
       pay_cash: "Наличными при получении", pay_cash_d: "Оплата курьеру наличными",
       pay_payme_d: "Онлайн картой", pay_click_d: "Онлайн картой",
       soon: "Скоро",
+      ftr_privacy: "Политика конфиденциальности", ftr_delete: "Удалить аккаунт",
       ok_t: "Заказ принят!", ok_d: "Наш оператор свяжется с вами в течение 15 минут.",
       ok_num: "Номер заказа", ok_home: "Вернуться на главную", ok_items: "товаров",
       help_title: "Центр помощи", help_sub: "Ответы на часто задаваемые вопросы",
@@ -1330,7 +1332,7 @@
         { q: "Сколько времени занимает доставка?", a: "Из Китая до Узбекистана обычно 10–16 рабочих дней." },
         { q: "Что входит в цену?", a: "Цена завода + карго + сервисный сбор. Никаких скрытых платежей." },
         { q: "Что если товар окажется некачественным?", a: "Мы даём гарантию — полный возврат средств или повторный заказ." },
-        { q: "Как можно оплатить?", a: "Click, Payme или наличными." },
+        { q: "Как можно оплатить?", a: "Пока наличными — при получении заказа. Click и Payme скоро." },
         { q: "Есть ли минимальная сумма заказа?", a: "Нет, можно заказать на любую сумму." },
         { q: "Есть ли скидка при заказе нескольких товаров?", a: "Да, стоимость карго делится — чем больше товаров, тем меньше карго на каждый." }
       ]
@@ -1756,6 +1758,11 @@ function Footer({ t, onHome, onCatalog, onHelp, onMyOrders }) {
       </div>
       <div className="wrap ftr-row">
         <small>© 2026 SAVAT.UZ — {t.tag}</small>
+        {/* Google Play requires both of these to be publicly reachable for the app. */}
+        <small style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <a href="/privacy.html" style={{ color: "var(--ink-3)" }}>{t.ftr_privacy}</a>
+          <a href="/delete-account.html" style={{ color: "var(--ink-3)" }}>{t.ftr_delete}</a>
+        </small>
       </div>
     </footer>
   );
@@ -2092,7 +2099,11 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
   const [address, setAddress] = useState("");
   const [comment, setComment] = useState("");
   const [phone, setPhone] = useState("+998 ");
-  const [pay, setPay] = useState("payme");
+  // Cash on delivery is the only method that actually works today, so it is the
+  // default. Payme/Click stay visible (customers ask for them) but are marked
+  // "tez orada" and cannot be picked — an order paid by nobody is worse than an
+  // honest "not yet".
+  const [pay, setPay] = useState("cash");
   const [err, setErr] = useState(false);
 
   useEffect(() => {
@@ -2104,9 +2115,9 @@ function Checkout({ items, t, lang, user, onBack, onPlace, onRequireAuth, onRemo
   const count = items.reduce((s, it) => s + it.q, 0);
 
   const methods = [
-    { id: "payme", label: "Payme", sub: t.pay_payme_d, tint: "#e6f6fb", color: "#00b8d4" },
-    { id: "click", label: "Click", sub: t.pay_click_d, tint: "#eef0ff", color: "#3461ff" },
-    { id: "cash", label: t.pay_cash, sub: t.pay_cash_d, tint: "#e7f7ee", color: "#12a150", soon: true },
+    { id: "cash", label: t.pay_cash, sub: t.pay_cash_d, tint: "#e7f7ee", color: "#12a150" },
+    { id: "payme", label: "Payme", sub: t.pay_payme_d, tint: "#e6f6fb", color: "#00b8d4", soon: true },
+    { id: "click", label: "Click", sub: t.pay_click_d, tint: "#eef0ff", color: "#3461ff", soon: true },
   ];
 
   if (!user) {
