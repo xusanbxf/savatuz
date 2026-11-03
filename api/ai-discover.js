@@ -6,6 +6,17 @@
 // Uses Claude's web_search tool. Needs maxDuration 60 in vercel.json (see "functions").
 // Env: ANTHROPIC_API_KEY (required), ADMIN_EMAILS (recommended), ANTHROPIC_DISCOVER_MODEL (optional)
 
+// Clean the key: strip spaces, newlines and stray quotes that sneak in when pasting.
+const API_KEY = (process.env.ANTHROPIC_API_KEY || "").trim().replace(/^["']+|["']+$/g, "").trim();
+function keyInfo() {
+  return " [kalit: " + (API_KEY ? API_KEY.slice(0, 7) + "…, uzunligi " + API_KEY.length : "yo'q") + "]";
+}
+async function upstreamError(r) {
+  let msg = "";
+  try { const j = await r.json(); msg = (j && j.error && j.error.message) || ""; } catch (e) {}
+  return "AI xato: " + r.status + (msg ? " — " + msg : "") + (r.status === 401 ? keyInfo() : "");
+}
+
 const SUPABASE_URL = "https://gjsaelqqubmlwnmfyuso.supabase.co";
 const SB_PUBLISHABLE = "sb_publishable_ckKVB9tWH-dXgHh_dtgapQ_Htl3IACg";
 
@@ -41,7 +52,7 @@ async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") { res.status(200).end(); return; }
   if (req.method !== "POST") { res.status(405).json({ error: "POST kerak" }); return; }
-  if (!process.env.ANTHROPIC_API_KEY) { res.status(500).json({ error: "ANTHROPIC_API_KEY o'rnatilmagan" }); return; }
+  if (!API_KEY) { res.status(500).json({ error: "ANTHROPIC_API_KEY o'rnatilmagan" }); return; }
   if (!(await isAllowed(req))) { res.status(401).json({ error: "Ruxsat yo'q" }); return; }
 
   let body = req.body;
@@ -70,7 +81,7 @@ async function handler(req, res) {
       signal: controller.signal,
       headers: {
         "content-type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "x-api-key": API_KEY,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
@@ -81,7 +92,7 @@ async function handler(req, res) {
       }),
     });
     clearTimeout(timer);
-    if (!r.ok) { res.status(502).json({ error: "AI xato: " + r.status }); return; }
+    if (!r.ok) { res.status(502).json({ error: await upstreamError(r) }); return; }
     const data = await r.json();
 
     // URLs that really appeared in search results
