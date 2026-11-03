@@ -1298,6 +1298,14 @@ function loadImport() {
   nameField.innerHTML = "<label>Nomi</label><div class=\"val\" id=\"importName\">—</div>";
   infoDiv.appendChild(nameField);
 
+  var aiField = document.createElement("div");
+  aiField.className = "import-field";
+  aiField.innerHTML = "<label>Nomi (RU)</label><input id=\"importNameRu\" placeholder=\"Название по-русски\" />"
+    + "<div id=\"importNameHint\" style=\"font-size:12px;color:var(--ink-3);margin:-4px 0 8px\"></div>"
+    + "<label>Qisqa tavsif (UZ)</label><input id=\"importSubUz\" />"
+    + "<label>Qisqa tavsif (RU)</label><input id=\"importSubRu\" />";
+  infoDiv.appendChild(aiField);
+
   var priceRow = document.createElement("div");
   priceRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:12px";
   priceRow.innerHTML = [
@@ -1340,6 +1348,314 @@ function loadImport() {
 
   fetchBtn.onclick = doImport;
   urlInput.addEventListener("keydown", function(e){ if(e.key === "Enter") doImport(); });
+
+  renderAutoAdd(cont);
+}
+
+// ===== AI avto-qo'shish: linklar -> AI tayyorlaydi -> admin tasdiqlaydi -> saytga =====
+function renderAutoAdd(cont) {
+  var box = document.createElement("div");
+  box.className = "import-box";
+  box.style.marginTop = "16px";
+  box.innerHTML = "<h3>🤖 AI avto-qo'shish</h3><p>Linklarni tashlang (har qatorga bittadan, ko'pi bilan 10 ta). AI nom, tavsif, kategoriya, vazn va narxlarni o'zi tayyorlaydi. Siz faqat tasdiqlaysiz.</p>";
+
+  var ta = document.createElement("textarea");
+  ta.id = "autoLinks";
+  ta.rows = 4;
+  ta.placeholder = "https://item.taobao.com/item.htm?id=...\nhttps://mobile.pinduoduo.com/goods.html?goods_id=...";
+  ta.style.cssText = "width:100%;margin-bottom:8px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;box-sizing:border-box";
+  box.appendChild(ta);
+
+  var go = document.createElement("button");
+  go.id = "autoGo";
+  go.className = "btn";
+  go.style.width = "100%";
+  go.textContent = "🤖 AI ga topshirish";
+  go.onclick = autoRun;
+  box.appendChild(go);
+
+  var dis = document.createElement("div");
+  dis.style.cssText = "margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--line)";
+  var dcats = '<option value="">Hammasi aralash</option>' + CATS.map(function(c){ return '<option value="' + c.id + '">' + c.label + '</option>'; }).join("");
+  dis.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:6px">Link yo\'qmi? AI o\'zi topsin</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 90px;gap:8px;margin-bottom:8px">'
+    + '<select id="discCat" style="margin:0;width:100%;box-sizing:border-box">' + dcats + '</select>'
+    + '<input id="discCount" type="number" min="1" max="12" value="8" style="margin:0;width:100%;box-sizing:border-box" />'
+    + '</div>'
+    + '<input id="discHint" placeholder="Kalit so\'z (ixtiyoriy), masalan: telefon aksessuarlari" style="width:100%;box-sizing:border-box;margin-bottom:8px" />';
+  var dgo = document.createElement("button");
+  dgo.id = "discGo";
+  dgo.className = "btn";
+  dgo.style.cssText = "width:100%;background:#6c2bd9";
+  dgo.textContent = "🔎 AI o'zi topsin va tayyorlasin";
+  dgo.onclick = autoDiscover;
+  dis.appendChild(dgo);
+  box.appendChild(dis);
+
+  var st = document.createElement("div");
+  st.id = "autoStatus";
+  st.className = "import-status";
+  box.appendChild(st);
+
+  var list = document.createElement("div");
+  list.id = "autoList";
+  list.style.marginTop = "12px";
+  box.appendChild(list);
+
+  var ok = document.createElement("button");
+  ok.id = "autoApprove";
+  ok.className = "btn";
+  ok.style.cssText = "width:100%;margin-top:10px;display:none;background:#12a150";
+  ok.onclick = autoApprove;
+  box.appendChild(ok);
+
+  cont.appendChild(box);
+  window._auto = [];
+}
+
+function autoSetStatus(cls, txt) {
+  var st = document.getElementById("autoStatus");
+  st.className = "import-status " + cls;
+  st.textContent = txt;
+}
+
+function autoNormalizeUrl(url) {
+  return url
+    .replace("mobile.yangkeduo.com", "mobile.pinduoduo.com")
+    .replace("//m.taobao.com", "//item.taobao.com")
+    .replace("//a.m.taobao.com/i", "//item.taobao.com/item.htm?id=");
+}
+
+function autoDiscover() {
+  var btn = document.getElementById("discGo");
+  btn.disabled = true;
+  autoSetStatus("ok", "🔎 AI internetda kichik va yengil mahsulotlarni qidirmoqda (1 daqiqagacha)...");
+  fetch("/api/ai-discover", {
+    method: "POST",
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body: JSON.stringify({
+      cat: document.getElementById("discCat").value,
+      count: parseInt(document.getElementById("discCount").value) || 8,
+      hint: document.getElementById("discHint").value
+    })
+  }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+  .then(function(x){
+    btn.disabled = false;
+    if(!x.ok || x.j.error) throw new Error(x.j.error || "xato");
+    if(!x.j.urls || !x.j.urls.length) { autoSetStatus("err", x.j.note || "Mahsulot topilmadi."); return; }
+    document.getElementById("autoLinks").value = x.j.urls.join("\n");
+    autoRun();
+  }).catch(function(e){
+    btn.disabled = false;
+    autoSetStatus("err", "AI qidiruvi ishlamadi (" + (e.message || "xato") + ")");
+  });
+}
+
+function autoRun() {
+  var raw = document.getElementById("autoLinks").value.split(/\s+/);
+  var seen = {}, urls = [];
+  raw.forEach(function(u){
+    u = u.trim();
+    if(/^https?:\/\//.test(u) && !seen[u]) { seen[u] = 1; urls.push(autoNormalizeUrl(u)); }
+  });
+  urls = urls.slice(0, 10);
+  if(!urls.length) { autoSetStatus("err", "Link kiriting!"); return; }
+
+  var go = document.getElementById("autoGo");
+  go.disabled = true;
+  window._auto = [];
+  document.getElementById("autoList").innerHTML = "";
+  document.getElementById("autoApprove").style.display = "none";
+
+  var i = 0;
+  function next() {
+    if(i >= urls.length) {
+      go.disabled = false;
+      var n = window._auto.filter(function(x){ return x.ready; }).length;
+      autoSetStatus(n ? "ok" : "err", n ? "✅ " + n + " ta mahsulot tayyor. Tekshirib, tasdiqlang." : "Hech narsa tayyorlanmadi.");
+      autoUpdateApproveBtn();
+      return;
+    }
+    var url = urls[i++];
+    autoSetStatus("ok", "⏳ " + i + " / " + urls.length + " — ma'lumot olinmoqda va AI ishlamoqda...");
+    autoProcessOne(url).then(function(item){
+      window._auto.push(item);
+      autoRenderCard(item);
+      next();
+    });
+  }
+  next();
+}
+
+function autoProcessOne(url) {
+  var item = { url: url, ready: false, saved: false, images: [], error: "" };
+  return fetch("/api/scrape?url=" + encodeURIComponent(url))
+    .then(function(r){ if(!r.ok) throw new Error("Scrape xato: " + r.status); return r.json(); })
+    .then(function(info){
+      if(info.error) throw new Error(info.error);
+      if(!info.name) throw new Error("Nom topilmadi");
+      item.images = info.images || [];
+      item.name_cn = info.name;
+      item.d = {
+        name_uz: info.name_uz || info.name, name_ru: info.name_ru || info.name,
+        sub_uz: "", sub_ru: "", cat: "home", weight: "", china: "", market: ""
+      };
+      var yuan = parseFloat(info.price);
+      if(yuan > 0) {
+        item.d.china = Math.round(yuan * 1300);
+        item.d.market = Math.round(yuan * 1300 * 4.5);
+      }
+      return fetch("/api/ai-enrich", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+        body: JSON.stringify({name: info.name, price: info.price})
+      }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+        .then(function(x){
+          if(!x.ok || x.j.error) { item.note = "AI ishlamadi (" + (x.j.error || "xato") + ") — oddiy tarjima ishlatildi"; return; }
+          var j = x.j;
+          if(j.name_uz) item.d.name_uz = j.name_uz;
+          if(j.name_ru) item.d.name_ru = j.name_ru;
+          item.d.sub_uz = j.sub_uz || ""; item.d.sub_ru = j.sub_ru || "";
+          if(j.cat) item.d.cat = j.cat;
+          if(j.weight) item.d.weight = j.weight;
+          if(j.china) item.d.china = j.china;
+          if(j.market) item.d.market = j.market;
+          if(j.bulky || parseFloat(j.weight) > 2) { item.skip = true; item.note = "Hajmi katta / og'ir — avtomatik tanlanmadi"; }
+        }).catch(function(){ item.note = "AI ishlamadi — oddiy tarjima ishlatildi"; });
+    })
+    .then(function(){ item.ready = true; return item; })
+    .catch(function(e){ item.error = e.message || "Xato"; return item; });
+}
+
+function autoRenderCard(item) {
+  var list = document.getElementById("autoList");
+  var card = document.createElement("div");
+  card.style.cssText = "border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff";
+  item.el = card;
+
+  var short = item.url.length > 60 ? item.url.slice(0, 60) + "…" : item.url;
+  if(!item.ready) {
+    card.innerHTML = '<div style="color:#e11d48;font-weight:700;font-size:13px">❌ ' + h(item.error) + '</div><div style="font-size:12px;color:var(--ink-3);word-break:break-all">' + h(short) + '</div>';
+    list.appendChild(card);
+    return;
+  }
+
+  var top = document.createElement("div");
+  top.style.cssText = "display:flex;gap:10px;align-items:flex-start;margin-bottom:8px";
+  var chk = document.createElement("input");
+  chk.type = "checkbox"; chk.checked = !item.skip; chk.style.cssText = "margin-top:4px;width:20px;height:20px;flex:none";
+  chk.onchange = autoUpdateApproveBtn;
+  item.chk = chk;
+  top.appendChild(chk);
+  if(item.images[0]) {
+    var im = document.createElement("img");
+    im.src = item.images[0];
+    im.style.cssText = "width:64px;height:64px;object-fit:cover;border-radius:8px;flex:none";
+    im.onerror = function(){ this.style.visibility = "hidden"; };
+    top.appendChild(im);
+  }
+  var meta = document.createElement("div");
+  meta.style.cssText = "font-size:12px;color:var(--ink-3);min-width:0;word-break:break-all";
+  meta.textContent = (item.name_cn || "") + (item.note ? "  ⚠️ " + item.note : "");
+  top.appendChild(meta);
+  card.appendChild(top);
+
+  function field(key, label, type) {
+    var wrap = document.createElement("div");
+    wrap.style.cssText = "margin-bottom:6px";
+    var l = document.createElement("label");
+    l.textContent = label;
+    l.style.cssText = "font-size:11px;font-weight:700;color:var(--ink-3);display:block";
+    var inp = document.createElement("input");
+    inp.type = type || "text";
+    if(type === "number") inp.step = "any";
+    inp.value = item.d[key] === undefined || item.d[key] === null ? "" : item.d[key];
+    inp.style.cssText = "width:100%;box-sizing:border-box;margin:0";
+    inp.oninput = function(){ item.d[key] = inp.value; autoUpdateApproveBtn(); };
+    wrap.appendChild(l); wrap.appendChild(inp);
+    return wrap;
+  }
+  card.appendChild(field("name_uz", "Nomi (UZ)"));
+  card.appendChild(field("name_ru", "Nomi (RU)"));
+  card.appendChild(field("sub_uz", "Tavsif (UZ)"));
+  card.appendChild(field("sub_ru", "Tavsif (RU)"));
+
+  var grid = document.createElement("div");
+  grid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px";
+  grid.appendChild(field("china", "Xitoy narxi (so'm)", "number"));
+  grid.appendChild(field("market", "Bozor narxi (so'm)", "number"));
+  grid.appendChild(field("weight", "Vazn (kg) — taxminiy", "number"));
+  var catWrap = document.createElement("div");
+  var cl = document.createElement("label");
+  cl.textContent = "Kategoriya";
+  cl.style.cssText = "font-size:11px;font-weight:700;color:var(--ink-3);display:block";
+  var sel = document.createElement("select");
+  sel.style.cssText = "width:100%;box-sizing:border-box;margin:0";
+  sel.innerHTML = CATS.map(function(c){ return '<option value="' + c.id + '">' + c.label + '</option>'; }).join("");
+  sel.value = item.d.cat;
+  sel.onchange = function(){ item.d.cat = sel.value; };
+  catWrap.appendChild(cl); catWrap.appendChild(sel);
+  grid.appendChild(catWrap);
+  card.appendChild(grid);
+
+  var res = document.createElement("div");
+  res.style.cssText = "font-size:12px;margin-top:6px;font-weight:700";
+  item.resEl = res;
+  card.appendChild(res);
+
+  list.appendChild(card);
+}
+
+function autoValid(item) {
+  var d = item.d;
+  return item.ready && !item.saved && d.name_uz && d.name_ru &&
+    parseInt(d.china) > 0 && parseInt(d.market) > 0 && parseFloat(d.weight) > 0;
+}
+
+function autoUpdateApproveBtn() {
+  var btn = document.getElementById("autoApprove");
+  var sel = window._auto.filter(function(x){ return x.chk && x.chk.checked && !x.saved; });
+  var okN = sel.filter(autoValid).length;
+  if(!sel.length) { btn.style.display = "none"; return; }
+  btn.style.display = "block";
+  btn.disabled = okN === 0;
+  btn.textContent = "✅ Tasdiqlash va saytga qo'shish (" + okN + ")" + (okN < sel.length ? " — " + (sel.length - okN) + " tasida maydon yetishmaydi" : "");
+}
+
+function autoApprove() {
+  var btn = document.getElementById("autoApprove");
+  var items = window._auto.filter(function(x){ return x.chk && x.chk.checked && autoValid(x); });
+  if(!items.length) return;
+  btn.disabled = true;
+  var done = 0, failed = 0;
+  var chain = Promise.resolve();
+  items.forEach(function(item){
+    chain = chain.then(function(){
+      var d = item.d;
+      var imgs = item.images || [];
+      var body = {
+        name_uz: d.name_uz, name_ru: d.name_ru,
+        sub_uz: d.sub_uz || "", sub_ru: d.sub_ru || "",
+        china: parseInt(d.china), market: parseInt(d.market), weight: parseFloat(d.weight), cat: d.cat,
+        image_url: imgs[0] || null,
+        image_urls: imgs.length > 0 ? imgs : null,
+        tile: "#ede4ff", accent: "#6c2bd9",
+        rating: 4.5, sold: 0, days: 12, hit: false
+      };
+      return fetch(SB + "/rest/v1/products", {
+        method: "POST",
+        headers: {"apikey":KEY,"Authorization":"Bearer "+token,"Content-Type":"application/json","Prefer":"return=minimal"},
+        body: JSON.stringify(body)
+      }).then(function(r){
+        if(r.ok) { item.saved = true; done++; item.resEl.style.color = "#12a150"; item.resEl.textContent = "✅ Saytga qo'shildi"; item.chk.disabled = true; }
+        else { failed++; item.resEl.style.color = "#e11d48"; item.resEl.textContent = "❌ Saqlanmadi (" + r.status + ")"; }
+      }).catch(function(){ failed++; item.resEl.style.color = "#e11d48"; item.resEl.textContent = "❌ Tarmoq xatosi"; });
+    });
+  });
+  chain.then(function(){
+    autoSetStatus(failed ? "err" : "ok", "Saytga qo'shildi: " + done + (failed ? ", xato: " + failed : "") + ". Mahsulotlar bo'limida ko'rishingiz mumkin.");
+    autoUpdateApproveBtn();
+  });
 }
 
 
@@ -1446,6 +1762,7 @@ function doImport() {
       status.className="import-status err";
       status.textContent = "⚠️ Nom topilmadi — yuqoridagi maydonga kiriting.";
     }
+    if(info.name) aiEnrich(info);
   }
 
   // Use our Vercel serverless function (avoids CORS)
@@ -1466,6 +1783,39 @@ function doImport() {
     });
 }
 
+
+// AI agent: fills UZ/RU names, short descriptions, category and a weight estimate.
+// Admin still reviews everything and presses "Saqlash" — nothing is saved here.
+function aiEnrich(info) {
+  var st = document.getElementById("importStatus");
+  st.className = "import-status ok";
+  st.textContent = "🤖 AI tarjima va tavsif tayyorlanmoqda...";
+  fetch("/api/ai-enrich", {
+    method: "POST",
+    headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body: JSON.stringify({name: info.name, price: info.price})
+  }).then(function(r){
+    return r.json().then(function(j){ return {ok:r.ok, j:j}; });
+  }).then(function(x){
+    if(!x.ok || x.j.error) throw new Error(x.j.error || "xato");
+    var j = x.j;
+    if(j.name_uz) document.getElementById("importName").textContent = j.name_uz;
+    if(j.name_ru) document.getElementById("importNameRu").value = j.name_ru;
+    document.getElementById("importSubUz").value = j.sub_uz || "";
+    document.getElementById("importSubRu").value = j.sub_ru || "";
+    var w = document.getElementById("importWeight");
+    if(j.weight && !w.value) w.value = j.weight;
+    if(j.china) document.getElementById("importChina").value = j.china;
+    if(j.market) document.getElementById("importMarket").value = j.market;
+    var c = document.getElementById("importCat");
+    if(j.cat) c.value = j.cat;
+    st.className = "import-status ok";
+    st.textContent = "✅ AI to'ldirdi. Nom, vazn (taxminiy!) va narxlarni tekshirib, Saqlang.";
+  }).catch(function(e){
+    st.className = "import-status err";
+    st.textContent = "AI ishlamadi (" + (e.message||"xato") + ") — qo'lda to'ldiring.";
+  });
+}
 
 function showManualForm(platform) {
   var result = document.getElementById("importResult");
@@ -1572,7 +1922,8 @@ function doImportSave() {
 
   var body = {
     name_uz: name, name_ru: nameRu || name,
-    sub_uz: "", sub_ru: "",
+    sub_uz: (document.getElementById("importSubUz")||{}).value || "",
+    sub_ru: (document.getElementById("importSubRu")||{}).value || "",
     china: china, market: market, weight: weight, cat: cat,
     image_url: firstImg,
     image_urls: images.length > 0 ? images : null,
