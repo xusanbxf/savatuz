@@ -1,4 +1,8 @@
 {
+  "functions": {
+    "api/ai-discover.js": { "maxDuration": 60 },
+    "api/scrape.js": { "maxDuration": 60 }
+  },
   "rewrites": [
     { "source": "/api/sb/:path*", "destination": "/api/sb-proxy?path=:path*" }
   ]
